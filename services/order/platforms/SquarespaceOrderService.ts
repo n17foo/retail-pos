@@ -1,6 +1,7 @@
 import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
+import { QueuedApiService } from '../../queue/QueuedApiService';
 
 // Squarespace API version
 const SQUARESPACE_API_VERSION = '1.0';
@@ -27,9 +28,7 @@ export class SquarespaceOrderService extends BaseOrderService {
       // Test connection
       try {
         const apiUrl = `https://api.squarespace.com/${this.config.apiVersion}/commerce/orders`;
-        const response = await fetch(apiUrl, {
-          headers: this.getAuthHeaders(),
-        });
+        const response = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
         if (response.ok) {
           this.initialized = true;
@@ -70,9 +69,7 @@ export class SquarespaceOrderService extends BaseOrderService {
     try {
       const apiUrl = `https://api.squarespace.com/${this.config.apiVersion}/commerce/orders/${orderId}`;
 
-      const response = await fetch(apiUrl, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -99,20 +96,16 @@ export class SquarespaceOrderService extends BaseOrderService {
       const apiUrl = `https://api.squarespace.com/${this.config.apiVersion}/commerce/orders/${orderId}/fulfillments`;
 
       if (updates.fulfillmentStatus === 'fulfilled') {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify({
-            shouldSendNotification: true,
-            shipments: [
-              {
-                carrierName: 'Other',
-                trackingNumber: '',
-                shipDate: new Date().toISOString(),
-              },
-            ],
-          }),
-        });
+        const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {
+          shouldSendNotification: true,
+          shipments: [
+            {
+              carrierName: 'Other',
+              trackingNumber: '',
+              shipDate: new Date().toISOString(),
+            },
+          ],
+        }, this.getAuthHeaders());
 
         if (!response.ok) {
           throw new Error(`Failed to update order on Squarespace: ${response.statusText}`);
@@ -137,9 +130,7 @@ export class SquarespaceOrderService extends BaseOrderService {
     try {
       const apiUrl = `https://api.squarespace.com/${this.config.apiVersion}/commerce/orders${cursor ? `?cursor=${cursor}` : ''}`;
 
-      const response = await fetch(apiUrl, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
       if (!response.ok) {
         throw new Error(`Failed to fetch orders from Squarespace: ${response.statusText}`);

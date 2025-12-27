@@ -1588,6 +1588,11 @@
   dependencies:
     merge-options "^3.0.4"
 
+"@react-native-community/netinfo@^11.4.1":
+  version "11.4.1"
+  resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-11.4.1.tgz#a3c247aceab35f75dd0aa4bfa85d2be5a4508688"
+  integrity sha512-B0BYAkghz3Q2V09BF88RA601XursIEA111tnc2JOaN7axJWmNefmfjZqw/KdSxKZp7CZUuPpjBmz/WCR9uaHYg==
+
 "@react-native/assets-registry@0.81.5":
   version "0.81.5"
   resolved "https://registry.yarnpkg.com/@react-native/assets-registry/-/assets-registry-0.81.5.tgz#d22c924fa6f6d4a463c5af34ce91f38756c0fa7d"
@@ -8199,3 +8204,8 @@ yocto-queue@^0.1.0:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.2.1.tgz#07f0388c7edbfd5f5a2466181cb4adf5b5dbd57b"
   integrity sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==
+
+zustand@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-5.0.9.tgz#389dcd0309b9c545d7a461bd3c54955962847654"
+  integrity sha512-ALBtUj0AfjJt3uNRQoL1tL2tMvj6Gp/6e39dnfT6uzpelGru8v1tPOGBzayOWbPJvujM8JojDk3E1LxeFisBNg==

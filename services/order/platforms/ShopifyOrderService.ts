@@ -2,6 +2,7 @@ import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
 import { SHOPIFY_API_VERSION } from '../../config/ServiceConfigBridge';
+import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**
  * Shopify-specific implementation of the order service
@@ -86,13 +87,13 @@ export class ShopifyOrderService extends BaseOrderService {
 
       const shopifyOrder = this.mapToShopifyOrder(order);
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ order: shopifyOrder }),
+      // For now, keep using direct API call but add X-Request-ID header for idempotency
+      const requestId = `shopify_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', { order: shopifyOrder }, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId,
       });
 
       if (!response.ok) {
@@ -104,7 +105,7 @@ export class ShopifyOrderService extends BaseOrderService {
       // Map created Shopify order to our format
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error('Error creating order on Shopify', error);
+      console.error('Error creating Shopify order:', error);
       throw error;
     }
   }

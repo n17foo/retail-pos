@@ -11,6 +11,7 @@ import {
 import { getBasketService } from '../services/basket/basketServiceFactory';
 import { BasketServiceInterface } from '../services/basket/BasketServiceInterface';
 import { ECommercePlatform } from '../utils/platforms';
+import { queueManager } from '../services/queue/QueueManager';
 
 // Re-export basket item type for components
 export interface CartItem {
@@ -91,6 +92,9 @@ export interface BasketContextType {
   syncAllPendingOrders: () => Promise<SyncResult>;
   getUnsyncedOrders: () => Promise<LocalOrder[]>;
   getLocalOrders: (status?: LocalOrderStatus) => Promise<LocalOrder[]>;
+
+  // Sync queue status
+  getSyncQueueStatus: () => { length: number; isProcessing: boolean; pendingRequests: number; retryingRequests: number };
 
   // Cart totals (from basket)
   subtotal: number;
@@ -502,6 +506,11 @@ export const BasketProvider = ({ children }: Readonly<{ children: ReactNode }>) 
     return serviceRef.current.getLocalOrders(status);
   }, []);
 
+  // Sync queue status
+  const getSyncQueueStatus = useCallback(() => {
+    return queueManager.getQueueStatus();
+  }, []);
+
   const value = useMemo(
     () => ({
       isRightPanelOpen,
@@ -531,6 +540,7 @@ export const BasketProvider = ({ children }: Readonly<{ children: ReactNode }>) 
       syncAllPendingOrders,
       getUnsyncedOrders,
       getLocalOrders,
+      getSyncQueueStatus,
       subtotal,
       tax,
       total,
@@ -564,6 +574,7 @@ export const BasketProvider = ({ children }: Readonly<{ children: ReactNode }>) 
       syncAllPendingOrders,
       getUnsyncedOrders,
       getLocalOrders,
+      getSyncQueueStatus,
       subtotal,
       tax,
       total,

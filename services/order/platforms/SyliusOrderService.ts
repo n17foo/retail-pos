@@ -2,6 +2,7 @@ import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
 import { SYLIUS_API_VERSION } from '../../config/ServiceConfigBridge';
+import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**
  * Sylius-specific implementation of the order service
@@ -95,15 +96,11 @@ export class SyliusOrderService extends BaseOrderService {
       // Complete the order
       const apiUrl = `${this.config.apiUrl}/api/${this.config.apiVersion}/orders/${cartToken}/complete`;
 
-      const response = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          notes: order.note,
-        }),
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'PUT', {
+        notes: order.note,
+      }, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
       });
 
       if (!response.ok) {
@@ -124,16 +121,12 @@ export class SyliusOrderService extends BaseOrderService {
   private async createCart(): Promise<string> {
     const apiUrl = `${this.config.apiUrl}/api/${this.config.apiVersion}/orders`;
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        ...this.getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        localeCode: 'en_US',
-        channelCode: 'default',
-      }),
+    const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {
+      localeCode: 'en_US',
+      channelCode: 'default',
+    }, {
+      ...this.getAuthHeaders(),
+      'Content-Type': 'application/json',
     });
 
     if (!response.ok) {
@@ -150,16 +143,12 @@ export class SyliusOrderService extends BaseOrderService {
   private async addItemToCart(cartToken: string, item: Order['lineItems'][0]): Promise<void> {
     const apiUrl = `${this.config.apiUrl}/api/${this.config.apiVersion}/orders/${cartToken}/items`;
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        ...this.getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        productCode: item.sku || item.productId,
-        quantity: item.quantity,
-      }),
+    const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {
+      productCode: item.sku || item.productId,
+      quantity: item.quantity,
+    }, {
+      ...this.getAuthHeaders(),
+      'Content-Type': 'application/json',
     });
 
     if (!response.ok) {
@@ -178,9 +167,7 @@ export class SyliusOrderService extends BaseOrderService {
     try {
       const apiUrl = `${this.config.apiUrl}/api/${this.config.apiVersion}/orders/${orderId}`;
 
-      const response = await fetch(apiUrl, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -208,15 +195,11 @@ export class SyliusOrderService extends BaseOrderService {
     try {
       const apiUrl = `${this.config.apiUrl}/api/${this.config.apiVersion}/orders/${orderId}`;
 
-      const response = await fetch(apiUrl, {
-        method: 'PATCH',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/merge-patch+json',
-        },
-        body: JSON.stringify({
-          notes: updates.note,
-        }),
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'PATCH', {
+        notes: updates.note,
+      }, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/merge-patch+json',
       });
 
       if (!response.ok) {
@@ -241,15 +224,11 @@ export class SyliusOrderService extends BaseOrderService {
     try {
       const apiUrl = `${this.config.apiUrl}/api/oauth/v2/token`;
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'client_credentials',
-          client_id: this.config.apiKey as string,
-          client_secret: this.config.apiSecret as string,
-        }).toString(),
-      });
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {
+        grant_type: 'client_credentials',
+        client_id: this.config.apiKey as string,
+        client_secret: this.config.apiSecret as string,
+      }, { 'Content-Type': 'application/x-www-form-urlencoded' });
 
       if (!response.ok) {
         return null;

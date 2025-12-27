@@ -2,6 +2,7 @@ import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
 import { BIGCOMMERCE_API_VERSION } from '../../config/ServiceConfigBridge';
+import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**
  * BigCommerce-specific implementation of the order service
@@ -78,13 +79,13 @@ export class BigCommerceOrderService extends BaseOrderService {
 
       const bcOrder = this.mapToBigCommerceOrder(order);
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bcOrder),
+      // Use QueuedApiService for API call with X-Request-ID for idempotency
+      const requestId = `bigcommerce_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', bcOrder, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId,
       });
 
       if (!response.ok) {
@@ -114,9 +115,7 @@ export class BigCommerceOrderService extends BaseOrderService {
       const productsUrl = `https://api.bigcommerce.com/stores/${this.config.storeHash}/v2/orders/${orderId}/products`;
 
       // Get the order details
-      const orderResponse = await fetch(apiUrl, {
-        headers: this.getAuthHeaders(),
-      });
+      const orderResponse = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
       if (!orderResponse.ok) {
         if (orderResponse.status === 404) {
@@ -128,9 +127,7 @@ export class BigCommerceOrderService extends BaseOrderService {
       const orderData = await orderResponse.json();
 
       // Get the order products (line items)
-      const productsResponse = await fetch(productsUrl, {
-        headers: this.getAuthHeaders(),
-      });
+      const productsResponse = await QueuedApiService.directRequest(productsUrl, 'GET', this.getAuthHeaders());
 
       if (!productsResponse.ok) {
         throw new Error(`Failed to fetch order products from BigCommerce: ${productsResponse.statusText}`);
@@ -176,13 +173,9 @@ export class BigCommerceOrderService extends BaseOrderService {
         customer_message: updates.note,
       };
 
-      const response = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bcOrderUpdate),
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'PUT', bcOrderUpdate, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
       });
 
       if (!response.ok) {

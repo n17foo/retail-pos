@@ -14,6 +14,8 @@ import { RootNavigator } from './navigation';
 import { logger } from './services/logger';
 import { useTranslate } from './hooks/useTranslate';
 import { lightColors } from './utils/theme';
+import { queueManager } from './services/queue/QueueManager';
+import { backgroundSyncService } from './services/sync/BackgroundSyncService';
 //import { StripeTerminalBridgeProvider } from './contexts/StripeTerminalBridge';
 
 const AppContent = () => {
@@ -73,9 +75,16 @@ const AppContent = () => {
       logger.error({ message: 'Failed to handle localization change' }, error instanceof Error ? error : new Error(String(error)));
     });
 
+    // Initialize sync queue manager
+    queueManager.initialize();
+
+    // Start background sync service for retrying failed order syncs
+    backgroundSyncService.start(300000); // Check every 5 minutes
+
     // Cleanup
     return () => {
       isMounted = false;
+      backgroundSyncService.stop();
     };
   }, []);
 

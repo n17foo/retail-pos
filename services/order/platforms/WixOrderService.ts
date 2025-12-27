@@ -2,6 +2,7 @@ import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
 import { WIX_API_VERSION } from '../../config/ServiceConfigBridge';
+import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**
  * Wix-specific implementation of the order service
@@ -27,11 +28,7 @@ export class WixOrderService extends BaseOrderService {
       // Test connection
       try {
         const apiUrl = `https://www.wixapis.com/stores/${this.config.apiVersion}/orders/query`;
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: this.getAuthHeaders(),
-          body: JSON.stringify({ query: { paging: { limit: 1 } } }),
-        });
+        const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', { query: { paging: { limit: 1 } } }, this.getAuthHeaders());
 
         if (response.ok) {
           this.initialized = true;
@@ -68,10 +65,12 @@ export class WixOrderService extends BaseOrderService {
 
       const wixOrder = this.mapToWixOrder(order);
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ order: wixOrder }),
+      // Use QueuedApiService for API call with X-Request-ID for idempotency
+      const requestId = `wix_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', { order: wixOrder }, {
+        ...this.getAuthHeaders(),
+        'X-Request-ID': requestId,
       });
 
       if (!response.ok) {
@@ -94,9 +93,7 @@ export class WixOrderService extends BaseOrderService {
     try {
       const apiUrl = `https://www.wixapis.com/stores/${this.config.apiVersion}/orders/${orderId}`;
 
-      const response = await fetch(apiUrl, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -122,15 +119,11 @@ export class WixOrderService extends BaseOrderService {
       // Wix has limited order update - mainly fulfillment status
       const apiUrl = `https://www.wixapis.com/stores/${this.config.apiVersion}/orders/${orderId}`;
 
-      const response = await fetch(apiUrl, {
-        method: 'PATCH',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({
-          order: {
-            buyerNote: updates.note,
-          },
-        }),
-      });
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'PATCH', {
+        order: {
+          buyerNote: updates.note,
+        },
+      }, this.getAuthHeaders());
 
       if (!response.ok) {
         throw new Error(`Failed to update order on Wix: ${response.statusText}`);

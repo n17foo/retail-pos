@@ -489,22 +489,45 @@ export class BasketService implements BasketServiceInterface {
         platformOrderId: createdOrder.id ?? createdOrder.platformOrderId,
       };
     } catch (error) {
+      const errorMessage = (error as Error).message;
       this.logger.error({ message: `Failed to sync order ${orderId} to platform` }, error as Error);
 
-      // Update sync status to failed
-      const now = Date.now();
-      await this.db.runAsync(`UPDATE local_orders SET sync_status = ?, sync_error = ?, updated_at = ? WHERE id = ?`, [
-        'failed',
-        (error as Error).message,
-        now,
-        orderId,
-      ]);
+      // Check if this is a network error or server error that should be retried
+      const isRetryableError = this.isRetryableError(error);
 
-      return {
-        success: false,
-        orderId,
-        error: (error as Error).message,
-      };
+      if (isRetryableError) {
+        // For retryable errors, mark as pending and let the queue system handle retries
+        const now = Date.now();
+        await this.db.runAsync(`UPDATE local_orders SET sync_status = ?, sync_error = ?, updated_at = ? WHERE id = ?`, [
+          'pending', // Keep as pending so it can be retried
+          errorMessage,
+          now,
+          orderId,
+        ]);
+
+        this.logger.info(`Order ${orderId} queued for retry due to: ${errorMessage}`);
+
+        return {
+          success: false,
+          orderId,
+          error: `Order queued for retry: ${errorMessage}`,
+        };
+      } else {
+        // For non-retryable errors (like 4xx client errors), mark as failed
+        const now = Date.now();
+        await this.db.runAsync(`UPDATE local_orders SET sync_status = ?, sync_error = ?, updated_at = ? WHERE id = ?`, [
+          'failed',
+          errorMessage,
+          now,
+          orderId,
+        ]);
+
+        return {
+          success: false,
+          orderId,
+          error: errorMessage,
+        };
+      }
     }
   }
 
@@ -684,6 +707,28 @@ export class BasketService implements BasketServiceInterface {
       paidAt: row.paid_at ? new Date(row.paid_at) : undefined,
       syncedAt: row.synced_at ? new Date(row.synced_at) : undefined,
     };
+  }
+
+  /**
+   * Determine if an error is retryable (network errors or server errors)
+   */
+  private isRetryableError(error: any): boolean {
+    // Network errors (connection failures, timeouts, etc.)
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      return true;
+    }
+
+    // Check for HTTP status codes in error message
+    const errorMessage = error.message || '';
+    const statusMatch = errorMessage.match(/status (\d+)/);
+    if (statusMatch) {
+      const status = parseInt(statusMatch[1]);
+      // Retry on 5xx server errors, but not 4xx client errors
+      return status >= 500;
+    }
+
+    // Default to retry for unknown errors that might be transient
+    return true;
   }
 
   basketItemsToLineItems(items: BasketItem[]): OrderLineItem[] {

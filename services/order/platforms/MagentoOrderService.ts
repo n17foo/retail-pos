@@ -2,6 +2,7 @@ import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
 import { MAGENTO_API_VERSION } from '../../config/ServiceConfigBridge';
+import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**
  * Magento-specific implementation of the order service
@@ -99,17 +100,13 @@ export class MagentoOrderService extends BaseOrderService {
       // Set shipping/billing info and place order
       const apiUrl = `${this.config.storeUrl}/rest/${this.config.apiVersion}/carts/${cartId}/order`;
 
-      const response = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/json',
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'PUT', {
+        paymentMethod: {
+          method: 'checkmo', // Check/Money Order - for POS use
         },
-        body: JSON.stringify({
-          paymentMethod: {
-            method: 'checkmo', // Check/Money Order - for POS use
-          },
-        }),
+      }, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
       });
 
       if (!response.ok) {
@@ -132,12 +129,9 @@ export class MagentoOrderService extends BaseOrderService {
   private async createCart(): Promise<string> {
     const apiUrl = `${this.config.storeUrl}/rest/${this.config.apiVersion}/carts`;
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        ...this.getAuthHeaders(),
-        'Content-Type': 'application/json',
-      },
+    const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {}, {
+      ...this.getAuthHeaders(),
+      'Content-Type': 'application/json',
     });
 
     if (!response.ok) {
@@ -153,19 +147,15 @@ export class MagentoOrderService extends BaseOrderService {
   private async addItemToCart(cartId: string, item: Order['lineItems'][0]): Promise<void> {
     const apiUrl = `${this.config.storeUrl}/rest/${this.config.apiVersion}/carts/${cartId}/items`;
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        ...this.getAuthHeaders(),
-        'Content-Type': 'application/json',
+    const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {
+      cartItem: {
+        sku: item.sku,
+        qty: item.quantity,
+        quote_id: cartId,
       },
-      body: JSON.stringify({
-        cartItem: {
-          sku: item.sku,
-          qty: item.quantity,
-          quote_id: cartId,
-        },
-      }),
+    }, {
+      ...this.getAuthHeaders(),
+      'Content-Type': 'application/json',
     });
 
     if (!response.ok) {
@@ -184,9 +174,7 @@ export class MagentoOrderService extends BaseOrderService {
     try {
       const apiUrl = `${this.config.storeUrl}/rest/${this.config.apiVersion}/orders/${orderId}`;
 
-      const response = await fetch(apiUrl, {
-        headers: this.getAuthHeaders(),
-      });
+      const response = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -216,19 +204,15 @@ export class MagentoOrderService extends BaseOrderService {
       // We can add comments or update status
       const apiUrl = `${this.config.storeUrl}/rest/${this.config.apiVersion}/orders/${orderId}/comments`;
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/json',
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {
+        statusHistory: {
+          comment: updates.note || 'Order updated from POS',
+          is_customer_notified: 0,
+          is_visible_on_front: 0,
         },
-        body: JSON.stringify({
-          statusHistory: {
-            comment: updates.note || 'Order updated from POS',
-            is_customer_notified: 0,
-            is_visible_on_front: 0,
-          },
-        }),
+      }, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
       });
 
       if (!response.ok) {
@@ -253,14 +237,10 @@ export class MagentoOrderService extends BaseOrderService {
     try {
       const apiUrl = `${this.config.storeUrl}/rest/${this.config.apiVersion}/integration/admin/token`;
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: this.config.username,
-          password: this.config.password,
-        }),
-      });
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', {
+        username: this.config.username,
+        password: this.config.password,
+      }, { 'Content-Type': 'application/json' });
 
       if (!response.ok) {
         return null;

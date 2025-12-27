@@ -2,6 +2,7 @@ import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
 import { createBasicAuthHeader } from '../../../utils/base64';
+import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**
  * PrestaShop-specific implementation of the order service
@@ -28,9 +29,7 @@ export class PrestaShopOrderService extends BaseOrderService {
       // Test connection
       try {
         const apiUrl = `${this.config.storeUrl}/api/orders?output_format=JSON&limit=1`;
-        const response = await fetch(apiUrl, {
-          headers: this.getAuthHeaders(),
-        });
+        const response = await QueuedApiService.directRequest(apiUrl, 'GET', this.getAuthHeaders());
 
         if (response.ok) {
           this.initialized = true;
@@ -66,13 +65,13 @@ export class PrestaShopOrderService extends BaseOrderService {
       const apiUrl = `${this.config.storeUrl}/api/orders?output_format=JSON`;
       const psOrder = this.mapToPrestaShopOrder(order);
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          ...this.getAuthHeaders(),
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ order: psOrder }),
+      // Use QueuedApiService for API call with X-Request-ID for idempotency
+      const requestId = `prestashop_order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      const response = await QueuedApiService.directRequestWithBody(apiUrl, 'POST', { order: psOrder }, {
+        ...this.getAuthHeaders(),
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId,
       });
 
       if (!response.ok) {
