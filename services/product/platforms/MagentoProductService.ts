@@ -5,7 +5,7 @@ import { ECommercePlatform } from '../../../utils/platforms';
 import { TokenInitializer } from '../../token/tokenInitializer';
 import { withTokenRefresh } from '../../token/tokenIntegration';
 import { LoggerFactory } from '../../logger';
-import { MAGENTO_API_VERSION } from '../../config/ServiceConfigBridge';
+import { MAGENTO_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Magento-specific implementation of the product service

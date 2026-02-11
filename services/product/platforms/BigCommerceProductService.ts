@@ -7,7 +7,7 @@ import { getPlatformToken } from '../../../services/token/tokenUtils';
 import { TokenType } from '../../../services/token/tokenServiceInterface';
 import { withTokenRefresh } from '../../../services/token/tokenIntegration';
 import { LoggerFactory } from '../../../services/logger';
-import { BIGCOMMERCE_API_VERSION } from '../../config/ServiceConfigBridge';
+import { BIGCOMMERCE_API_VERSION } from '../../config/apiVersions';
 
 /**
  * BigCommerce-specific implementation of the product service

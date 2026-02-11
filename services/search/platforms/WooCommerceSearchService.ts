@@ -3,7 +3,7 @@ import { ProductQueryOptions, Product, ProductResult } from '../../product/Produ
 import { PlatformConfigRequirements, PlatformSearchConfig } from './PlatformSearchServiceInterface';
 import { BaseSearchService } from './BaseSearchService';
 import { createBasicAuthHeader } from '../../../utils/base64';
-import { WOOCOMMERCE_API_VERSION } from '../../config/ServiceConfigBridge';
+import { WOOCOMMERCE_API_VERSION } from '../../config/apiVersions';
 
 /**
  * WooCommerce-specific implementation of the search service

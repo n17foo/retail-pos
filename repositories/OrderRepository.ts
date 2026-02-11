@@ -1,5 +1,6 @@
 import { sqliteStorage } from '../services/storage/SQLiteStorageService';
 import { type SQLiteDatabase } from 'expo-sqlite';
+import { generateUUID } from '../utils/uuid';
 
 export interface Order {
   id: string;
@@ -21,7 +22,7 @@ export class OrderRepository {
 
   async create(order: Omit<Order, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
     const now = Date.now();
-    const id = crypto.randomUUID();
+    const id = generateUUID();
     const result = await this.db.runAsync(
       'INSERT INTO orders (id, customer_id, date, total, payment_method, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [id, order.customer_id, order.date, order.total, order.payment_method, order.status, now, now]

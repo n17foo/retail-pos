@@ -1,7 +1,7 @@
 import { SearchOptions, SearchProduct } from '../searchServiceInterface';
 import { ProductQueryOptions, Product, ProductResult } from '../../product/ProductServiceInterface';
 import { PlatformConfigRequirements, PlatformSearchConfig } from './PlatformSearchServiceInterface';
-import { SHOPIFY_API_VERSION } from '../../config/ServiceConfigBridge';
+import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 
 // Import directly from the file to work around module resolution issues
 import { BaseSearchService } from './BaseSearchService';

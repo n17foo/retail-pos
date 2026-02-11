@@ -1,5 +1,6 @@
 import { sqliteStorage } from '../services/storage/SQLiteStorageService';
 import { type SQLiteDatabase } from 'expo-sqlite';
+import { generateUUID } from '../utils/uuid';
 
 export type UserRole = 'admin' | 'manager' | 'cashier';
 
@@ -50,7 +51,7 @@ export class UserRepository {
 
   async create(user: CreateUserInput): Promise<string> {
     const now = Date.now();
-    const id = crypto.randomUUID();
+    const id = generateUUID();
 
     await this.db.runAsync(
       `INSERT INTO users (id, name, email, pin, role, platform_user_id, is_active, created_at, updated_at) 

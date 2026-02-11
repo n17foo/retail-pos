@@ -5,7 +5,7 @@ import { ECommercePlatform } from '../../../utils/platforms';
 import { TokenInitializer } from '../../token/tokenInitializer';
 import { withTokenRefresh } from '../../token/tokenIntegration';
 import { LoggerFactory } from '../../logger';
-import { SYLIUS_API_VERSION } from '../../config/ServiceConfigBridge';
+import { SYLIUS_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Sylius-specific implementation of the product service

@@ -1,7 +1,7 @@
 import { InventoryResult, InventoryUpdate, InventoryUpdateResult } from '../InventoryServiceInterface';
 import { PlatformInventoryConfig, PlatformConfigRequirements } from './PlatformInventoryServiceInterface';
 import { BaseInventoryService } from './BaseInventoryService';
-import { MAGENTO_API_VERSION } from '../../config/ServiceConfigBridge';
+import { MAGENTO_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Magento-specific inventory service implementation

@@ -7,7 +7,7 @@ import { ECommercePlatform } from '../../../utils/platforms';
 import { getPlatformToken, withTokenRefresh } from '../../token/tokenUtils';
 import { LoggerFactory } from '../../logger';
 import { createBasicAuthHeader } from '../../../utils/base64';
-import { WOOCOMMERCE_API_VERSION } from '../../config/ServiceConfigBridge';
+import { WOOCOMMERCE_API_VERSION } from '../../config/apiVersions';
 
 /**
  * WooCommerce-specific implementation of the product service

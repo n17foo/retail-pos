@@ -1,5 +1,6 @@
 import { sqliteStorage } from '../services/storage/SQLiteStorageService';
 import { type SQLiteDatabase } from 'expo-sqlite';
+import { generateUUID } from '../utils/uuid';
 
 export interface Category {
   id: string;
@@ -27,7 +28,7 @@ export class CategoryRepository {
 
   async create(category: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
     const now = Date.now();
-    const id = crypto.randomUUID();
+    const id = generateUUID();
     await this.db.runAsync(
       `INSERT INTO categories (id, name, description, parent_id, image_url, position, product_count, platform, platform_id, level, path, status, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,

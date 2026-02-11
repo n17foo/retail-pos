@@ -7,7 +7,7 @@ import { InventoryServiceFactory } from '../../inventory/inventoryServiceFactory
 import { CategoryServiceFactory } from '../../category/categoryServiceFactory';
 import { OrderServiceFactory } from '../../order/orderServiceFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
-import { SHOPIFY_API_VERSION } from '../../config/ServiceConfigBridge';
+import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Shopify-specific sync service implementation

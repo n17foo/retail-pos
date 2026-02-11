@@ -13,6 +13,7 @@ import {
   SyncResult,
 } from './BasketServiceInterface';
 import { multiplyMoney, sumMoney, calculateTax, calculateLineTotal, roundMoney } from '../../utils/money';
+import { generateUUID } from '../../utils/uuid';
 
 /**
  * Default tax rate (8%)
@@ -87,7 +88,7 @@ export class BasketService implements BasketServiceInterface {
    * Generate a unique ID
    */
   private generateId(): string {
-    return crypto.randomUUID();
+    return generateUUID();
   }
 
   /**

@@ -1,7 +1,7 @@
 import { InventoryResult, InventoryUpdate, InventoryUpdateResult } from '../InventoryServiceInterface';
 import { PlatformInventoryConfig, PlatformConfigRequirements } from './PlatformInventoryServiceInterface';
 import { BaseInventoryService } from './BaseInventoryService';
-import { SYLIUS_API_VERSION } from '../../config/ServiceConfigBridge';
+import { SYLIUS_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Sylius-specific inventory service implementation

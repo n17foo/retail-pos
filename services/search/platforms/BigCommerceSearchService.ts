@@ -2,7 +2,7 @@ import { SearchOptions, SearchProduct } from '../searchServiceInterface';
 import { ProductQueryOptions, Product, ProductResult } from '../../product/ProductServiceInterface';
 import { PlatformConfigRequirements, PlatformSearchConfig } from './PlatformSearchServiceInterface';
 import { BaseSearchService } from './BaseSearchService';
-import { BIGCOMMERCE_API_VERSION } from '../../config/ServiceConfigBridge';
+import { BIGCOMMERCE_API_VERSION } from '../../config/apiVersions';
 
 /**
  * BigCommerce-specific implementation of the search service

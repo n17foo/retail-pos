@@ -1,7 +1,7 @@
 import { InventoryResult, InventoryUpdate, InventoryUpdateResult } from '../InventoryServiceInterface';
 import { PlatformInventoryConfig, PlatformConfigRequirements } from './PlatformInventoryServiceInterface';
 import { BaseInventoryService } from './BaseInventoryService';
-import { WIX_API_VERSION } from '../../config/ServiceConfigBridge';
+import { WIX_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Wix-specific inventory service implementation

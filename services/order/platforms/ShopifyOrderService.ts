@@ -1,7 +1,7 @@
 import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
-import { SHOPIFY_API_VERSION } from '../../config/ServiceConfigBridge';
+import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**

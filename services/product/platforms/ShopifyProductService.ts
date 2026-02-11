@@ -7,7 +7,7 @@ import { TokenType } from '../../token/tokenServiceInterface';
 import { TokenInitializer } from '../../token/tokenInitializer';
 import { withTokenRefresh } from '../../token/tokenIntegration';
 import { LoggerFactory } from '../../logger';
-import { SHOPIFY_API_VERSION } from '../../config/ServiceConfigBridge';
+import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Shopify-specific implementation of the product service

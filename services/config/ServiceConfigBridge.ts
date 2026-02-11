@@ -1,6 +1,14 @@
 import { ECommercePlatform } from '../../utils/platforms';
 import { LoggerFactory } from '../logger';
 import { storage } from '../storage/storage';
+import {
+  SHOPIFY_API_VERSION,
+  WOOCOMMERCE_API_VERSION,
+  BIGCOMMERCE_API_VERSION,
+  MAGENTO_API_VERSION,
+  SYLIUS_API_VERSION,
+  WIX_API_VERSION,
+} from './apiVersions';
 
 // NOTE: Factory imports are lazy-loaded inside methods to break require cycles.
 // The cycle was: ServiceConfigBridge → factory → platform service → ServiceConfigBridge
@@ -61,21 +69,6 @@ export interface StoredECommerceSettings {
     lastSync: string;
   };
 }
-
-/**
- * Centralized API versions for all e-commerce platforms
- */
-export const SHOPIFY_API_VERSION = '2024-01';
-export const WOOCOMMERCE_API_VERSION = 'wc/v3';
-export const BIGCOMMERCE_API_VERSION = 'v3';
-export const MAGENTO_API_VERSION = 'V1';
-export const SYLIUS_API_VERSION = 'v1';
-export const WIX_API_VERSION = 'v1';
-
-/**
- * ServiceConfigBridge - Connects user-configured settings from storage to service factories
- * This is the central point for ensuring all services use the correct configuration
- */
 export class ServiceConfigBridge {
   private static instance: ServiceConfigBridge;
   private logger: ReturnType<typeof LoggerFactory.prototype.createLogger>;

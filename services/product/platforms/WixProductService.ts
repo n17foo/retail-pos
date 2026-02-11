@@ -5,7 +5,7 @@ import { ECommercePlatform } from '../../../utils/platforms';
 import { TokenInitializer } from '../../token/tokenInitializer';
 import { withTokenRefresh } from '../../token/tokenIntegration';
 import { LoggerFactory } from '../../logger';
-import { WIX_API_VERSION } from '../../config/ServiceConfigBridge';
+import { WIX_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Wix-specific implementation of the product service
