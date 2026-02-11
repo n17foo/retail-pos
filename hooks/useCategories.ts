@@ -74,36 +74,23 @@ export const useUnifiedCategories = (platform?: ECommercePlatform): UseUnifiedCa
 
   // Fetch categories from the service
   const fetchCategories = useCallback(async () => {
-    console.log('[useCategories] Starting fetchCategories, platform:', platform);
     setIsLoading(true);
     setError(null);
 
     try {
       const categoryServiceFactory = CategoryServiceFactory.getInstance();
-      console.log('[useCategories] Got factory instance');
       const service = categoryServiceFactory.getService(platform);
-      console.log('[useCategories] Got service:', !!service);
 
       if (!service) {
         throw new Error('Category service not available');
       }
 
       const result = await service.getCategories();
-      console.log('[useCategories] Service returned', result?.length || 0, 'categories');
-      if (result?.length > 0) {
-        console.log('[useCategories] First category:', JSON.stringify(result[0]));
-      }
-
-      // Determine the platform for mapping
       const mappingPlatform = platform || ECommercePlatform.OFFLINE;
-
-      // Map to unified categories
       const unifiedCategories = mapToUnifiedCategories(result, mappingPlatform);
-      console.log('[useCategories] Mapped to', unifiedCategories.length, 'unified categories');
 
       setCategories(unifiedCategories);
     } catch (err) {
-      console.error('[useCategories] Error fetching categories:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch categories');
     } finally {
       setIsLoading(false);
@@ -177,10 +164,10 @@ export const useUnifiedCategories = (platform?: ECommercePlatform): UseUnifiedCa
     [getAncestorIds, getCategoryById]
   );
 
-  // Fetch categories on mount
+  // Fetch categories on mount and when platform changes
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   return {
     categories,

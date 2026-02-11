@@ -12,9 +12,6 @@ interface UseOfflineProductsReturn {
   deleteProduct: (id: string) => Promise<boolean>;
   getProductById: (id: string) => Promise<Product | null>;
   clearAllProducts: () => Promise<void>;
-  downloadMenu: () => Promise<{ products: Product[]; categories: any[] }>;
-  setMenuUrl: (url: string) => Promise<void>;
-  getLastSyncTime: () => Promise<Date | null>;
 }
 
 export const useOfflineProducts = (): UseOfflineProductsReturn => {
@@ -113,35 +110,6 @@ export const useOfflineProducts = (): UseOfflineProductsReturn => {
     }
   }, []);
 
-  const downloadMenu = useCallback(async (): Promise<{ products: Product[]; categories: any[] }> => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const result = await offlineProductService.downloadMenu();
-      await loadProducts();
-      return result;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to download menu';
-      setError(message);
-      throw new Error(message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [loadProducts]);
-
-  const setMenuUrl = useCallback(async (url: string): Promise<void> => {
-    try {
-      await offlineProductService.setMenuUrl(url);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set menu URL');
-      throw err;
-    }
-  }, []);
-
-  const getLastSyncTime = useCallback(async (): Promise<Date | null> => {
-    return await offlineProductService.getLastSyncTime();
-  }, []);
-
   useEffect(() => {
     loadProducts();
   }, [loadProducts]);
@@ -156,9 +124,6 @@ export const useOfflineProducts = (): UseOfflineProductsReturn => {
     deleteProduct,
     getProductById,
     clearAllProducts,
-    downloadMenu,
-    setMenuUrl,
-    getLastSyncTime,
   };
 };
 

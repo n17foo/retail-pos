@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert, StyleSheet, TextInput, ScrollView, ActivityIndicator } from 'react-native';
 import { useScannerSettings, ScannerSettings } from '../../hooks/useScannerSettings';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
-import { Button } from '../../components';
+import { Button } from '../../components/Button';
 
 const ScannerSettingsTab: React.FC = () => {
   const { scannerSettings, handleScannerSettingsChange, saveSettings, testConnection, isLoading, error, saveStatus, loadSettings } =

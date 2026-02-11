@@ -19,7 +19,6 @@ const PLATFORM_NAMES: Record<string, string> = {
   wix: 'Wix',
   prestashop: 'PrestaShop',
   squarespace: 'Squarespace',
-  custom: 'Custom API',
 };
 
 const PlatformConfigurationStep: React.FC<PlatformConfigurationStepProps> = ({ platformId, onBack, onComplete, config, setConfig }) => {
@@ -74,17 +73,7 @@ const PlatformConfigurationStep: React.FC<PlatformConfigurationStepProps> = ({ p
         }
         break;
       case 'offline':
-        if (!config.menuUrl) {
-          Alert.alert('Validation Error', 'Please enter the Menu Download URL.');
-          return false;
-        }
-        // Validate URL format
-        try {
-          new URL(config.menuUrl);
-        } catch {
-          Alert.alert('Validation Error', 'Please enter a valid URL for menu download.');
-          return false;
-        }
+        // Offline mode uses OfflineSetupStep, not this form
         break;
       default:
         break;
@@ -348,7 +337,8 @@ const PlatformConfigurationStep: React.FC<PlatformConfigurationStepProps> = ({ p
       case 'squarespace':
         return renderSquarespaceForm();
       case 'offline':
-        return renderCustomForm();
+        // Offline mode is handled by OfflineSetupStep
+        return <Text style={styles.errorText}>Please use the Offline Setup flow.</Text>;
       default:
         return <Text style={styles.errorText}>Unknown platform: {platformId}</Text>;
     }

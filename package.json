@@ -18,8 +18,8 @@
     "test": "jest --watchAll",
     "latest": "yarn upgrade --latest && npx expo install --fix",
     "doctor": "npx expo-doctor",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "lint": "npx tsc --noEmit && eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "npx tsc --noEmit && eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\""
   },
   "dependencies": {

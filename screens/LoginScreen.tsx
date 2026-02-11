@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, SafeAreaView, Animated, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, Animated, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { lightColors, spacing, typography, borderRadius } from '../utils/theme';
 import PinKeypad from '../components/PinKeypad';
 import PinDisplay from '../components/PinDisplay';

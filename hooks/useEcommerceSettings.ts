@@ -50,9 +50,15 @@ export interface ECommerceSettings {
     siteId: string;
   };
   offline: {
-    menuUrl: string;
+    menuUrl?: string;
     storeName: string;
-    lastSync: string;
+    currency?: string;
+    categories?: Array<{
+      id: string;
+      name: string;
+      products: Array<{ id: string; name: string; price: string; sku?: string; barcode?: string }>;
+    }>;
+    lastSync?: string;
   };
 }
 
@@ -102,9 +108,9 @@ const DEFAULT_ECOMMERCE_SETTINGS: ECommerceSettings = {
     siteId: '',
   },
   offline: {
-    menuUrl: '',
     storeName: '',
-    lastSync: '',
+    currency: 'GBP',
+    categories: [],
   },
 };
 
@@ -271,14 +277,6 @@ export const useEcommerceSettings = () => {
     }
   }, [ecommerceSettings, logger]);
 
-  // Synchronize local state with settings state
-  useEffect(() => {
-    if (initialized.current && !isUpdating.current) {
-      originalSettings.current = { ...ecommerceSettings };
-      setHasUnsavedChanges(false);
-    }
-  }, [ecommerceSettings]);
-
   // Reset to default settings
   const resetToDefaults = useCallback(() => {
     setEcommerceSettings({ ...DEFAULT_ECOMMERCE_SETTINGS });
@@ -287,54 +285,38 @@ export const useEcommerceSettings = () => {
 
   // Update local state and mark changes as unsaved
   const updateSettings = useCallback((updates: Partial<ECommerceSettings>) => {
-    setEcommerceSettings(current => {
-      const newSettings = {
-        ...current,
-        ...updates,
-        // Handle nested objects
-        ...(updates.shopify && {
-          shopify: { ...current.shopify, ...updates.shopify },
-        }),
-        ...(updates.woocommerce && {
-          woocommerce: { ...current.woocommerce, ...updates.woocommerce },
-        }),
-        ...(updates.magento && {
-          magento: { ...current.magento, ...updates.magento },
-        }),
-        ...(updates.bigcommerce && {
-          bigcommerce: { ...current.bigcommerce, ...updates.bigcommerce },
-        }),
-        ...(updates.sylius && {
-          sylius: { ...current.sylius, ...updates.sylius },
-        }),
-        ...(updates.wix && {
-          wix: { ...current.wix, ...updates.wix },
-        }),
-        ...(updates.prestashop && {
-          prestashop: { ...current.prestashop, ...updates.prestashop },
-        }),
-        ...(updates.squarespace && {
-          squarespace: { ...current.squarespace, ...updates.squarespace },
-        }),
-      };
-
-      // Also update the main ecommerceSettings state immediately
-      setEcommerceSettings(prev => ({
-        ...prev,
-        ...updates,
-        ...(updates.shopify && { shopify: { ...prev.shopify, ...updates.shopify } }),
-        ...(updates.woocommerce && { woocommerce: { ...prev.woocommerce, ...updates.woocommerce } }),
-        ...(updates.magento && { magento: { ...prev.magento, ...updates.magento } }),
-        ...(updates.bigcommerce && { bigcommerce: { ...prev.bigcommerce, ...updates.bigcommerce } }),
-        ...(updates.sylius && { sylius: { ...prev.sylius, ...updates.sylius } }),
-        ...(updates.wix && { wix: { ...prev.wix, ...updates.wix } }),
-        ...(updates.prestashop && { prestashop: { ...prev.prestashop, ...updates.prestashop } }),
-        ...(updates.squarespace && { squarespace: { ...prev.squarespace, ...updates.squarespace } }),
-      }));
-
-      setHasUnsavedChanges(true);
-      return newSettings;
-    });
+    setEcommerceSettings(current => ({
+      ...current,
+      ...updates,
+      ...(updates.shopify && {
+        shopify: { ...current.shopify, ...updates.shopify },
+      }),
+      ...(updates.woocommerce && {
+        woocommerce: { ...current.woocommerce, ...updates.woocommerce },
+      }),
+      ...(updates.magento && {
+        magento: { ...current.magento, ...updates.magento },
+      }),
+      ...(updates.bigcommerce && {
+        bigcommerce: { ...current.bigcommerce, ...updates.bigcommerce },
+      }),
+      ...(updates.sylius && {
+        sylius: { ...current.sylius, ...updates.sylius },
+      }),
+      ...(updates.wix && {
+        wix: { ...current.wix, ...updates.wix },
+      }),
+      ...(updates.prestashop && {
+        prestashop: { ...current.prestashop, ...updates.prestashop },
+      }),
+      ...(updates.squarespace && {
+        squarespace: { ...current.squarespace, ...updates.squarespace },
+      }),
+      ...(updates.offline && {
+        offline: { ...current.offline, ...updates.offline },
+      }),
+    }));
+    setHasUnsavedChanges(true);
   }, []);
 
   // Save changes to global state

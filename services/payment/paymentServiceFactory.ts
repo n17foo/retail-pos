@@ -57,7 +57,10 @@ export class PaymentServiceFactory {
               const { SquareService } = require('./squareService');
               return SquareService.getInstance();
             } catch (error) {
-              this.logger.warn({ message: 'Square service not available, falling back to mock' }, error instanceof Error ? error : new Error(String(error)));
+              this.logger.warn(
+                { message: 'Square service not available, falling back to mock' },
+                error instanceof Error ? error : new Error(String(error))
+              );
               return SquareMockService.getInstance();
             }
           }

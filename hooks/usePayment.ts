@@ -1,55 +1,51 @@
+import { useCallback, useMemo } from 'react';
 import { PaymentRequest, PaymentResponse } from '../services/payment/paymentServiceInterface';
 import { PaymentProvider } from '../services/payment/paymentServiceFactory';
 import paymentService from '../services/payment/paymentService';
 
 /**
  * Custom hook for payment processing functionality
- * Provides a simple interface to the payment service while following the factory pattern
+ * Provides a stable interface to the payment service singleton
  */
 export const usePayment = () => {
-  // Simple passthrough functions to the underlying payment service
-  // This maintains the factory pattern architecture while providing a clean React hook interface
+  const connectToTerminal = useCallback((deviceId: string): Promise<boolean> => paymentService.connectToTerminal(deviceId), []);
 
-  const connectToTerminal = async (deviceId: string): Promise<boolean> => {
-    return paymentService.connectToTerminal(deviceId);
-  };
+  const processPayment = useCallback((request: PaymentRequest): Promise<PaymentResponse> => paymentService.processPayment(request), []);
 
-  const processPayment = async (request: PaymentRequest): Promise<PaymentResponse> => {
-    return paymentService.processPayment(request);
-  };
-
-  const disconnect = (): void => {
+  const disconnect = useCallback((): void => {
     paymentService.disconnect();
-  };
+  }, []);
 
-  const isTerminalConnected = (): boolean => {
-    return paymentService.isTerminalConnected();
-  };
+  const isTerminalConnected = useCallback((): boolean => paymentService.isTerminalConnected(), []);
 
-  const getConnectedDeviceId = (): string | null => {
-    return paymentService.getConnectedDeviceId();
-  };
+  const getConnectedDeviceId = useCallback((): string | null => paymentService.getConnectedDeviceId(), []);
 
-  const getAvailableTerminals = async () => {
-    return paymentService.getAvailableTerminals();
-  };
+  const getAvailableTerminals = useCallback(() => paymentService.getAvailableTerminals(), []);
 
-  const setPaymentProvider = (provider: PaymentProvider) => {
-    return paymentService.setPaymentProvider(provider);
-  };
+  const setPaymentProvider = useCallback((provider: PaymentProvider) => paymentService.setPaymentProvider(provider), []);
 
-  const getCurrentProvider = () => {
-    return paymentService.getCurrentProvider();
-  };
+  const getCurrentProvider = useCallback(() => paymentService.getCurrentProvider(), []);
 
-  return {
-    connectToTerminal,
-    processPayment,
-    disconnect,
-    isTerminalConnected,
-    getConnectedDeviceId,
-    getAvailableTerminals,
-    setPaymentProvider,
-    getCurrentProvider,
-  };
+  return useMemo(
+    () => ({
+      connectToTerminal,
+      processPayment,
+      disconnect,
+      isTerminalConnected,
+      getConnectedDeviceId,
+      getAvailableTerminals,
+      setPaymentProvider,
+      getCurrentProvider,
+    }),
+    [
+      connectToTerminal,
+      processPayment,
+      disconnect,
+      isTerminalConnected,
+      getConnectedDeviceId,
+      getAvailableTerminals,
+      setPaymentProvider,
+      getCurrentProvider,
+    ]
+  );
 };

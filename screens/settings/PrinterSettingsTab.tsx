@@ -4,7 +4,8 @@ import { PrinterConnectionType } from '../../services/printer/UnifiedPrinterServ
 import { usePrinterSettings, PrinterSettings } from '../../hooks/usePrinterSettings';
 import { useTranslate } from '../../hooks/useTranslate';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
-import { Button, Input } from '../../components';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
 
 // Helper function to create a deep copy of the settings object
 const deepCopy = (obj: any) => JSON.parse(JSON.stringify(obj));

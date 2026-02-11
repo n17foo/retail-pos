@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { StatusBar, StyleSheet, SafeAreaView, I18nManager } from 'react-native';
+import { StatusBar, StyleSheet, I18nManager } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { I18nextProvider } from 'react-i18next';
 import * as Localization from 'expo-localization';

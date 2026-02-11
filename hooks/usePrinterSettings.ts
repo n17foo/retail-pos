@@ -123,19 +123,12 @@ export const usePrinterSettings = () => {
         logger.info('Printer settings saved successfully');
         return true;
       } catch (err) {
-        const errorMessage = t('settings.printer.saveError', { error: err.message, defaultValue: `Error: ${err.message}` }) as string;
+        const errMsg = err instanceof Error ? err.message : String(err);
+        const errorMessage = t('settings.printer.saveError', { error: errMsg, defaultValue: `Error: ${errMsg}` }) as string;
         setError(errorMessage);
         setSaveStatus('error');
         logger.error({ message: 'Error saving printer settings' }, err instanceof Error ? err : new Error(String(err)));
-        const showError = (error: Error) => {
-          const errorMessage = t('settings.printer.saveError', {
-            error: error.message,
-            defaultValue: `Error: ${error.message}`,
-          }) as string;
-          Alert.alert(t('common.error', 'Error') as string, errorMessage);
-          return errorMessage;
-        };
-        showError(err);
+        Alert.alert(t('common.error', 'Error') as string, errorMessage);
         return false;
       }
     },
@@ -196,13 +189,15 @@ export const usePrinterSettings = () => {
 
       return true;
     } catch (err) {
-      if (err.name !== 'AbortError') {
-        const errorMessage = err.message || 'Failed to connect to the printer';
+      if (err instanceof Error && err.name === 'AbortError') {
+        return false;
+      }
+      {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to connect to the printer';
         setError(errorMessage);
         logger.error({ message: 'Error testing printer connection' }, err instanceof Error ? err : new Error(String(err)));
         throw err;
       }
-      return false;
     } finally {
       if (testConnectionRef.current === controller) {
         setIsTesting(false);

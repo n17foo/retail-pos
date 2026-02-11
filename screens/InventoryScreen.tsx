@@ -4,7 +4,7 @@ import { lightColors, spacing, typography, borderRadius, elevation } from '../ut
 import { Button } from '../components/Button';
 import { Input } from '../components/Input';
 import { useInventory } from '../hooks/useInventory';
-import { useEcommerceProducts } from '../hooks/useEcommerceProducts';
+import { useProductsForDisplay } from '../hooks/useProducts';
 import { useEcommerceSettings } from '../hooks/useEcommerceSettings';
 
 interface InventoryItem {
@@ -23,7 +23,7 @@ interface InventoryScreenProps {
 const LOW_STOCK_THRESHOLD = 10;
 
 const InventoryScreen: React.FC<InventoryScreenProps> = ({ onGoBack }) => {
-  const { products, isLoading: productsLoading, fetchProducts } = useEcommerceProducts();
+  const { products, isLoading: productsLoading, refresh: fetchProducts } = useProductsForDisplay();
   const { isInitialized: ecommerceInitialized } = useEcommerceSettings();
   const { isLoading: inventoryLoading, error, getInventory, adjustInventory, setInventoryQuantity } = useInventory();
 

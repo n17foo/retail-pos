@@ -1,29 +1,28 @@
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useLocalProducts } from '../hooks/useLocalProducts';
-import { useLocalCategories } from '../hooks/useLocalCategories';
-import { useOrders } from '../hooks/useOrders';
-import { Product } from '../repositories/ProductRepository';
-import { Category } from '../repositories/CategoryRepository';
-import { OrderWithItems } from '../hooks/useOrders';
+import { useOrders, OrderWithItems } from '../hooks/useOrders';
 import { Order } from '../repositories/OrderRepository';
 import { OrderItem } from '../repositories/OrderItemRepository';
+import { useOfflineProducts } from '../hooks/useOfflineProducts';
+import { useOfflineCategories } from '../hooks/useOfflineCategories';
+import { Product } from '../services/product/ProductServiceInterface';
+import { Category } from '../services/category/CategoryServiceInterface';
 
 interface DataContextType {
   products: Product[];
   productLoading: boolean;
-  productError: Error | null;
-  fetchProducts: () => Promise<void>;
-  addProduct: (productData: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
-  updateProduct: (id: string, productData: Partial<Product>) => Promise<void>;
-  deleteProduct: (id: string) => Promise<void>;
+  productError: string | null;
+  loadProducts: () => Promise<void>;
+  createProduct: (productData: any) => Promise<Product>;
+  updateProduct: (id: string, productData: Partial<Product>) => Promise<Product>;
+  deleteProduct: (id: string) => Promise<boolean>;
 
   categories: Category[];
   categoryLoading: boolean;
-  categoryError: Error | null;
-  fetchCategories: () => Promise<void>;
-  addCategory: (categoryData: Omit<Category, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
-  updateCategory: (id: string, categoryData: Partial<Category>) => Promise<void>;
-  deleteCategory: (id: string) => Promise<void>;
+  categoryError: string | null;
+  loadCategories: () => Promise<void>;
+  createCategory: (categoryData: any) => Promise<Category>;
+  updateCategory: (id: string, categoryData: Partial<Category>) => Promise<Category>;
+  deleteCategory: (id: string) => Promise<boolean>;
 
   orders: OrderWithItems[];
   orderLoading: boolean;
@@ -39,41 +38,41 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const {
     products,
-    loading: productLoading,
+    isLoading: productLoading,
     error: productError,
-    fetchProducts,
-    addProduct,
+    loadProducts,
+    createProduct,
     updateProduct,
     deleteProduct,
-  } = useLocalProducts();
+  } = useOfflineProducts();
 
   const {
     categories,
-    loading: categoryLoading,
+    isLoading: categoryLoading,
     error: categoryError,
-    fetchCategories,
-    addCategory,
-    updateCategory: updateCat,
-    deleteCategory: deleteCat,
-  } = useLocalCategories();
+    loadCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+  } = useOfflineCategories();
 
   const { orders, loading: orderLoading, error: orderError, fetchOrders, addOrder, updateOrder, deleteOrder } = useOrders();
 
-  const value = {
+  const value: DataContextType = {
     products,
     productLoading,
     productError,
-    fetchProducts,
-    addProduct,
+    loadProducts,
+    createProduct,
     updateProduct,
     deleteProduct,
     categories,
     categoryLoading,
     categoryError,
-    fetchCategories,
-    addCategory,
-    updateCategory: updateCat,
-    deleteCategory: deleteCat,
+    loadCategories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
     orders,
     orderLoading,
     orderError,

@@ -50,48 +50,6 @@ export const useSearch = () => {
   }, [searchService, isInitialized]);
 
   /**
-   * Perform search with current options
-   */
-  const performSearch = useCallback(
-    (query: string) => {
-      return searchProducts(query, searchOptions);
-    },
-    [searchOptions]
-  );
-
-  /**
-   * Set search filter options
-   * @param options The search options to apply
-   */
-  const setSearchFilters = (options: Partial<SearchOptions>) => {
-    setSearchOptions(prevOptions => ({
-      ...prevOptions,
-      ...options,
-    }));
-
-    // Re-search with the new filters if we have a query
-    if (searchQuery) {
-      performSearch(searchQuery);
-    }
-  };
-
-  /**
-   * Set search field (name, sku, barcode, or all)
-   * @param field The field to search in
-   */
-  const setSearchField = (field: 'name' | 'sku' | 'barcode' | 'all') => {
-    setSearchOptions(prevOptions => ({
-      ...prevOptions,
-      searchField: field,
-    }));
-
-    // Re-search with the new field if we have a query
-    if (searchQuery) {
-      performSearch(searchQuery);
-    }
-  };
-
-  /**
    * Search for products
    */
   const searchProducts = useCallback(
@@ -106,20 +64,49 @@ export const useSearch = () => {
 
         const results = await searchService.searchProducts(query, options);
         setSearchResults(results);
-
-        // Update search history after search
         setSearchHistory(searchService.getSearchHistory());
 
         return results;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to search products');
-        console.error('Error searching products:', err);
         return null;
       } finally {
         setIsLoading(false);
       }
     },
     [searchService, isInitialized]
+  );
+
+  /**
+   * Set search filter options and re-search if active query exists
+   */
+  const setSearchFilters = useCallback(
+    (options: Partial<SearchOptions>) => {
+      setSearchOptions(prevOptions => {
+        const newOptions = { ...prevOptions, ...options };
+        if (searchQuery) {
+          searchProducts(searchQuery, newOptions);
+        }
+        return newOptions;
+      });
+    },
+    [searchQuery, searchProducts]
+  );
+
+  /**
+   * Set search field (name, sku, barcode, or all)
+   */
+  const setSearchField = useCallback(
+    (field: 'name' | 'sku' | 'barcode' | 'all') => {
+      setSearchOptions(prevOptions => {
+        const newOptions = { ...prevOptions, searchField: field };
+        if (searchQuery) {
+          searchProducts(searchQuery, newOptions);
+        }
+        return newOptions;
+      });
+    },
+    [searchQuery, searchProducts]
   );
 
   /**
@@ -131,7 +118,6 @@ export const useSearch = () => {
       setSearchHistory([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to clear search history');
-      console.error('Error clearing search history:', err);
     }
   }, [searchService]);
 
@@ -141,9 +127,9 @@ export const useSearch = () => {
   const search = useCallback(
     (query: string) => {
       setSearchQuery(query);
-      return performSearch(query);
+      return searchProducts(query, searchOptions);
     },
-    [performSearch]
+    [searchProducts, searchOptions]
   );
 
   return {

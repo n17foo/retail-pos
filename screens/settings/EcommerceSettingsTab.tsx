@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native';
 import { useEcommerceSettings } from '../../hooks/useEcommerceSettings';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
-import { Button } from '../../components';
+import { Button } from '../../components/Button';
 
 type ECommercePlatform =
   | 'shopify'

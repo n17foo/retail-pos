@@ -15,7 +15,7 @@ import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { useSearch } from '../hooks/useSearch';
 import { SearchOptions, SearchProduct } from '../services/search/searchServiceInterface';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../utils/theme';
-import { Button, Input } from '../components';
+import { Button } from '../components/Button';
 
 interface SearchScreenProps {
   onGoBack?: () => void;

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOnboardingContext } from '../contexts/OnboardingProvider';
 import { useEcommerceSettings } from '../hooks/useEcommerceSettings';
 import { ProgressIndicator } from '../components/ProgressIndicator';
@@ -8,6 +9,8 @@ import { spacing } from '../utils/theme';
 import WelcomeStep from './onboarding/WelcomeStep';
 import PlatformSelectionStep from './onboarding/PlatformSelectionStep';
 import PlatformConfigurationStep from './onboarding/PlatformConfigurationStep';
+import OfflineSetupStep, { OfflineStoreConfig } from './onboarding/OfflineSetupStep';
+import StaffSetupStep from './onboarding/StaffSetupStep';
 import PaymentProviderStep from './onboarding/PaymentProviderStep';
 import PrinterSetupStep from './onboarding/PrinterSetupStep';
 import ScannerSetupStep from './onboarding/ScannerSetupStep';
@@ -18,6 +21,8 @@ type OnboardingStep =
   | 'welcome'
   | 'platform_selection'
   | 'platform_configuration'
+  | 'offline_setup'
+  | 'staff_setup'
   | 'payment_provider_setup'
   | 'printer_setup'
   | 'scanner_setup'
@@ -30,6 +35,13 @@ const OnboardingScreen: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('welcome');
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
   const [ecommerceConfig, setEcommerceConfig] = useState<any>({});
+  const [offlineConfig, setOfflineConfig] = useState<OfflineStoreConfig>({
+    storeName: '',
+    categories: [],
+    currency: 'GBP',
+  });
+
+  const isOffline = selectedPlatform === 'offline';
 
   const handleNextFromWelcome = () => {
     setCurrentStep('platform_selection');
@@ -37,7 +49,11 @@ const OnboardingScreen: React.FC = () => {
 
   const handlePlatformSelect = (platformId: string) => {
     setSelectedPlatform(platformId);
-    setCurrentStep('platform_configuration');
+    if (platformId === 'offline') {
+      setCurrentStep('offline_setup');
+    } else {
+      setCurrentStep('platform_configuration');
+    }
   };
 
   const handleBackToPlatformSelection = () => {
@@ -51,10 +67,34 @@ const OnboardingScreen: React.FC = () => {
         platform: selectedPlatform,
         [selectedPlatform.toLowerCase()]: ecommerceConfig,
       };
-      // updateEcommerceSettings is not async, it just updates the state
       updateEcommerceSettings(newSettings);
-      await saveSettings(); // saveSettings is async and saves the current state
+      await saveSettings();
     }
+    setCurrentStep('payment_provider_setup');
+  };
+
+  const handleNextFromOfflineSetup = async (config: OfflineStoreConfig) => {
+    setOfflineConfig(config);
+    const newSettings = {
+      enabled: true,
+      platform: 'offline',
+      offline: {
+        storeName: config.storeName,
+        currency: config.currency,
+        categories: config.categories,
+      },
+    };
+    updateEcommerceSettings(newSettings);
+    await saveSettings();
+    // Go to admin user step first, then staff setup
+    setCurrentStep('admin_user');
+  };
+
+  const handleNextFromAdminUserOffline = () => {
+    setCurrentStep('staff_setup');
+  };
+
+  const handleNextFromStaffSetup = () => {
     setCurrentStep('payment_provider_setup');
   };
 
@@ -87,7 +127,11 @@ const OnboardingScreen: React.FC = () => {
   };
 
   const handleNextFromAdminUser = () => {
-    setCurrentStep('summary');
+    if (isOffline) {
+      setCurrentStep('staff_setup');
+    } else {
+      setCurrentStep('summary');
+    }
   };
 
   const handleBackToAdminUser = () => {
@@ -118,16 +162,36 @@ const OnboardingScreen: React.FC = () => {
             />
           );
         }
-        // Fallback in case platform is not selected
         return <WelcomeStep onNext={handleNextFromWelcome} />;
+      case 'offline_setup':
+        return (
+          <OfflineSetupStep
+            config={offlineConfig}
+            setConfig={setOfflineConfig}
+            onBack={handleBackToPlatformSelection}
+            onComplete={handleNextFromOfflineSetup}
+          />
+        );
+      case 'staff_setup':
+        return <StaffSetupStep onBack={handleBackToAdminUser} onComplete={handleNextFromStaffSetup} />;
       case 'payment_provider_setup':
-        return <PaymentProviderStep onBack={handleBackToPlatformConfig} onNext={handleNextFromPayment} />;
+        return (
+          <PaymentProviderStep
+            onBack={isOffline ? () => setCurrentStep('staff_setup') : handleBackToPlatformConfig}
+            onNext={handleNextFromPayment}
+          />
+        );
       case 'printer_setup':
         return <PrinterSetupStep onBack={handleBackToPayment} onNext={handleNextFromPrinter} />;
       case 'scanner_setup':
         return <ScannerSetupStep onBack={handleBackToPrinter} onComplete={handleNextFromScanner} />;
       case 'admin_user':
-        return <AdminUserStep onBack={handleBackToScanner} onComplete={handleNextFromAdminUser} />;
+        return (
+          <AdminUserStep
+            onBack={isOffline ? () => setCurrentStep('offline_setup') : handleBackToScanner}
+            onComplete={handleNextFromAdminUser}
+          />
+        );
       case 'summary':
         return <SummaryStep onBack={handleBackToAdminUser} onConfirm={handleOnboardingComplete} />;
       default:
@@ -135,17 +199,31 @@ const OnboardingScreen: React.FC = () => {
     }
   };
 
-  const STEP_LABELS = ['Welcome', 'Platform', 'Configure', 'Payment', 'Printer', 'Scanner', 'Admin User', 'Summary'];
-  const STEP_ORDER: OnboardingStep[] = [
-    'welcome',
-    'platform_selection',
-    'platform_configuration',
-    'payment_provider_setup',
-    'printer_setup',
-    'scanner_setup',
-    'admin_user',
-    'summary',
-  ];
+  const STEP_LABELS = isOffline
+    ? ['Welcome', 'Platform', 'Store Setup', 'Admin', 'Staff', 'Payment', 'Printer', 'Scanner', 'Summary']
+    : ['Welcome', 'Platform', 'Configure', 'Payment', 'Printer', 'Scanner', 'Admin', 'Summary'];
+  const STEP_ORDER: OnboardingStep[] = isOffline
+    ? [
+        'welcome',
+        'platform_selection',
+        'offline_setup',
+        'admin_user',
+        'staff_setup',
+        'payment_provider_setup',
+        'printer_setup',
+        'scanner_setup',
+        'summary',
+      ]
+    : [
+        'welcome',
+        'platform_selection',
+        'platform_configuration',
+        'payment_provider_setup',
+        'printer_setup',
+        'scanner_setup',
+        'admin_user',
+        'summary',
+      ];
   const currentStepNumber = STEP_ORDER.indexOf(currentStep) + 1;
 
   return (

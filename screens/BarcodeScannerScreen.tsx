@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { CameraView } from 'expo-camera';
-import { useEcommerceProducts } from '../hooks/useEcommerceProducts';
+import { useProductsForDisplay } from '../hooks/useProducts';
 import { useBarcodeScannerService } from '../hooks/useBarcodeScannerService';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../utils/theme';
 
@@ -18,8 +18,8 @@ export const BarcodeScannerScreen: React.FC<BarcodeScannerScreenProps> = ({ onSc
     deviceId: 'back',
   };
 
-  // Get products from the product service
-  const { products } = useEcommerceProducts();
+  // Get products from the unified product service
+  const { products } = useProductsForDisplay();
 
   // Use our custom hook for barcode scanner functionality
   const { hasPermission, scanned, connected, connecting, setScanned, connectScanner, disconnectScanner, handleBarCodeScanned } =
