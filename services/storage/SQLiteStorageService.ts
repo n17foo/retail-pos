@@ -19,7 +19,7 @@ export class SQLiteStorageService {
   }
 
   private async initializeDatabase(): Promise<void> {
-    const LATEST_VERSION = 4; // Increment this when schema changes
+    const LATEST_VERSION = 5; // Increment this when schema changes
 
     try {
       let currentVersion = (await this.db.getFirstAsync<{ user_version: number }>('PRAGMA user_version')).user_version;
@@ -148,8 +148,19 @@ export class SQLiteStorageService {
         this.logger.info('Baskets and local_orders tables created.');
       }
 
-      // Future migrations go here, e.g.:
-      // if (fromVersion < 5) { ... }
+      // Migration to Version 5: Add key_value_store table for general key-value storage
+      if (fromVersion < 5) {
+        this.logger.info('Applying migration to v5: Creating key_value_store table...');
+        await this.db.runAsync(
+          `CREATE TABLE IF NOT EXISTS key_value_store (
+            key TEXT PRIMARY KEY NOT NULL,
+            value TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+          );`
+        );
+        this.logger.info('key_value_store table created.');
+      }
 
       // Update the version in a single step at the end
       await this.db.runAsync(`PRAGMA user_version = ${toVersion}`);
@@ -159,6 +170,123 @@ export class SQLiteStorageService {
 
   public getDatabase(): SQLite.SQLiteDatabase {
     return this.db;
+  }
+
+  // ============ Key-Value Storage Methods ============
+
+  /**
+   * Set a value in key-value storage
+   */
+  public async setItem(key: string, value: string | object | number | boolean): Promise<void> {
+    const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
+    const now = Date.now();
+
+    await this.db.runAsync(
+      `INSERT INTO key_value_store (key, value, created_at, updated_at) 
+       VALUES (?, ?, ?, ?) 
+       ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`,
+      [key, stringValue, now, now, stringValue, now]
+    );
+  }
+
+  /**
+   * Get a value from key-value storage
+   */
+  public async getItem(key: string): Promise<string | null> {
+    const result = await this.db.getFirstAsync<{ value: string }>(
+      'SELECT value FROM key_value_store WHERE key = ?',
+      [key]
+    );
+    return result?.value ?? null;
+  }
+
+  /**
+   * Remove an item from key-value storage
+   */
+  public async removeItem(key: string): Promise<void> {
+    await this.db.runAsync('DELETE FROM key_value_store WHERE key = ?', [key]);
+  }
+
+  /**
+   * Get a parsed JSON value from storage
+   */
+  public async getObject<T>(key: string): Promise<T | null> {
+    try {
+      const value = await this.getItem(key);
+      if (!value) return null;
+      return JSON.parse(value) as T;
+    } catch (error) {
+      this.logger.error(
+        { message: `Error parsing stored value for key: ${key}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return null;
+    }
+  }
+
+  /**
+   * Store an object in storage after JSON stringifying it
+   */
+  public async setObject<T>(key: string, value: T): Promise<void> {
+    await this.setItem(key, JSON.stringify(value));
+  }
+
+  /**
+   * Check if a key exists in storage
+   */
+  public async containsKey(key: string): Promise<boolean> {
+    const result = await this.db.getFirstAsync<{ count: number }>(
+      'SELECT COUNT(*) as count FROM key_value_store WHERE key = ?',
+      [key]
+    );
+    return (result?.count ?? 0) > 0;
+  }
+
+  /**
+   * Clear all key-value storage
+   */
+  public async clearKeyValueStore(): Promise<void> {
+    await this.db.runAsync('DELETE FROM key_value_store');
+    this.logger.info('Key-value storage cleared');
+  }
+
+  /**
+   * Get all keys in storage
+   */
+  public async getAllKeys(): Promise<string[]> {
+    const results = await this.db.getAllAsync<{ key: string }>(
+      'SELECT key FROM key_value_store'
+    );
+    return results.map(r => r.key);
+  }
+
+  /**
+   * Set multiple items at once
+   */
+  public async multiSet(items: [string, string][]): Promise<void> {
+    const now = Date.now();
+    await this.db.withTransactionAsync(async () => {
+      for (const [key, value] of items) {
+        await this.db.runAsync(
+          `INSERT INTO key_value_store (key, value, created_at, updated_at) 
+           VALUES (?, ?, ?, ?) 
+           ON CONFLICT(key) DO UPDATE SET value = ?, updated_at = ?`,
+          [key, value, now, now, value, now]
+        );
+      }
+    });
+  }
+
+  /**
+   * Get multiple items at once
+   */
+  public async multiGet(keys: string[]): Promise<[string, string | null][]> {
+    const results: [string, string | null][] = [];
+    for (const key of keys) {
+      const value = await this.getItem(key);
+      results.push([key, value]);
+    }
+    return results;
   }
 }
 

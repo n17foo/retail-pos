@@ -95,7 +95,7 @@ export const useUnifiedCategories = (platform?: ECommercePlatform): UseUnifiedCa
       }
 
       // Determine the platform for mapping
-      const mappingPlatform = platform || ECommercePlatform.CUSTOM;
+      const mappingPlatform = platform || ECommercePlatform.OFFLINE;
 
       // Map to unified categories
       const unifiedCategories = mapToUnifiedCategories(result, mappingPlatform);

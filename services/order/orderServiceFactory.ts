@@ -1,5 +1,4 @@
 import { OrderServiceInterface, Order } from './OrderServiceInterface';
-import { MockOrderService } from './mock/MockOrderService';
 import { ShopifyOrderService } from './platforms/ShopifyOrderService';
 import { WooCommerceOrderService } from './platforms/WooCommerceOrderService';
 import { BigCommerceOrderService } from './platforms/BigCommerceOrderService';
@@ -8,7 +7,7 @@ import { SyliusOrderService } from './platforms/SyliusOrderService';
 import { WixOrderService } from './platforms/WixOrderService';
 import { PrestaShopOrderService } from './platforms/PrestaShopOrderService';
 import { SquarespaceOrderService } from './platforms/SquarespaceOrderService';
-import { CustomOrderService } from './platforms/CustomOrderService';
+import { OfflineOrderService } from './platforms/OfflineOrderService';
 import { PlatformOrderConfig } from './platforms/PlatformOrderServiceInterface';
 import { CompositeOrderService } from './platforms/CompositeOrderService';
 import { ECommercePlatform } from '../../utils/platforms';
@@ -19,7 +18,7 @@ import { ECommercePlatform } from '../../utils/platforms';
  */
 export class OrderServiceFactory {
   private static instance: OrderServiceFactory;
-  private mockService: OrderServiceInterface;
+  private offlineDefaultService: OrderServiceInterface;
   private shopifyService: ShopifyOrderService | null = null;
   private wooCommerceService: WooCommerceOrderService | null = null;
   private bigCommerceService: BigCommerceOrderService | null = null;
@@ -28,11 +27,11 @@ export class OrderServiceFactory {
   private wixService: WixOrderService | null = null;
   private prestaShopService: PrestaShopOrderService | null = null;
   private squarespaceService: SquarespaceOrderService | null = null;
-  private customService: CustomOrderService | null = null;
+  private offlineService: OfflineOrderService | null = null;
   private compositeService: CompositeOrderService | null = null;
 
   private constructor() {
-    this.mockService = new MockOrderService();
+    this.offlineDefaultService = new OfflineOrderService();
   }
 
   public static getInstance(): OrderServiceFactory {
@@ -50,8 +49,8 @@ export class OrderServiceFactory {
    */
   public getService(platform?: ECommercePlatform, config?: PlatformOrderConfig): OrderServiceInterface {
     // Determine if we should use the mock service
-    if (process.env.USE_MOCK_ORDER === 'true' || !platform) {
-      return this.mockService;
+    if (!platform) {
+      return this.offlineDefaultService;
     }
 
     switch (platform) {
@@ -127,18 +126,18 @@ export class OrderServiceFactory {
         }
         return this.squarespaceService;
 
-      case ECommercePlatform.CUSTOM:
-        if (!this.customService) {
-          this.customService = new CustomOrderService(config);
-          this.customService.initialize().catch(err => {
-            console.error('Failed to initialize Custom order service:', err);
+      case ECommercePlatform.OFFLINE:
+        if (!this.offlineService) {
+          this.offlineService = new OfflineOrderService(config);
+          this.offlineService.initialize().catch(err => {
+            console.error('Failed to initialize Offline order service:', err);
           });
         }
-        return this.customService;
+        return this.offlineService;
 
       default:
-        console.warn(`Platform ${platform} not supported for orders, using mock order service`);
-        return this.mockService;
+        console.warn(`Platform ${platform} not supported for orders, using offline order service`);
+        return this.offlineDefaultService;
     }
   }
 
@@ -168,7 +167,7 @@ export class OrderServiceFactory {
       const service = this.getService(platform, config);
 
       // Don't add mock service to composite unless explicitly requested
-      if (service instanceof MockOrderService && process.env.USE_MOCK_ORDER !== 'true') {
+      if (service instanceof OfflineOrderService) {
         return;
       }
 
@@ -185,8 +184,8 @@ export class OrderServiceFactory {
    * Initialize the mock order service with sample data
    * @returns The mock order service
    */
-  public getMockService(): OrderServiceInterface {
-    return this.mockService;
+  public getOfflineService(): OrderServiceInterface {
+    return this.offlineDefaultService;
   }
 
   /**
@@ -254,10 +253,10 @@ export class OrderServiceFactory {
         });
         break;
 
-      case ECommercePlatform.CUSTOM:
-        this.customService = new CustomOrderService(config);
-        this.customService.initialize().catch(err => {
-          console.error('Failed to initialize Custom order service with config:', err);
+      case ECommercePlatform.OFFLINE:
+        this.offlineService = new OfflineOrderService(config);
+        this.offlineService.initialize().catch(err => {
+          console.error('Failed to initialize Offline order service with config:', err);
         });
         break;
 

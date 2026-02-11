@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { storage } from '../utils/storage';
+import { storage } from '../services/storage/storage';
 import { LoggerFactory } from '../services/logger';
 
 export interface ScannerSettings {
@@ -23,7 +23,7 @@ export const useScannerSettings = () => {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'unsaved' | 'saving' | 'error'>('saved');
   const logger = LoggerFactory.getInstance().createLogger('useScannerSettings');
 
-  // Load scanner settings from MMKV storage
+  // Load scanner settings from storage
   const loadSettings = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -42,7 +42,7 @@ export const useScannerSettings = () => {
     }
   }, []);
 
-  // Save scanner settings to MMKV storage
+  // Save scanner settings to storage
   const saveSettings = useCallback(async (settings: ScannerSettings) => {
     try {
       setSaveStatus('saving');

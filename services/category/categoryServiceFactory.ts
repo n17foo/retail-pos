@@ -1,12 +1,11 @@
 import { CategoryServiceInterface } from './CategoryServiceInterface';
-import { MockCategoryService } from './mock/MockCategoryService';
 import { ECommercePlatform } from '../../utils/platforms';
 import { ShopifyCategoryService } from './platforms/ShopifyCategoryService';
 import { WooCommerceCategoryService } from './platforms/WooCommerceCategoryService';
 import { BigCommerceCategoryService } from './platforms/BigCommerceCategoryService';
 import { CompositeCategoryService } from './platforms/CompositeCategoryService';
 import { PlatformCategoryConfig, PlatformCategoryServiceInterface } from './platforms/PlatformCategoryServiceInterface';
-import { customCategoryService } from './platforms/CustomCategoryService';
+import { OfflineCategoryService, offlineCategoryService } from './platforms/OfflineCategoryService';
 import { PrestaShopCategoryService } from './platforms/PrestaShopCategoryService';
 import { SquarespaceCategoryService } from './platforms/SquarespaceCategoryService';
 import { MagentoCategoryService } from './platforms/MagentoCategoryService';
@@ -19,7 +18,7 @@ import { WixCategoryService } from './platforms/WixCategoryService';
  */
 export class CategoryServiceFactory {
   private static instance: CategoryServiceFactory;
-  private mockService: CategoryServiceInterface;
+  private offlineDefaultService: CategoryServiceInterface;
 
   // Cache for platform-specific services
   private serviceInstances: Record<string, CategoryServiceInterface | null> = {
@@ -31,11 +30,11 @@ export class CategoryServiceFactory {
     [ECommercePlatform.WIX]: null,
     [ECommercePlatform.PRESTASHOP]: null,
     [ECommercePlatform.SQUARESPACE]: null,
-    [ECommercePlatform.CUSTOM]: null,
+    [ECommercePlatform.OFFLINE]: null,
   };
 
   private constructor() {
-    this.mockService = new MockCategoryService();
+    this.offlineDefaultService = new OfflineCategoryService();
   }
 
   public static getInstance(): CategoryServiceFactory {
@@ -52,8 +51,8 @@ export class CategoryServiceFactory {
    */
   public getService(platform?: ECommercePlatform | ECommercePlatform[]): CategoryServiceInterface {
     // Check if we should use the mock service
-    if (process.env.USE_MOCK_CATEGORIES === 'true' || !platform) {
-      return this.mockService;
+    if (!platform) {
+      return this.offlineDefaultService;
     }
 
     // If an array of platforms is provided, return a composite service
@@ -102,13 +101,13 @@ export class CategoryServiceFactory {
         service = this.createSquarespaceService();
         break;
 
-      case ECommercePlatform.CUSTOM:
-        service = this.createCustomService();
+      case ECommercePlatform.OFFLINE:
+        service = this.createOfflineService();
         break;
 
       default:
-        console.warn(`Unknown platform: ${platform}, using mock category service`);
-        return this.mockService;
+        console.warn(`Unknown platform: ${platform}, using offline category service`);
+        return this.offlineDefaultService;
     }
 
     // Cache the instance
@@ -153,8 +152,8 @@ export class CategoryServiceFactory {
           case ECommercePlatform.SQUARESPACE:
             service = this.createSquarespaceService();
             break;
-          case ECommercePlatform.CUSTOM:
-            service = this.createCustomService();
+          case ECommercePlatform.OFFLINE:
+            service = this.createOfflineService();
             break;
           default:
             return null;
@@ -169,7 +168,7 @@ export class CategoryServiceFactory {
 
     // Include mock service if no valid platform services
     if (services.length === 0) {
-      services.push(this.mockService as unknown as PlatformCategoryServiceInterface);
+      services.push(this.offlineDefaultService as unknown as PlatformCategoryServiceInterface);
     }
 
     return new CompositeCategoryService(services);
@@ -309,13 +308,12 @@ export class CategoryServiceFactory {
   }
 
   /**
-   * Create and initialize a Custom category service
+   * Create and initialize an Offline category service
    */
-  private createCustomService(): CategoryServiceInterface {
-    // Custom service is already implemented
-    const service = customCategoryService;
+  private createOfflineService(): CategoryServiceInterface {
+    const service = offlineCategoryService;
     service.initialize().catch(err => {
-      console.error('Failed to initialize Custom category service:', err);
+      console.error('Failed to initialize Offline category service:', err);
     });
     return service;
   }

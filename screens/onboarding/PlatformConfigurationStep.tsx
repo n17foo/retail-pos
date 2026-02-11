@@ -73,7 +73,7 @@ const PlatformConfigurationStep: React.FC<PlatformConfigurationStepProps> = ({ p
           return false;
         }
         break;
-      case 'custom':
+      case 'offline':
         if (!config.menuUrl) {
           Alert.alert('Validation Error', 'Please enter the Menu Download URL.');
           return false;
@@ -347,7 +347,7 @@ const PlatformConfigurationStep: React.FC<PlatformConfigurationStepProps> = ({ p
         return renderPrestaShopForm();
       case 'squarespace':
         return renderSquarespaceForm();
-      case 'custom':
+      case 'offline':
         return renderCustomForm();
       default:
         return <Text style={styles.errorText}>Unknown platform: {platformId}</Text>;

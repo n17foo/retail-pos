@@ -39,7 +39,7 @@ const SummaryStep: React.FC<SummaryStepProps> = ({ onBack, onConfirm }) => {
         {ecommerceSettings.platform === 'wix' && renderSetting('Site ID', ecommerceSettings.wix?.siteId)}
         {ecommerceSettings.platform === 'prestashop' && renderSetting('Store URL', ecommerceSettings.prestashop?.storeUrl)}
         {ecommerceSettings.platform === 'squarespace' && renderSetting('Site ID', ecommerceSettings.squarespace?.siteId)}
-        {ecommerceSettings.platform === 'custom' && renderSetting('API URL', ecommerceSettings.apiUrl)}
+        {ecommerceSettings.platform === 'offline' && renderSetting('Menu URL', ecommerceSettings.offline?.menuUrl)}
       </View>
 
       <View style={styles.section}>

@@ -1,7 +1,20 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
+import { sqliteStorage } from '../services/storage/SQLiteStorageService';
 import { QueuedRequest, SyncStoreState } from '../types/syncQueue';
+
+// Custom SQLite storage adapter for zustand persist middleware
+const sqliteStorageAdapter: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    return sqliteStorage.getItem(name);
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    await sqliteStorage.setItem(name, value);
+  },
+  removeItem: async (name: string): Promise<void> => {
+    await sqliteStorage.removeItem(name);
+  },
+};
 
 export const useSyncStore = create<SyncStoreState>()(
   persist(
@@ -120,7 +133,7 @@ export const useSyncStore = create<SyncStoreState>()(
     }),
     {
       name: 'sync-queue-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => sqliteStorageAdapter),
       partialize: (state) => ({
         queue: state.queue,
         // Don't persist isProcessing state

@@ -1,4 +1,4 @@
-import { storage, Storage } from '../../utils/storage';
+import { storage, Storage } from './storage';
 import { sqliteStorage, SQLiteStorageService } from './SQLiteStorageService';
 
 export enum StorageType {

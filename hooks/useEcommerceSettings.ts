@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
-import { storage } from '../utils/storage';
+import { storage } from '../services/storage/storage';
 import { LoggerFactory } from '../services/logger';
 import { ECommercePlatform } from '../utils/platforms';
 import { ServiceConfigBridge } from '../services/config/ServiceConfigBridge';
@@ -49,7 +49,7 @@ export interface ECommerceSettings {
     apiKey: string;
     siteId: string;
   };
-  custom: {
+  offline: {
     menuUrl: string;
     storeName: string;
     lastSync: string;
@@ -101,7 +101,7 @@ const DEFAULT_ECOMMERCE_SETTINGS: ECommerceSettings = {
     apiKey: '',
     siteId: '',
   },
-  custom: {
+  offline: {
     menuUrl: '',
     storeName: '',
     lastSync: '',

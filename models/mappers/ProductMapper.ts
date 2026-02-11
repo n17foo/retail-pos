@@ -452,7 +452,7 @@ export function mapBigCommerceProduct(data: BigCommerceProduct): UnifiedProduct 
 }
 
 // ============================================================================
-// GENERIC/CUSTOM MAPPER
+// GENERIC/OFFLINE MAPPER
 // ============================================================================
 
 interface GenericProduct {
@@ -485,7 +485,7 @@ interface GenericProduct {
   }>;
 }
 
-export function mapGenericProduct(data: GenericProduct, platform: ECommercePlatform = ECommercePlatform.CUSTOM): UnifiedProduct {
+export function mapGenericProduct(data: GenericProduct, platform: ECommercePlatform = ECommercePlatform.OFFLINE): UnifiedProduct {
   const platformId = String(data.id);
 
   // Handle images - support both string arrays and image objects
@@ -600,7 +600,7 @@ export function mapToUnifiedProduct(data: unknown, platform: ECommercePlatform):
       return mapWooCommerceProduct(data as WooCommerceProduct);
     case ECommercePlatform.BIGCOMMERCE:
       return mapBigCommerceProduct(data as BigCommerceProduct);
-    case ECommercePlatform.CUSTOM:
+    case ECommercePlatform.OFFLINE:
     default:
       return mapGenericProduct(data as GenericProduct, platform);
   }

@@ -1,5 +1,4 @@
 import { ProductServiceInterface } from './ProductServiceInterface';
-import { MockProductService } from './mock/MockProductService';
 import { ShopifyProductService } from './platforms/ShopifyProductService';
 import { WooCommerceProductService } from './platforms/WooCommerceProductService';
 import { BigCommerceProductService } from './platforms/BigCommerceProductService';
@@ -9,6 +8,7 @@ import { WixProductService } from './platforms/WixProductService';
 import { PrestaShopProductService } from './platforms/PrestaShopProductService';
 import { SquarespaceProductService } from './platforms/SquarespaceProductService';
 import { CompositeProductService } from './platforms/CompositeProductService';
+import { OfflineProductService } from './platforms/OfflineProductService';
 import { PlatformProductConfig } from './platforms/PlatformProductServiceInterface';
 import { ECommercePlatform } from '../../utils/platforms';
 
@@ -18,7 +18,7 @@ import { ECommercePlatform } from '../../utils/platforms';
  */
 export class ProductServiceFactory {
   private static instance: ProductServiceFactory;
-  private mockService: ProductServiceInterface;
+  private offlineDefaultService: ProductServiceInterface;
   private shopifyService: ShopifyProductService | null = null;
   private wooCommerceService: WooCommerceProductService | null = null;
   private bigCommerceService: BigCommerceProductService | null = null;
@@ -27,10 +27,11 @@ export class ProductServiceFactory {
   private wixService: WixProductService | null = null;
   private prestaShopService: PrestaShopProductService | null = null;
   private squarespaceService: SquarespaceProductService | null = null;
+  private offlineService: OfflineProductService | null = null;
   private compositeService: CompositeProductService | null = null;
 
   private constructor() {
-    this.mockService = new MockProductService();
+    this.offlineDefaultService = new OfflineProductService();
   }
 
   public static getInstance(): ProductServiceFactory {
@@ -48,8 +49,8 @@ export class ProductServiceFactory {
    */
   public getService(platform?: ECommercePlatform, config?: PlatformProductConfig): ProductServiceInterface {
     // Determine if we should use the mock service
-    if (process.env.USE_MOCK_PRODUCT === 'true' || !platform) {
-      return this.mockService;
+    if (!platform) {
+      return this.offlineDefaultService;
     }
 
     switch (platform) {
@@ -125,9 +126,18 @@ export class ProductServiceFactory {
         }
         return this.squarespaceService;
 
+      case ECommercePlatform.OFFLINE:
+        if (!this.offlineService) {
+          this.offlineService = new OfflineProductService(config);
+          this.offlineService.initialize().catch(err => {
+            console.error('Failed to initialize Offline product service:', err);
+          });
+        }
+        return this.offlineService;
+
       default:
-        console.warn(`Platform ${platform} not supported, using mock product service`);
-        return this.mockService;
+        console.warn(`Platform ${platform} not supported, using offline product service`);
+        return this.offlineDefaultService;
     }
   }
 
@@ -157,7 +167,7 @@ export class ProductServiceFactory {
       const service = this.getService(platform, config);
 
       // Don't add mock service to composite unless explicitly requested
-      if (service instanceof MockProductService && process.env.USE_MOCK_PRODUCT !== 'true') {
+      if (service instanceof OfflineProductService) {
         return;
       }
 
@@ -174,8 +184,8 @@ export class ProductServiceFactory {
    * Initialize the mock product service with sample data
    * @returns The mock product service
    */
-  public getMockService(): ProductServiceInterface {
-    return this.mockService;
+  public getOfflineService(): ProductServiceInterface {
+    return this.offlineDefaultService;
   }
 
   /**
@@ -240,6 +250,13 @@ export class ProductServiceFactory {
         this.squarespaceService = new SquarespaceProductService(config);
         this.squarespaceService.initialize().catch(err => {
           console.error('Failed to initialize Squarespace product service with config:', err);
+        });
+        break;
+
+      case ECommercePlatform.OFFLINE:
+        this.offlineService = new OfflineProductService(config);
+        this.offlineService.initialize().catch(err => {
+          console.error('Failed to initialize Offline product service with config:', err);
         });
         break;
 

@@ -7,8 +7,10 @@ import PrinterSettingsTab from './settings/PrinterSettingsTab';
 import ScannerSettingsTab from './settings/ScannerSettingsTab';
 import EcommerceSettingsTab from './settings/EcommerceSettingsTab';
 import GenericSettingsTab from './settings/GenericSettingsTab';
+import OfflineManagementTab from './settings/OfflineManagementTab';
+import ReceiptSettingsTab from './settings/ReceiptSettingsTab';
 
-type SettingsTab = 'generic' | 'payment' | 'printer' | 'scanner' | 'ecommerce';
+type SettingsTab = 'generic' | 'payment' | 'printer' | 'scanner' | 'ecommerce' | 'offline' | 'receipt';
 type SaveStatus = 'unsaved' | 'saving' | 'saved';
 
 interface SettingsScreenProps {
@@ -56,6 +58,12 @@ const SettingsScreen: FC<SettingsScreenProps> = ({ onGoBack }) => {
         <TouchableOpacity style={[styles.tab, activeTab === 'ecommerce' && styles.activeTab]} onPress={() => setActiveTab('ecommerce')}>
           <Text style={[styles.tabText, activeTab === 'ecommerce' && styles.activeTabText]}>E-Comm</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.tab, activeTab === 'offline' && styles.activeTab]} onPress={() => setActiveTab('offline')}>
+          <Text style={[styles.tabText, activeTab === 'offline' && styles.activeTabText]}>Offline</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.tab, activeTab === 'receipt' && styles.activeTab]} onPress={() => setActiveTab('receipt')}>
+          <Text style={[styles.tabText, activeTab === 'receipt' && styles.activeTabText]}>Receipt</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
@@ -64,6 +72,8 @@ const SettingsScreen: FC<SettingsScreenProps> = ({ onGoBack }) => {
         {activeTab === 'scanner' && <ScannerSettingsTab />}
         {activeTab === 'ecommerce' && <EcommerceSettingsTab />}
         {activeTab === 'generic' && <GenericSettingsTab />}
+        {activeTab === 'offline' && <OfflineManagementTab />}
+        {activeTab === 'receipt' && <ReceiptSettingsTab />}
       </ScrollView>
 
       <View style={styles.footer}>

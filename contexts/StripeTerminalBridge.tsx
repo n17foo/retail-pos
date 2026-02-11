@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { StripeTerminalProvider, useStripeTerminal } from '@stripe/stripe-terminal-react-native';
-import { Storage } from '../utils/storage';
+import { storage } from '../services/storage/storage';
 
-// Get singleton storage service instance
-const storage = Storage.getInstance();
+// Use the singleton storage service instance directly
+const storageInstance = storage;
 
 // Define types based on Stripe Terminal SDK
 type Reader = any;

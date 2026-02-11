@@ -7,5 +7,5 @@ export enum ECommercePlatform {
   WIX = 'wix',
   PRESTASHOP = 'prestashop',
   SQUARESPACE = 'squarespace',
-  CUSTOM = 'custom', // Local-only mode with menu download from public URL
+  OFFLINE = 'offline', // Offline mode - all data managed locally via SQLite
 }

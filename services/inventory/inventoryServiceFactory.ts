@@ -1,5 +1,4 @@
 import { InventoryServiceInterface } from './InventoryServiceInterface';
-import { MockInventoryService } from './mock/MockInventoryService';
 import { ShopifyInventoryService } from './platforms/ShopifyInventoryService';
 import { WooCommerceInventoryService } from './platforms/WooCommerceInventoryService';
 import { BigCommerceInventoryService } from './platforms/BigCommerceInventoryService';
@@ -8,7 +7,7 @@ import { SyliusInventoryService } from './platforms/SyliusInventoryService';
 import { WixInventoryService } from './platforms/WixInventoryService';
 import { PrestaShopInventoryService } from './platforms/PrestaShopInventoryService';
 import { SquarespaceInventoryService } from './platforms/SquarespaceInventoryService';
-import { CustomInventoryService } from './platforms/CustomInventoryService';
+import { OfflineInventoryService } from './platforms/OfflineInventoryService';
 import { CompositeInventoryService } from './platforms/CompositeInventoryService';
 import { PlatformInventoryConfig, PlatformInventoryServiceInterface } from './platforms/PlatformInventoryServiceInterface';
 import { ECommercePlatform } from '../../utils/platforms';
@@ -19,7 +18,7 @@ import { ECommercePlatform } from '../../utils/platforms';
  */
 export class InventoryServiceFactory {
   private static instance: InventoryServiceFactory;
-  private mockService: InventoryServiceInterface;
+  private offlineDefaultService: InventoryServiceInterface;
 
   // Cache for platform-specific services
   private serviceInstances: Record<string, InventoryServiceInterface | null> = {
@@ -31,11 +30,11 @@ export class InventoryServiceFactory {
     [ECommercePlatform.WIX]: null,
     [ECommercePlatform.PRESTASHOP]: null,
     [ECommercePlatform.SQUARESPACE]: null,
-    [ECommercePlatform.CUSTOM]: null,
+    [ECommercePlatform.OFFLINE]: null,
   };
 
   private constructor() {
-    this.mockService = new MockInventoryService();
+    this.offlineDefaultService = new OfflineInventoryService();
   }
 
   public static getInstance(): InventoryServiceFactory {
@@ -52,8 +51,8 @@ export class InventoryServiceFactory {
    */
   public getService(platform?: ECommercePlatform | ECommercePlatform[]): InventoryServiceInterface {
     // Check if we should use the mock service
-    if (process.env.USE_MOCK_INVENTORY === 'true' || !platform) {
-      return this.mockService;
+    if (!platform) {
+      return this.offlineDefaultService;
     }
 
     // If an array of platforms is provided, return a composite service
@@ -102,13 +101,13 @@ export class InventoryServiceFactory {
         service = this.createSquarespaceService();
         break;
 
-      case ECommercePlatform.CUSTOM:
-        service = this.createCustomService();
+      case ECommercePlatform.OFFLINE:
+        service = this.createOfflineService();
         break;
 
       default:
-        console.warn(`Unknown platform: ${platform}, using mock inventory service`);
-        return this.mockService;
+        console.warn(`Unknown platform: ${platform}, using offline inventory service`);
+        return this.offlineDefaultService;
     }
 
     // Cache the instance
@@ -153,8 +152,8 @@ export class InventoryServiceFactory {
           case ECommercePlatform.SQUARESPACE:
             service = this.createSquarespaceService();
             break;
-          case ECommercePlatform.CUSTOM:
-            service = this.createCustomService();
+          case ECommercePlatform.OFFLINE:
+            service = this.createOfflineService();
             break;
           default:
             return null;
@@ -169,7 +168,7 @@ export class InventoryServiceFactory {
 
     // Include mock service if no valid platform services
     if (services.length === 0) {
-      services.push(this.mockService);
+      services.push(this.offlineDefaultService);
     }
 
     return new CompositeInventoryService(services as PlatformInventoryServiceInterface[]);
@@ -333,8 +332,8 @@ export class InventoryServiceFactory {
     return service;
   }
 
-  private createCustomService(): InventoryServiceInterface {
-    return new CustomInventoryService();
+  private createOfflineService(): InventoryServiceInterface {
+    return new OfflineInventoryService();
   }
 
   /**
@@ -379,9 +378,9 @@ export class InventoryServiceFactory {
         service = new SquarespaceInventoryService();
         break;
 
-      case ECommercePlatform.CUSTOM:
-        // Custom service doesn't use configuration - just initialize it
-        this.serviceInstances[platform] = new CustomInventoryService();
+      case ECommercePlatform.OFFLINE:
+        // Offline service doesn't use configuration - just initialize it
+        this.serviceInstances[platform] = new OfflineInventoryService();
         return;
 
       default:

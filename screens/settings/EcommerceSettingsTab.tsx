@@ -4,7 +4,7 @@ import { useEcommerceSettings } from '../../hooks/useEcommerceSettings';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
 import { Button } from '../../components';
 
-type ECommercePlatform = 'shopify' | 'woocommerce' | 'bigcommerce' | 'magento' | 'sylius' | 'wix' | 'prestashop' | 'squarespace' | 'custom';
+type ECommercePlatform = 'shopify' | 'woocommerce' | 'bigcommerce' | 'magento' | 'sylius' | 'wix' | 'prestashop' | 'squarespace' | 'offline';
 
 // Platform display names
 const PLATFORM_NAMES: Record<string, string> = {
@@ -16,7 +16,7 @@ const PLATFORM_NAMES: Record<string, string> = {
   wix: 'Wix',
   prestashop: 'PrestaShop',
   squarespace: 'Squarespace',
-  custom: 'Custom',
+  offline: 'Offline',
 };
 
 const EcommerceSettingsTab: React.FC = () => {
@@ -347,7 +347,7 @@ const EcommerceSettingsTab: React.FC = () => {
             </View>
           )}
 
-          {ecommerceSettings.platform === 'custom' && (
+          {ecommerceSettings.platform === 'offline' && (
             <>
               <View style={styles.infoBox}>
                 <Text style={styles.infoTitle}>Local-Only Mode</Text>
@@ -357,10 +357,10 @@ const EcommerceSettingsTab: React.FC = () => {
                 <Text style={styles.label}>Menu URL</Text>
                 <TextInput
                   style={styles.input}
-                  value={ecommerceSettings.custom?.menuUrl || ''}
+                  value={ecommerceSettings.offline?.menuUrl || ''}
                   onChangeText={value =>
                     updateSettings({
-                      custom: { ...ecommerceSettings.custom, menuUrl: value },
+                      offline: { ...ecommerceSettings.offline, menuUrl: value },
                     })
                   }
                   placeholder="https://example.com/menu.json"
@@ -374,10 +374,10 @@ const EcommerceSettingsTab: React.FC = () => {
                 <Text style={styles.label}>Store Name</Text>
                 <TextInput
                   style={styles.input}
-                  value={ecommerceSettings.custom?.storeName || ''}
+                  value={ecommerceSettings.offline?.storeName || ''}
                   onChangeText={value =>
                     updateSettings({
-                      custom: { ...ecommerceSettings.custom, storeName: value },
+                      offline: { ...ecommerceSettings.offline, storeName: value },
                     })
                   }
                   placeholder="My Local Store"
@@ -388,7 +388,7 @@ const EcommerceSettingsTab: React.FC = () => {
                 title="Download Menu"
                 variant="secondary"
                 onPress={async () => {
-                  const menuUrl = ecommerceSettings.custom?.menuUrl;
+                  const menuUrl = ecommerceSettings.offline?.menuUrl;
                   if (!menuUrl) {
                     Alert.alert('Error', 'Please enter a Menu URL first.');
                     return;

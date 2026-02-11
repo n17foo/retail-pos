@@ -1,4 +1,3 @@
-import { storage } from '../../utils/storage';
 import { ECommercePlatform } from '../../utils/platforms';
 import { LoggerFactory } from '../logger';
 import { ProductServiceFactory } from '../product/productServiceFactory';
@@ -10,9 +9,10 @@ import { RefundServiceFactory } from '../refund/refundServiceFactory';
 import { PlatformProductConfig } from '../product/platforms/PlatformProductServiceInterface';
 import { PlatformOrderConfig } from '../order/platforms/PlatformOrderServiceInterface';
 import { PlatformSearchConfig } from '../search/platforms/PlatformSearchServiceInterface';
+import { storage } from '../storage/storage';
 
 /**
- * E-commerce settings structure stored in AsyncStorage/MMKV
+ * E-commerce settings structure stored in SQLite
  */
 export interface StoredECommerceSettings {
   enabled: boolean;

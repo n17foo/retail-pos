@@ -1,26 +1,26 @@
 import { InventoryServiceInterface, InventoryResult, InventoryUpdate, InventoryUpdateResult } from '../InventoryServiceInterface';
 import { LoggerFactory } from '../../logger';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sqliteStorage } from '../../storage/SQLiteStorageService';
 
-const INVENTORY_STORAGE_KEY = 'custom_local_inventory';
+const INVENTORY_STORAGE_KEY = 'offline_local_inventory';
 
 /**
- * Custom/Local inventory service for offline-first POS operation
- * Tracks inventory locally - no online sync
- * In custom mode, inventory is maintained locally and not synced with any platform
+ * Offline inventory service for local-first POS operation
+ * Tracks inventory locally via SQLite - no online sync
+ * In offline mode, inventory is maintained locally and not synced with any platform
  */
-export class CustomInventoryService implements InventoryServiceInterface {
+export class OfflineInventoryService implements InventoryServiceInterface {
   private initialized: boolean = false;
   private inventory: Map<string, { quantity: number; sku?: string; updatedAt: Date }> = new Map();
-  private logger = LoggerFactory.getInstance().createLogger('CustomInventoryService');
+  private logger = LoggerFactory.getInstance().createLogger('OfflineInventoryService');
 
   /**
-   * Initialize the custom inventory service
+   * Initialize the offline inventory service
    * Loads inventory from local storage
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedInventory = await AsyncStorage.getItem(INVENTORY_STORAGE_KEY);
+      const storedInventory = await sqliteStorage.getItem(INVENTORY_STORAGE_KEY);
       if (storedInventory) {
         const parsed = JSON.parse(storedInventory);
         this.inventory = new Map(
@@ -36,11 +36,11 @@ export class CustomInventoryService implements InventoryServiceInterface {
       }
 
       this.initialized = true;
-      this.logger.info('Custom inventory service initialized (local-only mode)');
+      this.logger.info('Offline inventory service initialized (local-only mode)');
       return true;
     } catch (error) {
       this.logger.error(
-        { message: 'Error initializing custom inventory service' },
+        { message: 'Error initializing offline inventory service' },
         error instanceof Error ? error : new Error(String(error))
       );
       this.initialized = false;
@@ -98,19 +98,16 @@ export class CustomInventoryService implements InventoryServiceInterface {
 
         let newQuantity: number;
         if (update.adjustment) {
-          // Adjustment mode: add/subtract from current quantity
           newQuantity = currentItem.quantity + update.quantity;
         } else {
-          // Absolute mode: set to the specified quantity
           newQuantity = update.quantity;
         }
 
-        // Ensure quantity doesn't go below 0
         newQuantity = Math.max(0, newQuantity);
 
         this.inventory.set(update.productId, {
           quantity: newQuantity,
-          sku: update.variantId || (currentItem as { sku?: string }).sku, // Use variantId as SKU if provided
+          sku: update.variantId || (currentItem as { sku?: string }).sku,
           updatedAt: now,
         });
 
@@ -180,7 +177,7 @@ export class CustomInventoryService implements InventoryServiceInterface {
    */
   async clearLocalInventory(): Promise<void> {
     this.inventory.clear();
-    await AsyncStorage.removeItem(INVENTORY_STORAGE_KEY);
+    await sqliteStorage.removeItem(INVENTORY_STORAGE_KEY);
     this.logger.info('Cleared all local inventory');
   }
 
@@ -216,8 +213,8 @@ export class CustomInventoryService implements InventoryServiceInterface {
    */
   private async saveInventoryToStorage(): Promise<void> {
     const obj = Object.fromEntries(this.inventory);
-    await AsyncStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(obj));
+    await sqliteStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(obj));
   }
 }
 
-export const customInventoryService = new CustomInventoryService();
+export const offlineInventoryService = new OfflineInventoryService();

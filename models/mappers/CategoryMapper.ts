@@ -294,7 +294,7 @@ export function mapPrestaShopCategory(data: PrestaShopCategory): UnifiedCategory
 }
 
 // ============================================================================
-// GENERIC/CUSTOM MAPPER
+// GENERIC/OFFLINE MAPPER
 // ============================================================================
 
 interface GenericCategory {
@@ -307,7 +307,7 @@ interface GenericCategory {
   productCount?: number;
 }
 
-export function mapGenericCategory(data: GenericCategory, platform: ECommercePlatform = ECommercePlatform.CUSTOM): UnifiedCategory {
+export function mapGenericCategory(data: GenericCategory, platform: ECommercePlatform = ECommercePlatform.OFFLINE): UnifiedCategory {
   const platformId = String(data.id);
 
   const image: UnifiedCategoryImage | undefined = data.image
@@ -357,7 +357,7 @@ export function mapToUnifiedCategory(
       return mapMagentoCategory(data as MagentoCategory, context?.parentPath);
     case ECommercePlatform.PRESTASHOP:
       return mapPrestaShopCategory(data as PrestaShopCategory);
-    case ECommercePlatform.CUSTOM:
+    case ECommercePlatform.OFFLINE:
     default:
       return mapGenericCategory(data as GenericCategory, platform);
   }

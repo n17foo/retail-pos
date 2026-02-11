@@ -1,6 +1,5 @@
 import { RefundServiceInterface } from './refundServiceInterface';
 import { PlatformRefundServiceInterface } from './platforms/platformRefundServiceInterface';
-import { RefundMockService } from './mock/refundMockService';
 
 // Import platform-specific refund services
 import { ShopifyRefundService } from './platforms/shopifyRefundService';
@@ -9,7 +8,7 @@ import { MagentoRefundService } from './platforms/magentoRefundService';
 import { BigCommerceRefundService } from './platforms/bigCommerceRefundService';
 import { SyliusRefundService } from './platforms/syliusRefundService';
 import { WixRefundService } from './platforms/wixRefundService';
-import { CustomRefundService } from './platforms/CustomRefundService';
+import { OfflineRefundService } from './platforms/OfflineRefundService';
 import { PrestaShopRefundService } from './platforms/PrestaShopRefundService';
 import { SquarespaceRefundService } from './platforms/SquarespaceRefundService';
 import { LoggerFactory } from '../logger';
@@ -27,7 +26,7 @@ export enum RefundServiceType {
   BIGCOMMERCE = 'bigcommerce',
   SYLIUS = 'sylius',
   WIX = 'wix',
-  CUSTOM = 'custom',
+  OFFLINE = 'offline',
 }
 
 /**
@@ -36,7 +35,7 @@ export enum RefundServiceType {
  */
 export class RefundServiceFactory {
   private static instance: RefundServiceFactory;
-  private mockService: RefundServiceInterface | null = null;
+  private offlineDefaultService: RefundServiceInterface | null = null;
   private platformServices: Map<ECommercePlatform, PlatformRefundServiceInterface> = new Map();
   private logger: ReturnType<typeof LoggerFactory.prototype.createLogger>;
 
@@ -63,11 +62,12 @@ export class RefundServiceFactory {
    * @returns A refund service implementation
    */
   public getService(): RefundServiceInterface {
-    if (!this.mockService) {
-      // Use a mock implementation
-      this.mockService = new RefundMockService();
+    if (!this.offlineDefaultService) {
+      // Use offline implementation as default, wrapped in adapter
+      const offlineService = new OfflineRefundService();
+      this.offlineDefaultService = this.createPlatformServiceAdapter(offlineService, ECommercePlatform.OFFLINE);
     }
-    return this.mockService;
+    return this.offlineDefaultService;
   }
 
   /**
@@ -98,8 +98,8 @@ export class RefundServiceFactory {
         case ECommercePlatform.WIX:
           service = new WixRefundService();
           break;
-        case ECommercePlatform.CUSTOM:
-          service = new CustomRefundService();
+        case ECommercePlatform.OFFLINE:
+          service = new OfflineRefundService();
           break;
         case ECommercePlatform.PRESTASHOP:
           service = new PrestaShopRefundService();

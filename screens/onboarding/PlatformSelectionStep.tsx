@@ -11,7 +11,7 @@ const PLATFORMS = [
   { id: 'wix', name: 'Wix' },
   { id: 'prestashop', name: 'PrestaShop' },
   { id: 'squarespace', name: 'Squarespace' },
-  { id: 'custom', name: 'Custom API' },
+  { id: 'offline', name: 'Offline Mode' },
 ];
 
 interface PlatformSelectionStepProps {

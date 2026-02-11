@@ -4,7 +4,7 @@ This module provides a centralized way to manage platform-specific tokens and JW
 
 ## Features
 
-- Secure token storage using MMKV (native) or AsyncStorage (web)
+- Secure token storage using SQLite
 - Automatic token refresh via platform-specific providers
 - Token expiration management
 - Platform-specific token providers for all supported e-commerce platforms

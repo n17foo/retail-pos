@@ -6,8 +6,7 @@ import { WooCommerceSearchService } from './platforms/WooCommerceSearchService';
 import { WixSearchService } from './platforms/WixSearchService';
 import { SyliusSearchService } from './platforms/SyliusSearchService';
 import { MagentoSearchService } from './platforms/MagentoSearchService';
-import { MockSearchService } from './mock/MockSearchService';
-import { CustomSearchService } from './platforms/CustomSearchService';
+import { OfflineSearchService } from './platforms/OfflineSearchService';
 import { PlatformSearchConfig } from './platforms/PlatformSearchServiceInterface';
 
 /**
@@ -94,15 +93,10 @@ export class SearchServiceFactory {
       platformServices.push(new MagentoSearchService(magentoConfig));
     }
 
-    // Create Mock service if config is provided
-    if (platformConfigs.mock) {
-      const mockConfig = platformConfigs.mock || {};
-      platformServices.push(new MockSearchService(mockConfig));
-    }
 
-    // Create Custom service if config is provided
-    if (platformConfigs.custom) {
-      platformServices.push(new CustomSearchService());
+    // Create Offline service if config is provided
+    if (platformConfigs.offline) {
+      platformServices.push(new OfflineSearchService());
     }
 
     // Create a new composite service with configured platforms
@@ -186,14 +180,6 @@ export class SearchServiceFactory {
       platformServices.push(new MagentoSearchService(magentoConfig));
     }
 
-    // Check if mock service is requested
-    if (process.env.USE_MOCK_SEARCH === 'true') {
-      const mockConfig = {
-        mockDelay: process.env.MOCK_SEARCH_DELAY || '500',
-        mockFailure: process.env.MOCK_SEARCH_FAILURE === 'true',
-      };
-      platformServices.push(new MockSearchService(mockConfig));
-    }
 
     return platformServices;
   }

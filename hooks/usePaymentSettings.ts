@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { storage } from '../utils/storage';
+import { storage } from '../services/storage/storage';
 import { PaymentProvider } from '../services/payment/paymentServiceFactory';
 import { usePayment } from './usePayment';
 import { LoggerFactory } from '../services/logger';

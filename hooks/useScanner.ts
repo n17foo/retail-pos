@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { storage } from '../utils/storage';
+import { storage } from '../services/storage/storage';
 import { ScannerServiceFactory, ScannerType as ScannerTypeEnum } from '../services/scanner/scannerServiceFactory';
 import { ScannerServiceInterface } from '../services/scanner/ScannerServiceInterface';
 import { LoggerFactory } from '../services/logger';

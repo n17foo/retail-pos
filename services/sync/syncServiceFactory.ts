@@ -1,11 +1,10 @@
 import { SyncServiceInterface } from './SyncServiceInterface';
 import { CompositeSyncService } from './CompositeSyncService';
 import { ECommercePlatform } from '../../utils/platforms';
-import { MockSyncService } from './mock/MockSyncService';
 import { ShopifySyncService } from './platforms/ShopifySyncService';
 import { WooCommerceSyncService } from './platforms/WooCommerceSyncService';
 import { BigCommerceSyncService } from './platforms/BigCommerceSyncService';
-import { CustomSyncService } from './platforms/CustomSyncService';
+import { OfflineSyncService } from './platforms/OfflineSyncService';
 import { PrestaShopSyncService } from './platforms/PrestaShopSyncService';
 import { SquarespaceSyncService } from './platforms/SquarespaceSyncService';
 import { PlatformSyncConfig } from './platforms/PlatformSyncServiceInterface';
@@ -20,11 +19,11 @@ export class SyncServiceFactory {
   // Cache for platform-specific services
   private serviceInstances: Record<string, SyncServiceInterface | null> = {};
   private compositeService: CompositeSyncService | null = null;
-  private mockService: MockSyncService;
+  private offlineDefaultService: OfflineSyncService;
 
   private constructor() {
-    // Initialize mock service
-    this.mockService = new MockSyncService();
+    // Initialize offline service as default
+    this.offlineDefaultService = new OfflineSyncService();
   }
 
   public static getInstance(): SyncServiceFactory {
@@ -41,9 +40,6 @@ export class SyncServiceFactory {
    */
   public getService(platform?: ECommercePlatform | ECommercePlatform[]): SyncServiceInterface {
     // Check if we should use the mock service
-    if (process.env.USE_MOCK_SYNC === 'true') {
-      return this.mockService;
-    }
 
     // If no platform is specified, return a composite service with all available platforms
     if (!platform) {
@@ -119,8 +115,8 @@ export class SyncServiceFactory {
         service = this.createBigCommerceSyncService();
         break;
 
-      case ECommercePlatform.CUSTOM:
-        service = this.createCustomSyncService();
+      case ECommercePlatform.OFFLINE:
+        service = this.createOfflineSyncService();
         break;
 
       case ECommercePlatform.PRESTASHOP:
@@ -132,8 +128,8 @@ export class SyncServiceFactory {
         break;
 
       default:
-        console.warn(`Unknown platform: ${platform}, using mock sync service`);
-        service = this.mockService;
+        console.warn(`Unknown platform: ${platform}, using offline sync service`);
+        service = this.offlineDefaultService;
     }
 
     return service;
@@ -210,14 +206,14 @@ export class SyncServiceFactory {
   }
 
   /**
-   * Create a Custom-specific sync service
+   * Create an Offline-specific sync service
    */
-  private createCustomSyncService(): SyncServiceInterface {
-    const service = new CustomSyncService();
+  private createOfflineSyncService(): SyncServiceInterface {
+    const service = new OfflineSyncService();
 
-    // Custom service doesn't need configuration - it works locally
+    // Offline service doesn't need configuration - it works locally
     service.initialize().catch(err => {
-      console.error('Failed to initialize Custom sync service:', err);
+      console.error('Failed to initialize Offline sync service:', err);
     });
 
     return service;
@@ -284,9 +280,9 @@ export class SyncServiceFactory {
         break;
       }
 
-      case ECommercePlatform.CUSTOM: {
-        // Custom service doesn't use configuration - just initialize it
-        this.serviceInstances[platform] = new CustomSyncService();
+      case ECommercePlatform.OFFLINE: {
+        // Offline service doesn't use configuration - just initialize it
+        this.serviceInstances[platform] = new OfflineSyncService();
         break;
       }
 

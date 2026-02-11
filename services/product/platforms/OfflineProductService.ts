@@ -1,22 +1,22 @@
 import { Product, ProductQueryOptions, ProductResult, SyncResult } from '../ProductServiceInterface';
 import { PlatformProductServiceInterface, PlatformConfigRequirements, PlatformProductConfig } from './PlatformProductServiceInterface';
 import { LoggerFactory } from '../../logger';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sqliteStorage } from '../../storage/SQLiteStorageService';
 
-const PRODUCTS_STORAGE_KEY = 'custom_local_products';
-const MENU_URL_STORAGE_KEY = 'custom_menu_url';
-const LAST_SYNC_KEY = 'custom_last_menu_sync';
+const PRODUCTS_STORAGE_KEY = 'offline_local_products';
+const MENU_URL_STORAGE_KEY = 'offline_menu_url';
+const LAST_SYNC_KEY = 'offline_last_menu_sync';
 
 /**
- * Custom/Local product service for offline-first POS operation
- * Downloads menu from a public URL and stores locally
+ * Offline product service for local-first POS operation
+ * Downloads menu from a public URL and stores locally via SQLite
  * All operations are local-only, no online sync
  */
-export class CustomProductService implements PlatformProductServiceInterface {
+export class OfflineProductService implements PlatformProductServiceInterface {
   private initialized: boolean = false;
   private products: Product[] = [];
   private menuUrl: string = '';
-  private logger = LoggerFactory.getInstance().createLogger('CustomProductService');
+  private logger = LoggerFactory.getInstance().createLogger('OfflineProductService');
 
   constructor(config: PlatformProductConfig = {}) {
     if (config.menuUrl) {
@@ -25,32 +25,32 @@ export class CustomProductService implements PlatformProductServiceInterface {
   }
 
   /**
-   * Initialize the custom product service
+   * Initialize the offline product service
    * Loads products from local storage
    */
   async initialize(): Promise<boolean> {
     try {
       // Load menu URL from storage if not provided
       if (!this.menuUrl) {
-        const storedUrl = await AsyncStorage.getItem(MENU_URL_STORAGE_KEY);
+        const storedUrl = await sqliteStorage.getItem(MENU_URL_STORAGE_KEY);
         if (storedUrl) {
           this.menuUrl = storedUrl;
         }
       }
 
       // Load cached products from local storage
-      const storedProducts = await AsyncStorage.getItem(PRODUCTS_STORAGE_KEY);
+      const storedProducts = await sqliteStorage.getItem(PRODUCTS_STORAGE_KEY);
       if (storedProducts) {
         this.products = JSON.parse(storedProducts);
         this.logger.info(`Loaded ${this.products.length} products from local storage`);
       }
 
       this.initialized = true;
-      this.logger.info('Custom product service initialized (local-only mode)');
+      this.logger.info('Offline product service initialized (local-only mode)');
       return true;
     } catch (error) {
       this.logger.error(
-        { message: 'Error initializing custom product service' },
+        { message: 'Error initializing offline product service' },
         error instanceof Error ? error : new Error(String(error))
       );
       this.initialized = false;
@@ -66,13 +66,13 @@ export class CustomProductService implements PlatformProductServiceInterface {
   }
 
   /**
-   * Get configuration requirements for custom platform
+   * Get configuration requirements for offline platform
    */
   getConfigRequirements(): PlatformConfigRequirements {
     return {
       required: ['menuUrl'],
       optional: ['refreshInterval'],
-      description: 'Custom local-only mode. Provide a public URL to download your menu/products JSON.',
+      description: 'Offline local-only mode. Provide a public URL to download your menu/products JSON.',
     };
   }
 
@@ -81,7 +81,7 @@ export class CustomProductService implements PlatformProductServiceInterface {
    */
   async setMenuUrl(url: string): Promise<void> {
     this.menuUrl = url;
-    await AsyncStorage.setItem(MENU_URL_STORAGE_KEY, url);
+    await sqliteStorage.setItem(MENU_URL_STORAGE_KEY, url);
     this.logger.info(`Menu URL set: ${url}`);
   }
 
@@ -123,8 +123,8 @@ export class CustomProductService implements PlatformProductServiceInterface {
 
       // Store products locally
       this.products = products;
-      await AsyncStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
-      await AsyncStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+      await sqliteStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+      await sqliteStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
 
       this.logger.info(`Downloaded ${products.length} products and ${categories.length} categories`);
 
@@ -139,7 +139,7 @@ export class CustomProductService implements PlatformProductServiceInterface {
    * Get last sync timestamp
    */
   async getLastSyncTime(): Promise<Date | null> {
-    const lastSync = await AsyncStorage.getItem(LAST_SYNC_KEY);
+    const lastSync = await sqliteStorage.getItem(LAST_SYNC_KEY);
     return lastSync ? new Date(lastSync) : null;
   }
 
@@ -245,7 +245,7 @@ export class CustomProductService implements PlatformProductServiceInterface {
     const updatedProduct = {
       ...this.products[index],
       ...productData,
-      id: productId, // Ensure ID doesn't change
+      id: productId,
       updatedAt: new Date(),
     };
 
@@ -277,12 +277,11 @@ export class CustomProductService implements PlatformProductServiceInterface {
   }
 
   /**
-   * Sync products - In custom mode, this just saves to local storage
+   * Sync products - In offline mode, this just saves to local storage
    * No online sync is performed
    */
   async syncProducts(products: Product[]): Promise<SyncResult> {
     try {
-      // In custom/local mode, sync just means saving to local storage
       this.products = products;
       await this.saveProductsToStorage();
 
@@ -311,7 +310,7 @@ export class CustomProductService implements PlatformProductServiceInterface {
    * Save products to local storage
    */
   private async saveProductsToStorage(): Promise<void> {
-    await AsyncStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(this.products));
+    await sqliteStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(this.products));
   }
 
   /**
@@ -362,8 +361,10 @@ export class CustomProductService implements PlatformProductServiceInterface {
    */
   async clearLocalProducts(): Promise<void> {
     this.products = [];
-    await AsyncStorage.removeItem(PRODUCTS_STORAGE_KEY);
-    await AsyncStorage.removeItem(LAST_SYNC_KEY);
+    await sqliteStorage.removeItem(PRODUCTS_STORAGE_KEY);
+    await sqliteStorage.removeItem(LAST_SYNC_KEY);
     this.logger.info('Cleared all local products');
   }
 }
+
+export const offlineProductService = new OfflineProductService();

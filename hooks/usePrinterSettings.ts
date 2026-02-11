@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
-import { storage } from '../utils/storage';
+import { storage } from '../services/storage/storage';
 import { PrinterConnectionType } from '../services/printer/UnifiedPrinterService';
 import { useTranslate } from './useTranslate';
 import { LoggerFactory } from '../services/logger';
@@ -78,7 +78,7 @@ export const usePrinterSettings = () => {
   const [isTesting, setIsTesting] = useState(false);
   const testConnectionRef = useRef<AbortController | null>(null);
 
-  // Load printer settings from MMKV storage
+  // Load printer settings from storage
   const loadSettings = useCallback(async () => {
     try {
       setIsLoading(true);

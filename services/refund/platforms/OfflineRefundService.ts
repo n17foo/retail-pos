@@ -1,27 +1,26 @@
 import { PlatformRefundServiceInterface } from './platformRefundServiceInterface';
 import { RefundData, RefundResult, RefundRecord } from '../refundServiceInterface';
 import { LoggerFactory } from '../../logger';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sqliteStorage } from '../../storage/SQLiteStorageService';
 
-const REFUNDS_STORAGE_KEY = 'custom_local_refunds';
+const REFUNDS_STORAGE_KEY = 'offline_local_refunds';
 
 /**
- * Custom/Local refund service for offline-first POS operation
- * All refunds are stored locally only - no online sync
- * This is a simplified mock implementation for local-only mode
+ * Offline refund service for local-first POS operation
+ * All refunds are stored locally via SQLite - no online sync
  */
-export class CustomRefundService implements PlatformRefundServiceInterface {
+export class OfflineRefundService implements PlatformRefundServiceInterface {
   private initialized: boolean = false;
   private refundHistory: Map<string, RefundRecord[]> = new Map();
-  private logger = LoggerFactory.getInstance().createLogger('CustomRefundService');
+  private logger = LoggerFactory.getInstance().createLogger('OfflineRefundService');
 
   /**
-   * Initialize the custom refund service
+   * Initialize the offline refund service
    * Loads refund history from local storage
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedRefunds = await AsyncStorage.getItem(REFUNDS_STORAGE_KEY);
+      const storedRefunds = await sqliteStorage.getItem(REFUNDS_STORAGE_KEY);
       if (storedRefunds) {
         const parsed = JSON.parse(storedRefunds);
         this.refundHistory = new Map(Object.entries(parsed));
@@ -29,10 +28,10 @@ export class CustomRefundService implements PlatformRefundServiceInterface {
       }
 
       this.initialized = true;
-      this.logger.info('Custom refund service initialized (local-only mode)');
+      this.logger.info('Offline refund service initialized (local-only mode)');
       return true;
     } catch (error) {
-      this.logger.error({ message: 'Error initializing custom refund service' }, error instanceof Error ? error : new Error(String(error)));
+      this.logger.error({ message: 'Error initializing offline refund service' }, error instanceof Error ? error : new Error(String(error)));
       this.initialized = false;
       return false;
     }
@@ -47,7 +46,7 @@ export class CustomRefundService implements PlatformRefundServiceInterface {
 
   /**
    * Process a refund for a local order
-   * In custom/local mode, this just records the refund locally
+   * In offline mode, this just records the refund locally
    */
   async processRefund(orderId: string, refundData: RefundData): Promise<RefundResult> {
     try {
@@ -57,10 +56,8 @@ export class CustomRefundService implements PlatformRefundServiceInterface {
 
       this.logger.info(`Processing local refund for order: ${orderId}`);
 
-      // Generate refund ID
       const refundId = `local-refund-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-      // Create refund record
       const refundRecord: RefundRecord = {
         id: refundId,
         orderId,
@@ -73,11 +70,10 @@ export class CustomRefundService implements PlatformRefundServiceInterface {
         reason: refundData.reason,
         note: refundData.note,
         status: 'completed',
-        source: 'ecommerce', // Local refund recorded as ecommerce type
+        source: 'ecommerce',
         timestamp: new Date(),
       };
 
-      // Add to history
       this.addRefundToHistory(orderId, refundRecord);
       await this.saveToStorage();
 
@@ -143,7 +139,7 @@ export class CustomRefundService implements PlatformRefundServiceInterface {
    */
   private async saveToStorage(): Promise<void> {
     const obj = Object.fromEntries(this.refundHistory);
-    await AsyncStorage.setItem(REFUNDS_STORAGE_KEY, JSON.stringify(obj));
+    await sqliteStorage.setItem(REFUNDS_STORAGE_KEY, JSON.stringify(obj));
   }
 
   /**
@@ -151,9 +147,9 @@ export class CustomRefundService implements PlatformRefundServiceInterface {
    */
   async clearLocalRefunds(): Promise<void> {
     this.refundHistory.clear();
-    await AsyncStorage.removeItem(REFUNDS_STORAGE_KEY);
+    await sqliteStorage.removeItem(REFUNDS_STORAGE_KEY);
     this.logger.info('Cleared all local refunds');
   }
 }
 
-export const customRefundService = new CustomRefundService();
+export const offlineRefundService = new OfflineRefundService();

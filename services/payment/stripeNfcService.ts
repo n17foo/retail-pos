@@ -1,6 +1,6 @@
 import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from './paymentServiceInterface';
 import { Platform } from 'react-native';
-import { storage } from '../../utils/storage';
+import { storage } from '../storage/storage';
 import { StripeTerminalBridgeManager } from '../../contexts/StripeTerminalBridge';
 
 /**
@@ -11,9 +11,6 @@ export class StripeNfcService implements PaymentServiceInterface {
   private static instance: StripeNfcService;
   private isConnected: boolean = false;
   private deviceId: string | null = null;
-  private reader: any = null;
-  private terminal: any = null;
-  private locationId: string | null = null;
   private currentTransactionId: string | null = null;
   private isInitialized: boolean = false;
 

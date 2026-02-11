@@ -1,37 +1,37 @@
 import { SearchServiceInterface, SearchOptions, SearchResult, SearchProduct } from '../searchServiceInterface';
 import { LoggerFactory } from '../../logger';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sqliteStorage } from '../../storage/SQLiteStorageService';
 import { ProductServiceFactory } from '../../product/productServiceFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
 
-const SEARCH_HISTORY_KEY = 'custom_search_history';
+const SEARCH_HISTORY_KEY = 'offline_search_history';
 
 /**
- * Custom/Local search service for offline-first POS operation
+ * Offline search service for local-first POS operation
  * Searches through locally stored products only
  */
-export class CustomSearchService implements SearchServiceInterface {
+export class OfflineSearchService implements SearchServiceInterface {
   private initialized: boolean = false;
   private searchHistory: string[] = [];
-  private logger = LoggerFactory.getInstance().createLogger('CustomSearchService');
+  private logger = LoggerFactory.getInstance().createLogger('OfflineSearchService');
 
   /**
-   * Initialize the custom search service
+   * Initialize the offline search service
    * Loads search history from local storage
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedHistory = await AsyncStorage.getItem(SEARCH_HISTORY_KEY);
+      const storedHistory = await sqliteStorage.getItem(SEARCH_HISTORY_KEY);
       if (storedHistory) {
         this.searchHistory = JSON.parse(storedHistory);
         this.logger.info(`Loaded ${this.searchHistory.length} search history items`);
       }
 
       this.initialized = true;
-      this.logger.info('Custom search service initialized (local-only mode)');
+      this.logger.info('Offline search service initialized (local-only mode)');
       return true;
     } catch (error) {
-      this.logger.error({ message: 'Error initializing custom search service' }, error instanceof Error ? error : new Error(String(error)));
+      this.logger.error({ message: 'Error initializing offline search service' }, error instanceof Error ? error : new Error(String(error)));
       this.initialized = false;
       return false;
     }
@@ -58,21 +58,18 @@ export class CustomSearchService implements SearchServiceInterface {
     }
 
     try {
-      // Get local products service
-      const productService = ProductServiceFactory.getInstance().getService(ECommercePlatform.CUSTOM);
+      const productService = ProductServiceFactory.getInstance().getService(ECommercePlatform.OFFLINE);
       const limit = options?.limit || 50;
       const page = options?.page || 1;
 
-      // Search local products
       const localResults = await productService.getProducts({
         search: trimmedQuery,
-        category: options?.categories?.[0], // Use first category if specified
+        category: options?.categories?.[0],
         limit,
         page,
         includeOutOfStock: !options?.inStock,
       });
 
-      // Convert products to search results
       const searchProducts: SearchProduct[] = localResults.products.map(product => ({
         id: product.id,
         name: product.title,
@@ -88,14 +85,13 @@ export class CustomSearchService implements SearchServiceInterface {
         originalProduct: product,
       }));
 
-      // Extract unique categories from results
       const categories = [...new Set(localResults.products.map(p => p.productType).filter(Boolean))] as string[];
 
       return {
         query: trimmedQuery,
         totalResults: localResults.pagination.totalItems,
         localResults: searchProducts,
-        ecommerceResults: [], // No ecommerce results in custom mode
+        ecommerceResults: [],
         categories,
       };
     } catch (error) {
@@ -122,7 +118,7 @@ export class CustomSearchService implements SearchServiceInterface {
    */
   async clearSearchHistory(): Promise<void> {
     this.searchHistory = [];
-    await AsyncStorage.removeItem(SEARCH_HISTORY_KEY);
+    await sqliteStorage.removeItem(SEARCH_HISTORY_KEY);
     this.logger.info('Cleared search history');
   }
 
@@ -130,25 +126,21 @@ export class CustomSearchService implements SearchServiceInterface {
    * Add search query to history
    */
   private addToSearchHistory(query: string): void {
-    // Remove if already exists
     const index = this.searchHistory.indexOf(query);
     if (index > -1) {
       this.searchHistory.splice(index, 1);
     }
 
-    // Add to beginning
     this.searchHistory.unshift(query);
 
-    // Keep only last 50 searches
     if (this.searchHistory.length > 50) {
       this.searchHistory = this.searchHistory.slice(0, 50);
     }
 
-    // Save to storage
-    AsyncStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(this.searchHistory)).catch(err => {
+    sqliteStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(this.searchHistory)).catch(err => {
       this.logger.error('Failed to save search history', err);
     });
   }
 }
 
-export const customSearchService = new CustomSearchService();
+export const offlineSearchService = new OfflineSearchService();

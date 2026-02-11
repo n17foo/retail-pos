@@ -1,60 +1,20 @@
 import { TokenServiceInterface, TokenType, TokenInfo, TokenProviderFunction } from './tokenServiceInterface';
 import { LoggerFactory } from '../logger';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
-
-// Conditionally import MMKV to avoid errors in Expo Go
-let MMKV: any = null;
-try {
-  // Check if we're in Expo Go
-  const isExpoGo = typeof global !== 'undefined' && (global as any).__expo !== undefined;
-  if (!isExpoGo) {
-    MMKV = require('react-native-mmkv').MMKV;
-  }
-} catch (e) {
-  // MMKV import failed (Expo Go or NitroModules not available)
-  console.warn('MMKV import failed in TokenService, falling back to AsyncStorage');
-}
+import { sqliteStorage } from '../storage/SQLiteStorageService';
 
 /**
- * TokenService implementation that uses a combination of storage mechanisms
+ * TokenService implementation that uses SQLite for persistent token storage
  * and provider functions to manage platform tokens
  */
 export class TokenService implements TokenServiceInterface {
   private static instance: TokenService;
   private logger: ReturnType<typeof LoggerFactory.prototype.createLogger>;
   private tokenProviders: Map<string, TokenProviderFunction> = new Map();
-  private storage: any = null;
   private tokenRefreshPromises: Map<string, Promise<string | null>> = new Map();
 
   private constructor() {
     this.logger = LoggerFactory.getInstance().createLogger('TokenService');
-    this.initializeStorage();
-  }
-
-  /**
-   * Initialize storage based on environment
-   */
-  private initializeStorage(): void {
-    try {
-      // Use MMKV if available (native platforms and not Expo Go)
-      if (Platform.OS !== 'web' && MMKV) {
-        this.storage = new MMKV({
-          id: 'tokens-storage',
-          encryptionKey: 'secure-token-storage-key',
-        });
-        this.logger.info('MMKV token storage initialized');
-      } else {
-        this.storage = null; // Will fall back to AsyncStorage
-        this.logger.info('Using AsyncStorage for tokens (Expo Go or web platform)');
-      }
-    } catch (error) {
-      this.storage = null; // Fall back to AsyncStorage on error
-      this.logger.error(
-        { message: 'Error initializing token storage, falling back to AsyncStorage' },
-        error instanceof Error ? error : new Error(String(error))
-      );
-    }
+    this.logger.info('TokenService initialized with SQLite storage');
   }
 
   /**
@@ -78,13 +38,7 @@ export class TokenService implements TokenServiceInterface {
         expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
       };
 
-      const tokenJson = JSON.stringify(tokenInfo);
-
-      if (this.storage) {
-        this.storage.set(key, tokenJson);
-      } else {
-        await AsyncStorage.setItem(key, tokenJson);
-      }
+      await sqliteStorage.setItem(key, tokenInfo);
 
       this.logger.info(`Token stored for platform: ${platform}, type: ${tokenType}`);
       return true;
@@ -172,16 +126,8 @@ export class TokenService implements TokenServiceInterface {
     try {
       const keys = Object.values(TokenType).map(type => this.getStorageKey(platform, type as TokenType));
 
-      if (this.storage) {
-        keys.forEach(key => {
-          if (this.storage?.contains(key)) {
-            this.storage.delete(key);
-          }
-        });
-      } else {
-        const existingKeys = await AsyncStorage.getAllKeys();
-        const keysToRemove = existingKeys.filter(key => keys.includes(key));
-        await AsyncStorage.multiRemove(keysToRemove);
+      for (const key of keys) {
+        await sqliteStorage.removeItem(key);
       }
 
       this.logger.info(`All tokens cleared for platform: ${platform}`);
@@ -197,13 +143,7 @@ export class TokenService implements TokenServiceInterface {
     try {
       const key = this.getStorageKey(platform, tokenType);
 
-      if (this.storage) {
-        if (this.storage.contains(key)) {
-          this.storage.delete(key);
-        }
-      } else {
-        await AsyncStorage.removeItem(key);
-      }
+      await sqliteStorage.removeItem(key);
 
       this.logger.info(`Token cleared for platform: ${platform}, type: ${tokenType}`);
     } catch (error) {
@@ -225,19 +165,7 @@ export class TokenService implements TokenServiceInterface {
   private async getTokenFromStorage(platform: string, tokenType: TokenType): Promise<TokenInfo | null> {
     try {
       const key = this.getStorageKey(platform, tokenType);
-      let tokenJson: string | undefined | null = null;
-
-      if (this.storage) {
-        tokenJson = this.storage.getString(key);
-      } else {
-        tokenJson = await AsyncStorage.getItem(key);
-      }
-
-      if (!tokenJson) {
-        return null;
-      }
-
-      return JSON.parse(tokenJson) as TokenInfo;
+      return await sqliteStorage.getObject<TokenInfo>(key);
     } catch (error) {
       this.logger.error(
         { message: `Error reading token from storage for ${platform}` },

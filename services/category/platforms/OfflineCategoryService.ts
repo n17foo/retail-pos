@@ -1,36 +1,36 @@
 import { Category, CategoryServiceInterface } from '../CategoryServiceInterface';
 import { LoggerFactory } from '../../logger';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sqliteStorage } from '../../storage/SQLiteStorageService';
 
-const CATEGORIES_STORAGE_KEY = 'custom_local_categories';
+const CATEGORIES_STORAGE_KEY = 'offline_local_categories';
 
 /**
- * Custom/Local category service for offline-first POS operation
- * Categories are downloaded along with menu and stored locally
+ * Offline category service for local-first POS operation
+ * Categories are downloaded along with menu and stored locally via SQLite
  */
-export class CustomCategoryService implements CategoryServiceInterface {
+export class OfflineCategoryService implements CategoryServiceInterface {
   private initialized: boolean = false;
   private categories: Category[] = [];
-  private logger = LoggerFactory.getInstance().createLogger('CustomCategoryService');
+  private logger = LoggerFactory.getInstance().createLogger('OfflineCategoryService');
 
   /**
-   * Initialize the custom category service
+   * Initialize the offline category service
    * Loads categories from local storage
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedCategories = await AsyncStorage.getItem(CATEGORIES_STORAGE_KEY);
+      const storedCategories = await sqliteStorage.getItem(CATEGORIES_STORAGE_KEY);
       if (storedCategories) {
         this.categories = JSON.parse(storedCategories);
         this.logger.info(`Loaded ${this.categories.length} categories from local storage`);
       }
 
       this.initialized = true;
-      this.logger.info('Custom category service initialized (local-only mode)');
+      this.logger.info('Offline category service initialized (local-only mode)');
       return true;
     } catch (error) {
       this.logger.error(
-        { message: 'Error initializing custom category service' },
+        { message: 'Error initializing offline category service' },
         error instanceof Error ? error : new Error(String(error))
       );
       this.initialized = false;
@@ -60,7 +60,7 @@ export class CustomCategoryService implements CategoryServiceInterface {
    */
   async setCategories(categories: Category[]): Promise<void> {
     this.categories = categories.map((cat, index) => this.mapToCategory(cat, index));
-    await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
     this.logger.info(`Saved ${this.categories.length} categories to local storage`);
   }
 
@@ -74,7 +74,7 @@ export class CustomCategoryService implements CategoryServiceInterface {
     };
 
     this.categories.push(newCategory);
-    await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
 
     this.logger.info(`Added local category: ${newCategory.name}`);
     return newCategory;
@@ -92,11 +92,11 @@ export class CustomCategoryService implements CategoryServiceInterface {
     const updated = {
       ...this.categories[index],
       ...data,
-      id: categoryId, // Ensure ID doesn't change
+      id: categoryId,
     };
 
     this.categories[index] = updated;
-    await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
 
     this.logger.info(`Updated local category: ${updated.name}`);
     return updated;
@@ -112,7 +112,7 @@ export class CustomCategoryService implements CategoryServiceInterface {
     }
 
     this.categories.splice(index, 1);
-    await AsyncStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
 
     this.logger.info(`Deleted local category: ${categoryId}`);
     return true;
@@ -123,7 +123,7 @@ export class CustomCategoryService implements CategoryServiceInterface {
    */
   async clearLocalCategories(): Promise<void> {
     this.categories = [];
-    await AsyncStorage.removeItem(CATEGORIES_STORAGE_KEY);
+    await sqliteStorage.removeItem(CATEGORIES_STORAGE_KEY);
     this.logger.info('Cleared all local categories');
   }
 
@@ -142,4 +142,4 @@ export class CustomCategoryService implements CategoryServiceInterface {
   }
 }
 
-export const customCategoryService = new CustomCategoryService();
+export const offlineCategoryService = new OfflineCategoryService();

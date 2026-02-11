@@ -110,7 +110,7 @@ export const useUnifiedProducts = (platform?: ECommercePlatform, initialOptions?
         }
 
         // Determine the platform for mapping
-        const mappingPlatform = platform || ECommercePlatform.CUSTOM;
+        const mappingPlatform = platform || ECommercePlatform.OFFLINE;
 
         // Map to unified products
         const unifiedProducts = mapToUnifiedProducts(result.products, mappingPlatform);

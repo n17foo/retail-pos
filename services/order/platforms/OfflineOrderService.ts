@@ -1,30 +1,30 @@
-import { Order, OrderLineItem } from '../OrderServiceInterface';
+import { Order } from '../OrderServiceInterface';
 import { PlatformOrderServiceInterface, PlatformConfigRequirements, PlatformOrderConfig } from './PlatformOrderServiceInterface';
 import { LoggerFactory } from '../../logger';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { sqliteStorage } from '../../storage/SQLiteStorageService';
 
-const ORDERS_STORAGE_KEY = 'custom_local_orders';
+const ORDERS_STORAGE_KEY = 'offline_local_orders';
 
 /**
- * Custom/Local order service for offline-first POS operation
- * Stores orders locally - no online sync
+ * Offline order service for local-first POS operation
+ * Stores orders locally via SQLite - no online sync
  */
-export class CustomOrderService implements PlatformOrderServiceInterface {
+export class OfflineOrderService implements PlatformOrderServiceInterface {
   private initialized: boolean = false;
   private orders: Order[] = [];
-  private logger = LoggerFactory.getInstance().createLogger('CustomOrderService');
+  private logger = LoggerFactory.getInstance().createLogger('OfflineOrderService');
 
   constructor(config?: PlatformOrderConfig) {
-    // Custom service doesn't need online configuration
+    // Offline service doesn't need online configuration
   }
 
   /**
-   * Initialize the custom order service
+   * Initialize the offline order service
    * Loads orders from local storage
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedOrders = await AsyncStorage.getItem(ORDERS_STORAGE_KEY);
+      const storedOrders = await sqliteStorage.getItem(ORDERS_STORAGE_KEY);
       if (storedOrders) {
         const parsed = JSON.parse(storedOrders);
         this.orders = parsed.map((order: any) => ({
@@ -36,10 +36,10 @@ export class CustomOrderService implements PlatformOrderServiceInterface {
       }
 
       this.initialized = true;
-      this.logger.info('Custom order service initialized (local-only mode)');
+      this.logger.info('Offline order service initialized (local-only mode)');
       return true;
     } catch (error) {
-      this.logger.error({ message: 'Error initializing custom order service' }, error instanceof Error ? error : new Error(String(error)));
+      this.logger.error({ message: 'Error initializing offline order service' }, error instanceof Error ? error : new Error(String(error)));
       this.initialized = false;
       return false;
     }
@@ -53,13 +53,13 @@ export class CustomOrderService implements PlatformOrderServiceInterface {
   }
 
   /**
-   * Get configuration requirements for custom platform
+   * Get configuration requirements for offline platform
    */
   getConfigRequirements(): PlatformConfigRequirements {
     return {
       required: [],
       optional: ['storeName'],
-      description: 'Local-only mode. Orders are stored locally with no online sync.',
+      description: 'Offline local-only mode. Orders are stored locally with no online sync.',
     };
   }
 
@@ -75,7 +75,7 @@ export class CustomOrderService implements PlatformOrderServiceInterface {
     const newOrder: Order = {
       ...order,
       id: order.id || `local-order-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      platformOrderId: order.platformOrderId || order.id, // Use same ID for local platform
+      platformOrderId: order.platformOrderId || order.id,
       createdAt: order.createdAt || now,
       updatedAt: now,
       paymentStatus: order.paymentStatus || 'pending',
@@ -116,7 +116,7 @@ export class CustomOrderService implements PlatformOrderServiceInterface {
     const updatedOrder: Order = {
       ...this.orders[index],
       ...updates,
-      id: orderId, // Ensure ID doesn't change
+      id: orderId,
       updatedAt: new Date(),
     };
 
@@ -186,7 +186,7 @@ export class CustomOrderService implements PlatformOrderServiceInterface {
    */
   async clearLocalOrders(): Promise<void> {
     this.orders = [];
-    await AsyncStorage.removeItem(ORDERS_STORAGE_KEY);
+    await sqliteStorage.removeItem(ORDERS_STORAGE_KEY);
     this.logger.info('Cleared all local orders');
   }
 
@@ -235,8 +235,8 @@ export class CustomOrderService implements PlatformOrderServiceInterface {
    * Save orders to local storage
    */
   private async saveOrdersToStorage(): Promise<void> {
-    await AsyncStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(this.orders));
+    await sqliteStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(this.orders));
   }
 }
 
-export const customOrderService = new CustomOrderService();
+export const offlineOrderService = new OfflineOrderService();
