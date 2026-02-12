@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../utils/theme';
-
+import { useCurrency } from '../hooks/useCurrency';
 import { usePayment } from '../hooks/usePayment';
 import { PaymentResponse } from '../services/payment/paymentServiceInterface';
 import { PaymentProvider } from '../services/payment/paymentServiceFactory';
@@ -35,6 +35,7 @@ const AVAILABLE_TERMINALS = [
 ];
 
 const PaymentTerminalScreen: React.FC<PaymentTerminalScreenProps> = ({ route, navigation }) => {
+  const cs = useCurrency();
   // Handle optional route params with defaults for demo mode
   const routeParams = route?.params || {};
   const amount = routeParams.amount || 25.99; // Demo amount
@@ -142,7 +143,10 @@ const PaymentTerminalScreen: React.FC<PaymentTerminalScreenProps> = ({ route, na
 
       <View style={styles.amountContainer}>
         <Text style={styles.amountLabel}>Total Amount:</Text>
-        <Text style={styles.amount}>${amount.toFixed(2)}</Text>
+        <Text style={styles.amount}>
+          {cs}
+          {amount.toFixed(2)}
+        </Text>
       </View>
 
       {!connected ? (

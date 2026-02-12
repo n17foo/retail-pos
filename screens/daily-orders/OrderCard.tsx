@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../../utils/theme';
+import { useCurrency } from '../../hooks/useCurrency';
 import { LocalOrder } from '../../services/basket/BasketServiceInterface';
 
 interface OrderCardProps {
@@ -24,6 +25,7 @@ const getOrderStatusText = (order: LocalOrder) => {
 };
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, isSyncing, onResync, onPrintReceipt }) => {
+  const cs = useCurrency();
   const statusColor = getOrderStatusColor(order);
 
   return (
@@ -40,7 +42,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, isSyncing, onResync, onPri
 
       <View style={styles.orderDetails}>
         <Text style={styles.customerInfo}>
-          {order.customerName || 'Guest'} • ${order.total.toFixed(2)}
+          {order.customerName || 'Guest'} • {cs}
+          {order.total.toFixed(2)}
         </Text>
         <Text style={styles.itemCount}>
           {order.items.length} item{order.items.length !== 1 ? 's' : ''}

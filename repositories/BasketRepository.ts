@@ -225,6 +225,31 @@ export class BasketRepository {
       orderId,
     ]);
   }
+
+  // ============ Daily Report Queries ============
+
+  async findOrdersByDateRange(fromTimestamp: number, toTimestamp: number, cashierId?: string): Promise<LocalOrderRow[]> {
+    if (cashierId) {
+      return db.getAllAsync<LocalOrderRow>(
+        'SELECT * FROM local_orders WHERE created_at >= ? AND created_at < ? AND cashier_id = ? ORDER BY created_at DESC',
+        [fromTimestamp, toTimestamp, cashierId]
+      );
+    }
+    return db.getAllAsync<LocalOrderRow>('SELECT * FROM local_orders WHERE created_at >= ? AND created_at < ? ORDER BY created_at DESC', [
+      fromTimestamp,
+      toTimestamp,
+    ]);
+  }
+
+  async findDistinctCashiers(): Promise<{ cashier_id: string; cashier_name: string }[]> {
+    return db.getAllAsync<{ cashier_id: string; cashier_name: string }>(
+      'SELECT DISTINCT cashier_id, cashier_name FROM local_orders WHERE cashier_id IS NOT NULL ORDER BY cashier_name ASC'
+    );
+  }
+
+  async deleteOrder(orderId: string): Promise<void> {
+    await db.runAsync('DELETE FROM local_orders WHERE id = ?', [orderId]);
+  }
 }
 
 export const basketRepository = new BasketRepository();

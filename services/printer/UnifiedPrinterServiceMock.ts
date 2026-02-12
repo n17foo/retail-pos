@@ -64,12 +64,14 @@ export class UnifiedPrinterServiceMock extends AbstractPrinterService {
     this.logger.info(`Items (${data.items.length}):`, { mock: true, receipt: true });
 
     data.items.forEach(item => {
-      this.logger.info(`Item: ${item.quantity}x ${item.name}: $${item.price.toFixed(2)}`, { mock: true, receipt: true, item });
+      const cs = data.currencySymbol || '£';
+      this.logger.info(`Item: ${item.quantity}x ${item.name}: ${cs}${item.price.toFixed(2)}`, { mock: true, receipt: true, item });
     });
 
-    this.logger.info(`Subtotal: $${data.subtotal.toFixed(2)}`, { mock: true, receipt: true });
-    this.logger.info(`Tax: $${data.tax.toFixed(2)}`, { mock: true, receipt: true });
-    this.logger.info(`Total: $${data.total.toFixed(2)}`, { mock: true, receipt: true });
+    const csMock = data.currencySymbol || '£';
+    this.logger.info(`Subtotal: ${csMock}${data.subtotal.toFixed(2)}`, { mock: true, receipt: true });
+    this.logger.info(`Tax: ${csMock}${data.tax.toFixed(2)}`, { mock: true, receipt: true });
+    this.logger.info(`Total: ${csMock}${data.total.toFixed(2)}`, { mock: true, receipt: true });
     this.logger.info(`Payment: ${data.paymentMethod}`, { mock: true, receipt: true });
 
     if (data.notes) {

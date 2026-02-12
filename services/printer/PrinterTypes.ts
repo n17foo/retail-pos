@@ -41,6 +41,7 @@ export interface ReceiptData {
   cashierName: string;
   customerName?: string;
   notes?: string;
+  currencySymbol?: string;
 }
 
 /**

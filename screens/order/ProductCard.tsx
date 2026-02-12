@@ -1,6 +1,7 @@
 import React, { useState, useEffect, memo } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ImageSourcePropType } from 'react-native';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface ProductCardProps {
   id: string;
@@ -17,7 +18,7 @@ interface ProductCardProps {
 const ProductCardInner: React.FC<ProductCardProps> = ({
   id,
   name,
-  price,
+  price: priceProp,
   image,
   onAddToCart,
   inCart = false,
@@ -25,6 +26,7 @@ const ProductCardInner: React.FC<ProductCardProps> = ({
   stock,
   widthPercent,
 }) => {
+  const cs = useCurrency();
   const [quantity, setQuantity] = useState(initialQuantity);
 
   useEffect(() => {
@@ -92,7 +94,10 @@ const ProductCardInner: React.FC<ProductCardProps> = ({
         <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
           {name}
         </Text>
-        <Text style={styles.price}>${price.toFixed(2)}</Text>
+        <Text style={styles.price}>
+          {cs}
+          {priceProp.toFixed(2)}
+        </Text>
       </View>
 
       {isInCart && (

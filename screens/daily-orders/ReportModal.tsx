@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { lightColors, spacing, typography, borderRadius } from '../../utils/theme';
+import { useCurrency } from '../../hooks/useCurrency';
 import { DailyReportData } from '../../hooks/useDailyReport';
 
 interface ReportModalProps {
@@ -12,6 +13,7 @@ interface ReportModalProps {
 }
 
 const ReportModal: React.FC<ReportModalProps> = ({ visible, report, onPrint, onClose }) => {
+  const cs = useCurrency();
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
@@ -30,15 +32,24 @@ const ReportModal: React.FC<ReportModalProps> = ({ visible, report, onPrint, onC
               </View>
               <View style={styles.reportRow}>
                 <Text style={styles.reportLabel}>Gross Sales:</Text>
-                <Text style={styles.reportValue}>${report.summary.totalSales.toFixed(2)}</Text>
+                <Text style={styles.reportValue}>
+                  {cs}
+                  {report.summary.totalSales.toFixed(2)}
+                </Text>
               </View>
               <View style={styles.reportRow}>
                 <Text style={styles.reportLabel}>Tax Collected:</Text>
-                <Text style={styles.reportValue}>${report.summary.totalTax.toFixed(2)}</Text>
+                <Text style={styles.reportValue}>
+                  {cs}
+                  {report.summary.totalTax.toFixed(2)}
+                </Text>
               </View>
               <View style={styles.reportRow}>
                 <Text style={styles.reportLabel}>Net Sales:</Text>
-                <Text style={[styles.reportValue, styles.reportTotal]}>${report.summary.netSales.toFixed(2)}</Text>
+                <Text style={[styles.reportValue, styles.reportTotal]}>
+                  {cs}
+                  {report.summary.netSales.toFixed(2)}
+                </Text>
               </View>
             </View>
           )}

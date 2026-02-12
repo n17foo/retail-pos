@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal, Image } from 'react-native';
 import { useOfflineProducts, Product } from '../../hooks/useOfflineProducts';
 import { useOfflineCategories } from '../../hooks/useOfflineCategories';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface ProductFormData {
   title: string;
@@ -26,6 +27,7 @@ const emptyFormData: ProductFormData = {
 };
 
 const ProductManagementTab: React.FC = () => {
+  const cs = useCurrency();
   const { products, isLoading, error, loadProducts, createProduct, updateProduct, deleteProduct } = useOfflineProducts();
   const { categories } = useOfflineCategories();
 
@@ -154,7 +156,10 @@ const ProductManagementTab: React.FC = () => {
           <Text style={styles.productTitle} numberOfLines={2}>
             {product.title}
           </Text>
-          <Text style={styles.productPrice}>${defaultVariant?.price?.toFixed(2) || '0.00'}</Text>
+          <Text style={styles.productPrice}>
+            {cs}
+            {defaultVariant?.price?.toFixed(2) || '0.00'}
+          </Text>
           {defaultVariant?.sku && <Text style={styles.productSku}>SKU: {defaultVariant.sku}</Text>}
           <Text style={styles.productStock}>Stock: {defaultVariant?.inventoryQuantity || 0}</Text>
           {product.productType && <Text style={styles.productCategory}>{product.productType}</Text>}

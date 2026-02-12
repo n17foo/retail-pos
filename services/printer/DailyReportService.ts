@@ -2,6 +2,7 @@ import { keyValueRepository } from '../../repositories/KeyValueRepository';
 import { LocalOrder } from '../basket/BasketServiceInterface';
 import { receiptConfigService, ReceiptConfig } from './ReceiptConfigService';
 import { addMoney, multiplyMoney, roundMoney, subtractMoney, sumMoney } from '../../utils/money';
+import { getCurrencySymbol } from '../../utils/currency';
 
 export interface ShiftData {
   id: string;
@@ -175,7 +176,17 @@ export class DailyReportService {
     };
   }
 
-  formatDailyReportForPrint(report: DailyReportData): string[] {
+  async getCurrencySymbolFromSettings(): Promise<string> {
+    try {
+      const settings = await keyValueRepository.getObject<{ offline?: { currency?: string } }>('ecommerceSettings');
+      return getCurrencySymbol(settings?.offline?.currency || 'GBP');
+    } catch {
+      return '£';
+    }
+  }
+
+  formatDailyReportForPrint(report: DailyReportData, currencySymbol: string = '£'): string[] {
+    const cs = currencySymbol;
     const config = receiptConfigService.getConfig();
     const lines: string[] = [];
     const divider = receiptConfigService.getDividerLine();
@@ -213,11 +224,11 @@ export class DailyReportService {
     lines.push(divider);
     lines.push(receiptConfigService.formatLine('Total Orders:', report.summary.totalOrders.toString()));
     lines.push(receiptConfigService.formatLine('Items Sold:', report.summary.itemsSold.toString()));
-    lines.push(receiptConfigService.formatLine('Gross Sales:', `$${report.summary.totalSales.toFixed(2)}`));
-    lines.push(receiptConfigService.formatLine('Tax Collected:', `$${report.summary.totalTax.toFixed(2)}`));
-    lines.push(receiptConfigService.formatLine('Discounts:', `$${report.summary.totalDiscount.toFixed(2)}`));
-    lines.push(receiptConfigService.formatLine('Net Sales:', `$${report.summary.netSales.toFixed(2)}`));
-    lines.push(receiptConfigService.formatLine('Avg Order Value:', `$${report.summary.averageOrderValue.toFixed(2)}`));
+    lines.push(receiptConfigService.formatLine('Gross Sales:', `${cs}${report.summary.totalSales.toFixed(2)}`));
+    lines.push(receiptConfigService.formatLine('Tax Collected:', `${cs}${report.summary.totalTax.toFixed(2)}`));
+    lines.push(receiptConfigService.formatLine('Discounts:', `${cs}${report.summary.totalDiscount.toFixed(2)}`));
+    lines.push(receiptConfigService.formatLine('Net Sales:', `${cs}${report.summary.netSales.toFixed(2)}`));
+    lines.push(receiptConfigService.formatLine('Avg Order Value:', `${cs}${report.summary.averageOrderValue.toFixed(2)}`));
     lines.push('');
 
     // Payment Breakdown
@@ -225,7 +236,7 @@ export class DailyReportService {
     lines.push(receiptConfigService.centerText('PAYMENT BREAKDOWN'));
     lines.push(divider);
     for (const [method, data] of Object.entries(report.summary.paymentBreakdown)) {
-      lines.push(receiptConfigService.formatLine(`${method} (${data.count}):`, `$${data.total.toFixed(2)}`));
+      lines.push(receiptConfigService.formatLine(`${method} (${data.count}):`, `${cs}${data.total.toFixed(2)}`));
     }
     lines.push('');
 
@@ -234,18 +245,18 @@ export class DailyReportService {
       lines.push(divider);
       lines.push(receiptConfigService.centerText('CASH DRAWER'));
       lines.push(divider);
-      lines.push(receiptConfigService.formatLine('Opening Cash:', `$${report.shift.openingCash.toFixed(2)}`));
+      lines.push(receiptConfigService.formatLine('Opening Cash:', `${cs}${report.shift.openingCash.toFixed(2)}`));
 
       const cashPayments = report.summary.paymentBreakdown['Cash']?.total || 0;
-      lines.push(receiptConfigService.formatLine('Cash Sales:', `$${cashPayments.toFixed(2)}`));
+      lines.push(receiptConfigService.formatLine('Cash Sales:', `${cs}${cashPayments.toFixed(2)}`));
 
       const expectedCash = addMoney(report.shift.openingCash, cashPayments);
-      lines.push(receiptConfigService.formatLine('Expected Cash:', `$${expectedCash.toFixed(2)}`));
+      lines.push(receiptConfigService.formatLine('Expected Cash:', `${cs}${expectedCash.toFixed(2)}`));
 
       if (report.shift.closingCash !== null) {
-        lines.push(receiptConfigService.formatLine('Actual Cash:', `$${report.shift.closingCash.toFixed(2)}`));
+        lines.push(receiptConfigService.formatLine('Actual Cash:', `${cs}${report.shift.closingCash.toFixed(2)}`));
         const difference = subtractMoney(report.shift.closingCash, expectedCash);
-        const diffStr = difference >= 0 ? `+$${difference.toFixed(2)}` : `-$${Math.abs(difference).toFixed(2)}`;
+        const diffStr = difference >= 0 ? `+${cs}${difference.toFixed(2)}` : `-${cs}${Math.abs(difference).toFixed(2)}`;
         lines.push(receiptConfigService.formatLine('Difference:', diffStr));
       }
       lines.push('');
@@ -257,7 +268,7 @@ export class DailyReportService {
       lines.push(receiptConfigService.centerText('REFUNDS'));
       lines.push(divider);
       lines.push(receiptConfigService.formatLine('Total Refunds:', report.summary.refunds.toString()));
-      lines.push(receiptConfigService.formatLine('Refund Amount:', `$${report.summary.refundAmount.toFixed(2)}`));
+      lines.push(receiptConfigService.formatLine('Refund Amount:', `${cs}${report.summary.refundAmount.toFixed(2)}`));
       lines.push('');
     }
 
@@ -273,7 +284,8 @@ export class DailyReportService {
     return lines;
   }
 
-  formatReceiptForPrint(order: LocalOrder): string[] {
+  formatReceiptForPrint(order: LocalOrder, currencySymbol: string = '£'): string[] {
+    const cs = currencySymbol;
     const config = receiptConfigService.getConfig();
     const lines: string[] = [];
     const divider = receiptConfigService.getDividerLine();
@@ -310,24 +322,24 @@ export class DailyReportService {
       const itemTotal = multiplyMoney(item.price, item.quantity);
       if (item.quantity > 1) {
         lines.push(item.name);
-        lines.push(receiptConfigService.formatLine(`  ${item.quantity} x $${item.price.toFixed(2)}`, `$${itemTotal.toFixed(2)}`));
+        lines.push(receiptConfigService.formatLine(`  ${item.quantity} x ${cs}${item.price.toFixed(2)}`, `${cs}${itemTotal.toFixed(2)}`));
       } else {
-        lines.push(receiptConfigService.formatLine(item.name, `$${itemTotal.toFixed(2)}`));
+        lines.push(receiptConfigService.formatLine(item.name, `${cs}${itemTotal.toFixed(2)}`));
       }
     }
     lines.push(divider);
 
     // Totals
     const subtotal = subtractMoney(order.total, order.tax || 0);
-    lines.push(receiptConfigService.formatLine('Subtotal:', `$${subtotal.toFixed(2)}`));
+    lines.push(receiptConfigService.formatLine('Subtotal:', `${cs}${subtotal.toFixed(2)}`));
     if (order.tax) {
-      lines.push(receiptConfigService.formatLine('Tax:', `$${order.tax.toFixed(2)}`));
+      lines.push(receiptConfigService.formatLine('Tax:', `${cs}${order.tax.toFixed(2)}`));
     }
     if (order.discountAmount) {
-      lines.push(receiptConfigService.formatLine('Discount:', `-$${order.discountAmount.toFixed(2)}`));
+      lines.push(receiptConfigService.formatLine('Discount:', `-${cs}${order.discountAmount.toFixed(2)}`));
     }
     lines.push(doubleDivider);
-    lines.push(receiptConfigService.formatLine('TOTAL:', `$${order.total.toFixed(2)}`));
+    lines.push(receiptConfigService.formatLine('TOTAL:', `${cs}${order.total.toFixed(2)}`));
     lines.push(doubleDivider);
 
     // Payment

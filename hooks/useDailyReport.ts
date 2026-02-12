@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { dailyReportService, ShiftData, DailyReportData } from '../services/printer/DailyReportService';
 import { LocalOrder } from '../services/basket/BasketServiceInterface';
+import { useCurrency } from './useCurrency';
 
 interface UseDailyReportReturn {
   currentShift: ShiftData | null;
@@ -17,6 +18,7 @@ interface UseDailyReportReturn {
 }
 
 export const useDailyReport = (): UseDailyReportReturn => {
+  const currencySymbol = useCurrency();
   const [currentShift, setCurrentShift] = useState<ShiftData | null>(null);
   const [shiftHistory, setShiftHistory] = useState<ShiftData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,13 +87,19 @@ export const useDailyReport = (): UseDailyReportReturn => {
     }
   }, []);
 
-  const getReportLines = useCallback((report: DailyReportData): string[] => {
-    return dailyReportService.formatDailyReportForPrint(report);
-  }, []);
+  const getReportLines = useCallback(
+    (report: DailyReportData): string[] => {
+      return dailyReportService.formatDailyReportForPrint(report, currencySymbol);
+    },
+    [currencySymbol]
+  );
 
-  const getReceiptLines = useCallback((order: LocalOrder): string[] => {
-    return dailyReportService.formatReceiptForPrint(order);
-  }, []);
+  const getReceiptLines = useCallback(
+    (order: LocalOrder): string[] => {
+      return dailyReportService.formatReceiptForPrint(order, currencySymbol);
+    },
+    [currencySymbol]
+  );
 
   useEffect(() => {
     reload();

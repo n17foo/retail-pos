@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Animated, Easing } from 'react-native';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../utils/theme';
+import { useCurrency } from '../hooks/useCurrency';
 import { usePayment } from '../hooks/usePayment';
 import { PaymentResponse } from '../services/payment/paymentServiceInterface';
 import { PaymentProvider } from '../services/payment/paymentServiceFactory';
@@ -31,6 +32,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
   onPaymentComplete,
   onCancel,
 }) => {
+  const cs = useCurrency();
   // Animation value for the tap animation
   const tapAnimation = new Animated.Value(1);
 
@@ -245,7 +247,10 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
 
       <View style={styles.amountContainer}>
         <Text style={styles.amountLabel}>Total Amount:</Text>
-        <Text style={styles.amount}>${amount.toFixed(2)}</Text>
+        <Text style={styles.amount}>
+          {cs}
+          {amount.toFixed(2)}
+        </Text>
       </View>
 
       {renderPaymentInstructions()}

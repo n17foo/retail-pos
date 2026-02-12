@@ -218,7 +218,8 @@ export class UnifiedPrinterService extends AbstractPrinterService {
         }
 
         // Pad name, quantity, price, and total
-        const line = `${itemName.padEnd(20)}${item.quantity.toString().padStart(3)} ${item.price.toFixed(2).padStart(8)} ${itemTotal.toFixed(2).padStart(8)}`;
+        const cs = data.currencySymbol || '£';
+        const line = `${itemName.padEnd(20)}${item.quantity.toString().padStart(3)} ${cs}${item.price.toFixed(2).padStart(7)} ${cs}${itemTotal.toFixed(2).padStart(7)}`;
         await this.printerInstance.printText(`${line}\n`);
       }
 
@@ -227,12 +228,13 @@ export class UnifiedPrinterService extends AbstractPrinterService {
 
       // Totals
       await this.printerInstance.alignRight();
-      await this.printerInstance.printText(`Subtotal: ${data.subtotal.toFixed(2)}\n`);
-      await this.printerInstance.printText(`Tax: ${data.tax.toFixed(2)}\n`);
+      const csSummary = data.currencySymbol || '£';
+      await this.printerInstance.printText(`Subtotal: ${csSummary}${data.subtotal.toFixed(2)}\n`);
+      await this.printerInstance.printText(`Tax: ${csSummary}${data.tax.toFixed(2)}\n`);
 
       // Total - bold
       await this.printerInstance.setBold(true);
-      await this.printerInstance.printText(`Total: ${data.total.toFixed(2)}\n`);
+      await this.printerInstance.printText(`Total: ${csSummary}${data.total.toFixed(2)}\n`);
       await this.printerInstance.setBold(false);
 
       // Divider

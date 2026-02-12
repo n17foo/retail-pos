@@ -57,7 +57,7 @@ export function calculateTax(amount: number, rate: number): number {
  * Format a dollar amount for display (e.g. "$19.99").
  * Always shows exactly 2 decimal places.
  */
-export function formatMoney(amount: number, currencySymbol: string = '$'): string {
+export function formatMoney(amount: number, currencySymbol: string = '£'): string {
   return `${currencySymbol}${roundMoney(amount).toFixed(2)}`;
 }
 

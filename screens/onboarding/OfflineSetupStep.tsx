@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
+import { CURRENCIES, getCurrencySymbol } from '../../utils/currency';
 
 interface OfflineSetupStepProps {
   onBack: () => void;
@@ -35,7 +36,7 @@ const DEFAULT_CONFIG: OfflineStoreConfig = {
   currency: 'GBP',
 };
 
-const CURRENCIES = ['GBP', 'USD', 'EUR', 'CAD', 'AUD'];
+const CURRENCY_CODES = CURRENCIES.map(c => c.code);
 
 const OfflineSetupStep: React.FC<OfflineSetupStepProps> = ({ onBack, onComplete, config, setConfig }) => {
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -171,17 +172,23 @@ const OfflineSetupStep: React.FC<OfflineSetupStepProps> = ({ onBack, onComplete,
         />
 
         <Text style={styles.inputLabel}>Currency</Text>
-        <View style={styles.currencyRow}>
-          {CURRENCIES.map(cur => (
+        <FlatList
+          data={CURRENCIES}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={item => item.code}
+          contentContainerStyle={styles.currencyRow}
+          renderItem={({ item: cur }) => (
             <TouchableOpacity
-              key={cur}
-              style={[styles.currencyChip, currentConfig.currency === cur && styles.currencyChipActive]}
-              onPress={() => setConfig({ ...currentConfig, currency: cur })}
+              style={[styles.currencyChip, currentConfig.currency === cur.code && styles.currencyChipActive]}
+              onPress={() => setConfig({ ...currentConfig, currency: cur.code })}
             >
-              <Text style={[styles.currencyText, currentConfig.currency === cur && styles.currencyTextActive]}>{cur}</Text>
+              <Text style={[styles.currencyText, currentConfig.currency === cur.code && styles.currencyTextActive]}>
+                {cur.symbol} {cur.code}
+              </Text>
             </TouchableOpacity>
-          ))}
-        </View>
+          )}
+        />
       </View>
 
       {/* Categories */}
@@ -229,7 +236,7 @@ const OfflineSetupStep: React.FC<OfflineSetupStepProps> = ({ onBack, onComplete,
                       <View style={styles.productInfo}>
                         <Text style={styles.productName}>{product.name}</Text>
                         <Text style={styles.productPrice}>
-                          {currentConfig.currency} {parseFloat(product.price).toFixed(2)}
+                          {getCurrencySymbol(currentConfig.currency)} {parseFloat(product.price).toFixed(2)}
                         </Text>
                         {product.sku && <Text style={styles.productSku}>SKU: {product.sku}</Text>}
                       </View>

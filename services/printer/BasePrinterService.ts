@@ -95,6 +95,7 @@ export abstract class AbstractPrinterService implements BasePrinterService {
    * @param data Receipt data
    */
   formatReceiptBuffer(data: ReceiptData): Buffer {
+    const cs = data.currencySymbol || '£';
     let commands: number[] = [];
 
     // Initialize printer
@@ -160,7 +161,7 @@ export abstract class AbstractPrinterService implements BasePrinterService {
       }
 
       // Pad name, quantity, price, and total
-      const line = `${itemName.padEnd(20)}${item.quantity.toString().padStart(3)} ${item.price.toFixed(2).padStart(8)} ${itemTotal.toFixed(2).padStart(8)}`;
+      const line = `${itemName.padEnd(20)}${item.quantity.toString().padStart(3)} ${cs}${item.price.toFixed(2).padStart(7)} ${cs}${itemTotal.toFixed(2).padStart(7)}`;
       commands.push(...stringToBytes(line));
       commands.push(...ESC_POS_COMMANDS.NEWLINE);
     }
@@ -173,14 +174,14 @@ export abstract class AbstractPrinterService implements BasePrinterService {
     commands.push(...ESC_POS_COMMANDS.ALIGN_RIGHT);
 
     // Totals
-    commands.push(...stringToBytes(`Subtotal: ${data.subtotal.toFixed(2)}`));
+    commands.push(...stringToBytes(`Subtotal: ${cs}${data.subtotal.toFixed(2)}`));
     commands.push(...ESC_POS_COMMANDS.NEWLINE);
-    commands.push(...stringToBytes(`Tax: ${data.tax.toFixed(2)}`));
+    commands.push(...stringToBytes(`Tax: ${cs}${data.tax.toFixed(2)}`));
     commands.push(...ESC_POS_COMMANDS.NEWLINE);
 
     // Total - bold
     commands.push(...ESC_POS_COMMANDS.BOLD_ON);
-    commands.push(...stringToBytes(`Total: ${data.total.toFixed(2)}`));
+    commands.push(...stringToBytes(`Total: ${cs}${data.total.toFixed(2)}`));
     commands.push(...ESC_POS_COMMANDS.NEWLINE);
     commands.push(...ESC_POS_COMMANDS.BOLD_OFF);
 

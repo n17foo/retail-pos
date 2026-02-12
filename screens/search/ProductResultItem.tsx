@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image, ImageSourcePropType, StyleSheet } from 'react-native';
 import { SearchProduct } from '../../services/search/searchServiceInterface';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../../utils/theme';
+import { useCurrency } from '../../hooks/useCurrency';
 
 interface ProductResultItemProps {
   product: SearchProduct;
@@ -9,6 +10,7 @@ interface ProductResultItemProps {
 }
 
 const ProductResultItem: React.FC<ProductResultItemProps> = ({ product, onSelect }) => {
+  const cs = useCurrency();
   let imageSource: ImageSourcePropType = null;
   if (product.imageUrl) {
     imageSource = { uri: product.imageUrl };
@@ -23,7 +25,10 @@ const ProductResultItem: React.FC<ProductResultItemProps> = ({ product, onSelect
           {product.description || 'No description available'}
         </Text>
         <View style={styles.productMetaRow}>
-          <Text style={styles.productPrice}>${product.price.toFixed(2)}</Text>
+          <Text style={styles.productPrice}>
+            {cs}
+            {product.price.toFixed(2)}
+          </Text>
           <View style={styles.badgeContainer}>
             <View
               style={[
