@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Alert } from 'react-native';
-import { storage } from '../services/storage/storage';
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 import { PrinterConnectionType } from '../services/printer/UnifiedPrinterService';
 import { useTranslate } from './useTranslate';
 import { LoggerFactory } from '../services/logger';
@@ -82,7 +82,7 @@ export const usePrinterSettings = () => {
   const loadSettings = useCallback(async () => {
     try {
       setIsLoading(true);
-      const savedSettings = await storage.getObject<PrinterSettings>(PRINTER_SETTINGS_KEY);
+      const savedSettings = await keyValueRepository.getObject<PrinterSettings>(PRINTER_SETTINGS_KEY);
       if (savedSettings) {
         setPrinterSettings({ ...DEFAULT_PRINTER_SETTINGS, ...savedSettings });
         logger.info('Printer settings loaded successfully');
@@ -117,7 +117,7 @@ export const usePrinterSettings = () => {
         }
 
         setSaveStatus('saving');
-        await storage.setItem(PRINTER_SETTINGS_KEY, settings);
+        await keyValueRepository.setItem(PRINTER_SETTINGS_KEY, settings);
         setPrinterSettings(settings);
         setSaveStatus('saved');
         logger.info('Printer settings saved successfully');

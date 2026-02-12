@@ -1,7 +1,7 @@
 import { Order } from '../OrderServiceInterface';
 import { PlatformOrderServiceInterface, PlatformConfigRequirements, PlatformOrderConfig } from './PlatformOrderServiceInterface';
 import { LoggerFactory } from '../../logger';
-import { sqliteStorage } from '../../storage/SQLiteStorageService';
+import { keyValueRepository } from '../../../repositories/KeyValueRepository';
 
 const ORDERS_STORAGE_KEY = 'offline_local_orders';
 
@@ -24,7 +24,7 @@ export class OfflineOrderService implements PlatformOrderServiceInterface {
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedOrders = await sqliteStorage.getItem(ORDERS_STORAGE_KEY);
+      const storedOrders = await keyValueRepository.getItem(ORDERS_STORAGE_KEY);
       if (storedOrders) {
         const parsed = JSON.parse(storedOrders);
         this.orders = parsed.map((order: any) => ({
@@ -186,7 +186,7 @@ export class OfflineOrderService implements PlatformOrderServiceInterface {
    */
   async clearLocalOrders(): Promise<void> {
     this.orders = [];
-    await sqliteStorage.removeItem(ORDERS_STORAGE_KEY);
+    await keyValueRepository.removeItem(ORDERS_STORAGE_KEY);
     this.logger.info('Cleared all local orders');
   }
 
@@ -235,7 +235,7 @@ export class OfflineOrderService implements PlatformOrderServiceInterface {
    * Save orders to local storage
    */
   private async saveOrdersToStorage(): Promise<void> {
-    await sqliteStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(this.orders));
+    await keyValueRepository.setItem(ORDERS_STORAGE_KEY, JSON.stringify(this.orders));
   }
 }
 

@@ -1,6 +1,6 @@
 import { Category, CategoryServiceInterface } from '../CategoryServiceInterface';
 import { LoggerFactory } from '../../logger';
-import { sqliteStorage } from '../../storage/SQLiteStorageService';
+import { KeyValueRepository } from '../../../repositories/KeyValueRepository';
 
 const CATEGORIES_STORAGE_KEY = 'offline_local_categories';
 
@@ -12,6 +12,7 @@ export class OfflineCategoryService implements CategoryServiceInterface {
   private initialized: boolean = false;
   private categories: Category[] = [];
   private logger = LoggerFactory.getInstance().createLogger('OfflineCategoryService');
+  private kvRepo = new KeyValueRepository();
 
   /**
    * Initialize the offline category service
@@ -19,7 +20,7 @@ export class OfflineCategoryService implements CategoryServiceInterface {
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedCategories = await sqliteStorage.getItem(CATEGORIES_STORAGE_KEY);
+      const storedCategories = await this.kvRepo.getItem(CATEGORIES_STORAGE_KEY);
       if (storedCategories) {
         this.categories = JSON.parse(storedCategories);
         this.logger.info(`Loaded ${this.categories.length} categories from local storage`);
@@ -60,7 +61,7 @@ export class OfflineCategoryService implements CategoryServiceInterface {
    */
   async setCategories(categories: Category[]): Promise<void> {
     this.categories = categories.map((cat, index) => this.mapToCategory(cat, index));
-    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await this.kvRepo.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
     this.logger.info(`Saved ${this.categories.length} categories to local storage`);
   }
 
@@ -74,7 +75,7 @@ export class OfflineCategoryService implements CategoryServiceInterface {
     };
 
     this.categories.push(newCategory);
-    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await this.kvRepo.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
 
     this.logger.info(`Added local category: ${newCategory.name}`);
     return newCategory;
@@ -96,7 +97,7 @@ export class OfflineCategoryService implements CategoryServiceInterface {
     };
 
     this.categories[index] = updated;
-    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await this.kvRepo.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
 
     this.logger.info(`Updated local category: ${updated.name}`);
     return updated;
@@ -112,7 +113,7 @@ export class OfflineCategoryService implements CategoryServiceInterface {
     }
 
     this.categories.splice(index, 1);
-    await sqliteStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
+    await this.kvRepo.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(this.categories));
 
     this.logger.info(`Deleted local category: ${categoryId}`);
     return true;
@@ -123,7 +124,7 @@ export class OfflineCategoryService implements CategoryServiceInterface {
    */
   async clearLocalCategories(): Promise<void> {
     this.categories = [];
-    await sqliteStorage.removeItem(CATEGORIES_STORAGE_KEY);
+    await this.kvRepo.removeItem(CATEGORIES_STORAGE_KEY);
     this.logger.info('Cleared all local categories');
   }
 

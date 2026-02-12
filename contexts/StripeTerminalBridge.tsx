@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { StripeTerminalProvider, useStripeTerminal } from '@stripe/stripe-terminal-react-native';
-import { storage } from '../services/storage/storage';
-
-// Use the singleton storage service instance directly
-const storageInstance = storage;
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 
 // Define types based on Stripe Terminal SDK
 type Reader = any;
@@ -64,9 +61,9 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
   // Token provider function
   const fetchTokenProvider = async () => {
     try {
-      const apiKey = (await storage.getItem('stripe_nfc_apiKey')) || '';
-      const locationId = (await storage.getItem('stripe_nfc_merchantId')) || '';
-      const useDirectApi = (await storage.getItem('stripe_nfc_useDirectApi')) === 'true';
+      const apiKey = (await keyValueRepository.getItem('stripe_nfc_apiKey')) || '';
+      const locationId = (await keyValueRepository.getItem('stripe_nfc_merchantId')) || '';
+      const useDirectApi = (await keyValueRepository.getItem('stripe_nfc_useDirectApi')) === 'true';
 
       if (!apiKey) {
         throw new Error('Stripe API key not configured');
@@ -79,7 +76,7 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
       }
 
       // Otherwise, use backend to fetch token
-      const backendUrl = (await storage.getItem('stripe_nfc_backendUrl')) || 'https://your-backend-url.com';
+      const backendUrl = (await keyValueRepository.getItem('stripe_nfc_backendUrl')) || 'https://your-backend-url.com';
       console.log(`Fetching Stripe Terminal token from ${backendUrl}/stripe/connection_token`);
 
       const response = await fetch(`${backendUrl}/stripe/connection_token`, {
@@ -220,7 +217,7 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
           setState(prev => ({ ...prev, discoveredReaders: [], lastError: null }));
 
           // Get timeout from settings
-          const timeoutStr = (await storage.getItem('stripe_nfc_connectionTimeout')) || '30';
+          const timeoutStr = (await keyValueRepository.getItem('stripe_nfc_connectionTimeout')) || '30';
           const timeout = parseInt(timeoutStr, 10) * 1000; // Convert to milliseconds
 
           // Construct proper configuration for reader discovery
@@ -273,7 +270,7 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
 
           setState(prev => ({ ...prev, isConnecting: true }));
           // Make sure we have a location ID for the reader
-          const locationId = (await storage.getItem('stripe_nfc_locationId')) || '';
+          const locationId = (await keyValueRepository.getItem('stripe_nfc_locationId')) || '';
           if (!locationId) {
             throw new Error('Stripe location ID is not configured');
           }
@@ -359,12 +356,12 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
           console.log(`Processing payment: $${amount} ${currency} - ${description}`);
 
           // Check if we should use the direct API or backend
-          const useDirectApi = (await storage.getItem('stripe_nfc_useDirectApi')) === 'true';
+          const useDirectApi = (await keyValueRepository.getItem('stripe_nfc_useDirectApi')) === 'true';
           let paymentIntent;
 
           if (useDirectApi) {
             // Direct API - use API key
-            const apiKey = (await storage.getItem('stripe_nfc_apiKey')) || '';
+            const apiKey = (await keyValueRepository.getItem('stripe_nfc_apiKey')) || '';
             if (!apiKey) {
               throw new Error('Stripe API key not configured');
             }
@@ -395,7 +392,7 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
             paymentIntent = await stripeResponse.json();
           } else {
             // Use backend endpoint
-            const backendUrl = await storage.getItem('stripe_nfc_backendUrl');
+            const backendUrl = await keyValueRepository.getItem('stripe_nfc_backendUrl');
             if (!backendUrl) {
               throw new Error('Stripe backend URL not configured');
             }
@@ -531,13 +528,13 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
 
           // The Stripe Terminal SDK requires a backend call to first retrieve the payment intent
           // before cancelling, as the terminal itself may not have the full intent details
-          const apiKey = (await storage.getItem('stripe_nfc_apiKey')) || '';
+          const apiKey = (await keyValueRepository.getItem('stripe_nfc_apiKey')) || '';
           if (!apiKey) {
             throw new Error('Stripe API key not configured');
           }
 
           // Get backend URL from storage
-          const backendUrl = (await storage.getItem('stripe_nfc_backendUrl')) || 'https://your-backend-url.com';
+          const backendUrl = (await keyValueRepository.getItem('stripe_nfc_backendUrl')) || 'https://your-backend-url.com';
           const response = await fetch(`${backendUrl}/stripe/cancel_payment`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -565,13 +562,13 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
         // Note: Refunds are typically handled through the Stripe API, not the Terminal SDK
         // This would be implemented by calling your backend which calls the Stripe Refunds API
         try {
-          const apiKey = (await storage.getItem('stripe_nfc_apiKey')) || '';
+          const apiKey = (await keyValueRepository.getItem('stripe_nfc_apiKey')) || '';
           if (!apiKey) {
             throw new Error('Stripe API key not configured');
           }
 
           // Get backend URL from storage
-          const backendUrl = (await storage.getItem('stripe_nfc_backendUrl')) || 'https://your-backend-url.com';
+          const backendUrl = (await keyValueRepository.getItem('stripe_nfc_backendUrl')) || 'https://your-backend-url.com';
           const response = await fetch(`${backendUrl}/stripe/refund`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

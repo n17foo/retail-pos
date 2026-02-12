@@ -1,6 +1,6 @@
 import { TokenServiceInterface, TokenType, TokenInfo, TokenProviderFunction } from './tokenServiceInterface';
 import { LoggerFactory } from '../logger';
-import { sqliteStorage } from '../storage/SQLiteStorageService';
+import { keyValueRepository } from '../../repositories/KeyValueRepository';
 
 /**
  * TokenService implementation that uses SQLite for persistent token storage
@@ -38,7 +38,7 @@ export class TokenService implements TokenServiceInterface {
         expiresAt: expiresIn ? Date.now() + expiresIn * 1000 : undefined,
       };
 
-      await sqliteStorage.setItem(key, tokenInfo);
+      await keyValueRepository.setItem(key, tokenInfo);
 
       this.logger.info(`Token stored for platform: ${platform}, type: ${tokenType}`);
       return true;
@@ -127,7 +127,7 @@ export class TokenService implements TokenServiceInterface {
       const keys = Object.values(TokenType).map(type => this.getStorageKey(platform, type as TokenType));
 
       for (const key of keys) {
-        await sqliteStorage.removeItem(key);
+        await keyValueRepository.removeItem(key);
       }
 
       this.logger.info(`All tokens cleared for platform: ${platform}`);
@@ -143,7 +143,7 @@ export class TokenService implements TokenServiceInterface {
     try {
       const key = this.getStorageKey(platform, tokenType);
 
-      await sqliteStorage.removeItem(key);
+      await keyValueRepository.removeItem(key);
 
       this.logger.info(`Token cleared for platform: ${platform}, type: ${tokenType}`);
     } catch (error) {
@@ -165,7 +165,7 @@ export class TokenService implements TokenServiceInterface {
   private async getTokenFromStorage(platform: string, tokenType: TokenType): Promise<TokenInfo | null> {
     try {
       const key = this.getStorageKey(platform, tokenType);
-      return await sqliteStorage.getObject<TokenInfo>(key);
+      return await keyValueRepository.getObject<TokenInfo>(key);
     } catch (error) {
       this.logger.error(
         { message: `Error reading token from storage for ${platform}` },

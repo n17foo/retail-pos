@@ -1,7 +1,7 @@
 import { Product, ProductQueryOptions, ProductResult, SyncResult } from '../ProductServiceInterface';
 import { PlatformProductServiceInterface, PlatformConfigRequirements, PlatformProductConfig } from './PlatformProductServiceInterface';
 import { LoggerFactory } from '../../logger';
-import { sqliteStorage } from '../../storage/SQLiteStorageService';
+import { keyValueRepository } from '../../../repositories/KeyValueRepository';
 
 const PRODUCTS_STORAGE_KEY = 'offline_local_products';
 const MENU_URL_STORAGE_KEY = 'offline_menu_url';
@@ -32,14 +32,14 @@ export class OfflineProductService implements PlatformProductServiceInterface {
     try {
       // Load menu URL from storage if not provided
       if (!this.menuUrl) {
-        const storedUrl = await sqliteStorage.getItem(MENU_URL_STORAGE_KEY);
+        const storedUrl = await keyValueRepository.getItem(MENU_URL_STORAGE_KEY);
         if (storedUrl) {
           this.menuUrl = storedUrl;
         }
       }
 
       // Load cached products from local storage
-      const storedProducts = await sqliteStorage.getItem(PRODUCTS_STORAGE_KEY);
+      const storedProducts = await keyValueRepository.getItem(PRODUCTS_STORAGE_KEY);
       if (storedProducts) {
         this.products = JSON.parse(storedProducts);
         this.logger.info(`Loaded ${this.products.length} products from local storage`);
@@ -81,7 +81,7 @@ export class OfflineProductService implements PlatformProductServiceInterface {
    */
   async setMenuUrl(url: string): Promise<void> {
     this.menuUrl = url;
-    await sqliteStorage.setItem(MENU_URL_STORAGE_KEY, url);
+    await keyValueRepository.setItem(MENU_URL_STORAGE_KEY, url);
     this.logger.info(`Menu URL set: ${url}`);
   }
 
@@ -123,8 +123,8 @@ export class OfflineProductService implements PlatformProductServiceInterface {
 
       // Store products locally
       this.products = products;
-      await sqliteStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
-      await sqliteStorage.setItem(LAST_SYNC_KEY, new Date().toISOString());
+      await keyValueRepository.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+      await keyValueRepository.setItem(LAST_SYNC_KEY, new Date().toISOString());
 
       this.logger.info(`Downloaded ${products.length} products and ${categories.length} categories`);
 
@@ -139,7 +139,7 @@ export class OfflineProductService implements PlatformProductServiceInterface {
    * Get last sync timestamp
    */
   async getLastSyncTime(): Promise<Date | null> {
-    const lastSync = await sqliteStorage.getItem(LAST_SYNC_KEY);
+    const lastSync = await keyValueRepository.getItem(LAST_SYNC_KEY);
     return lastSync ? new Date(lastSync) : null;
   }
 
@@ -310,7 +310,7 @@ export class OfflineProductService implements PlatformProductServiceInterface {
    * Save products to local storage
    */
   private async saveProductsToStorage(): Promise<void> {
-    await sqliteStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(this.products));
+    await keyValueRepository.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(this.products));
   }
 
   /**
@@ -361,8 +361,8 @@ export class OfflineProductService implements PlatformProductServiceInterface {
    */
   async clearLocalProducts(): Promise<void> {
     this.products = [];
-    await sqliteStorage.removeItem(PRODUCTS_STORAGE_KEY);
-    await sqliteStorage.removeItem(LAST_SYNC_KEY);
+    await keyValueRepository.removeItem(PRODUCTS_STORAGE_KEY);
+    await keyValueRepository.removeItem(LAST_SYNC_KEY);
     this.logger.info('Cleared all local products');
   }
 }

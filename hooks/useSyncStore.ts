@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
-import { sqliteStorage } from '../services/storage/SQLiteStorageService';
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 
 export interface QueuedRequest {
   id: string;
@@ -28,15 +28,15 @@ export interface SyncStoreState {
 }
 
 // Custom SQLite storage adapter for zustand persist middleware
-const sqliteStorageAdapter: StateStorage = {
+const keyValueRepositoryAdapter: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
-    return sqliteStorage.getItem(name);
+    return keyValueRepository.getItem(name);
   },
   setItem: async (name: string, value: string): Promise<void> => {
-    await sqliteStorage.setItem(name, value);
+    await keyValueRepository.setItem(name, value);
   },
   removeItem: async (name: string): Promise<void> => {
-    await sqliteStorage.removeItem(name);
+    await keyValueRepository.removeItem(name);
   },
 };
 
@@ -155,7 +155,7 @@ export const useSyncStore = create<SyncStoreState>()(
     }),
     {
       name: 'sync-queue-storage',
-      storage: createJSONStorage(() => sqliteStorageAdapter),
+      storage: createJSONStorage(() => keyValueRepositoryAdapter),
       partialize: state => ({
         queue: state.queue,
         // Don't persist isProcessing state

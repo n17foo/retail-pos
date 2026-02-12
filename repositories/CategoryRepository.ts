@@ -1,5 +1,4 @@
-import { sqliteStorage } from '../services/storage/SQLiteStorageService';
-import { type SQLiteDatabase } from 'expo-sqlite';
+import { db } from '../utils/db';
 import { generateUUID } from '../utils/uuid';
 
 export interface Category {
@@ -20,16 +19,10 @@ export interface Category {
 }
 
 export class CategoryRepository {
-  private db: SQLiteDatabase;
-
-  constructor() {
-    this.db = sqliteStorage.getDatabase();
-  }
-
   async create(category: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
     const now = Date.now();
     const id = generateUUID();
-    await this.db.runAsync(
+    await db.runAsync(
       `INSERT INTO categories (id, name, description, parent_id, image_url, position, product_count, platform, platform_id, level, path, status, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
@@ -54,7 +47,7 @@ export class CategoryRepository {
 
   async upsert(category: Omit<Category, 'created_at' | 'updated_at'> & { id: string }): Promise<void> {
     const now = Date.now();
-    await this.db.runAsync(
+    await db.runAsync(
       `INSERT INTO categories (id, name, description, parent_id, image_url, position, product_count, platform, platform_id, level, path, status, created_at, updated_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
@@ -90,42 +83,40 @@ export class CategoryRepository {
   }
 
   async findById(id: string): Promise<Category | null> {
-    return await this.db.getFirstAsync<Category>('SELECT * FROM categories WHERE id = ?', [id]);
+    return await db.getFirstAsync<Category>('SELECT * FROM categories WHERE id = ?', [id]);
   }
 
   async findAll(): Promise<Category[]> {
-    return await this.db.getAllAsync<Category>('SELECT * FROM categories ORDER BY position ASC');
+    return await db.getAllAsync<Category>('SELECT * FROM categories ORDER BY position ASC');
   }
 
   async findByPlatform(platform: string): Promise<Category[]> {
-    return await this.db.getAllAsync<Category>('SELECT * FROM categories WHERE platform = ? ORDER BY position ASC', [platform]);
+    return await db.getAllAsync<Category>('SELECT * FROM categories WHERE platform = ? ORDER BY position ASC', [platform]);
   }
 
   async findByParentId(parentId: string | null): Promise<Category[]> {
     if (parentId === null) {
-      return await this.db.getAllAsync<Category>('SELECT * FROM categories WHERE parent_id IS NULL ORDER BY position ASC');
+      return await db.getAllAsync<Category>('SELECT * FROM categories WHERE parent_id IS NULL ORDER BY position ASC');
     }
-    return await this.db.getAllAsync<Category>('SELECT * FROM categories WHERE parent_id = ? ORDER BY position ASC', [parentId]);
+    return await db.getAllAsync<Category>('SELECT * FROM categories WHERE parent_id = ? ORDER BY position ASC', [parentId]);
   }
 
   async findRootCategories(platform?: string): Promise<Category[]> {
     if (platform) {
-      return await this.db.getAllAsync<Category>(
-        'SELECT * FROM categories WHERE parent_id IS NULL AND platform = ? ORDER BY position ASC',
-        [platform]
-      );
+      return await db.getAllAsync<Category>('SELECT * FROM categories WHERE parent_id IS NULL AND platform = ? ORDER BY position ASC', [
+        platform,
+      ]);
     }
-    return await this.db.getAllAsync<Category>('SELECT * FROM categories WHERE parent_id IS NULL ORDER BY position ASC');
+    return await db.getAllAsync<Category>('SELECT * FROM categories WHERE parent_id IS NULL ORDER BY position ASC');
   }
 
   async findActive(platform?: string): Promise<Category[]> {
     if (platform) {
-      return await this.db.getAllAsync<Category>(
-        "SELECT * FROM categories WHERE status = 'active' AND platform = ? ORDER BY position ASC",
-        [platform]
-      );
+      return await db.getAllAsync<Category>("SELECT * FROM categories WHERE status = 'active' AND platform = ? ORDER BY position ASC", [
+        platform,
+      ]);
     }
-    return await this.db.getAllAsync<Category>("SELECT * FROM categories WHERE status = 'active' ORDER BY position ASC");
+    return await db.getAllAsync<Category>("SELECT * FROM categories WHERE status = 'active' ORDER BY position ASC");
   }
 
   async update(id: string, data: Partial<Category>): Promise<void> {
@@ -135,21 +126,21 @@ export class CategoryRepository {
 
     const values = fields.map(key => data[key as keyof typeof data]);
     const statement = `UPDATE categories SET ${fields.map(field => `${field} = ?`).join(', ')}, updated_at = ? WHERE id = ?`;
-    await this.db.runAsync(statement, [...values, now, id]);
+    await db.runAsync(statement, [...values, now, id]);
   }
 
   async delete(id: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
+    await db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
   }
 
   async deleteByPlatform(platform: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM categories WHERE platform = ?', [platform]);
+    await db.runAsync('DELETE FROM categories WHERE platform = ?', [platform]);
   }
 
   async count(platform?: string): Promise<number> {
     const query = platform ? 'SELECT COUNT(*) as count FROM categories WHERE platform = ?' : 'SELECT COUNT(*) as count FROM categories';
     const params = platform ? [platform] : [];
-    const result = await this.db.getFirstAsync<{ count: number }>(query, params);
+    const result = await db.getFirstAsync<{ count: number }>(query, params);
     return result?.count ?? 0;
   }
 }

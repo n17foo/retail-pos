@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { storage } from '../services/storage/storage';
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 import { PaymentProvider } from '../services/payment/paymentServiceFactory';
 import { usePayment } from './usePayment';
 import { LoggerFactory } from '../services/logger';
@@ -76,7 +76,7 @@ export const usePaymentSettings = () => {
   const loadSettings = useCallback(async () => {
     try {
       setIsLoading(true);
-      const savedSettings = await storage.getObject<PaymentSettings>('paymentSettings');
+      const savedSettings = await keyValueRepository.getObject<PaymentSettings>('paymentSettings');
       if (savedSettings) {
         setPaymentSettings({ ...DEFAULT_PAYMENT_SETTINGS, ...savedSettings });
         logger.info('Payment settings loaded successfully');
@@ -101,7 +101,7 @@ export const usePaymentSettings = () => {
       try {
         setIsLoading(true);
         setSaveStatus('saving');
-        await storage.setItem('paymentSettings', settings);
+        await keyValueRepository.setItem('paymentSettings', settings);
         setPaymentSettings(settings);
         await setPaymentProvider(settings.provider);
         setSaveStatus('saved');
@@ -146,14 +146,14 @@ export const usePaymentSettings = () => {
           // For Stripe NFC, use the dedicated StripeNfcService to test the terminal connection
 
           // First, save all the current settings to storage so the service can access them
-          await storage.setItem('stripe_nfc_apiKey', paymentSettings.stripe_nfc.apiKey);
-          await storage.setItem('stripe_nfc_publishableKey', paymentSettings.stripe_nfc.publishableKey || '');
-          await storage.setItem('stripe_nfc_merchantId', paymentSettings.stripe_nfc.merchantId);
-          await storage.setItem('stripe_nfc_backendUrl', paymentSettings.stripe_nfc.backendUrl);
-          await storage.setItem('stripe_nfc_useDirectApi', String(paymentSettings.stripe_nfc.useDirectApi || false));
-          await storage.setItem('stripe_nfc_useSimulatedReader', String(paymentSettings.stripe_nfc.useSimulatedReader || false));
-          await storage.setItem('stripe_nfc_connectionTimeout', paymentSettings.stripe_nfc.connectionTimeout || '30');
-          await storage.setItem('stripe_nfc_enableNfc', String(paymentSettings.stripe_nfc.enableNfc || false));
+          await keyValueRepository.setItem('stripe_nfc_apiKey', paymentSettings.stripe_nfc.apiKey);
+          await keyValueRepository.setItem('stripe_nfc_publishableKey', paymentSettings.stripe_nfc.publishableKey || '');
+          await keyValueRepository.setItem('stripe_nfc_merchantId', paymentSettings.stripe_nfc.merchantId);
+          await keyValueRepository.setItem('stripe_nfc_backendUrl', paymentSettings.stripe_nfc.backendUrl);
+          await keyValueRepository.setItem('stripe_nfc_useDirectApi', String(paymentSettings.stripe_nfc.useDirectApi || false));
+          await keyValueRepository.setItem('stripe_nfc_useSimulatedReader', String(paymentSettings.stripe_nfc.useSimulatedReader || false));
+          await keyValueRepository.setItem('stripe_nfc_connectionTimeout', paymentSettings.stripe_nfc.connectionTimeout || '30');
+          await keyValueRepository.setItem('stripe_nfc_enableNfc', String(paymentSettings.stripe_nfc.enableNfc || false));
 
           // Import and use the StripeNfcService
           const { StripeNfcService } = await import('../services/payment/stripeNfcService');

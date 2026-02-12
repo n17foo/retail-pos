@@ -1,6 +1,6 @@
 import { SearchServiceInterface, SearchOptions, SearchResult, SearchProduct } from '../searchServiceInterface';
 import { LoggerFactory } from '../../logger';
-import { sqliteStorage } from '../../storage/SQLiteStorageService';
+import { keyValueRepository } from '../../../repositories/KeyValueRepository';
 import { ProductServiceFactory } from '../../product/productServiceFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
 
@@ -21,7 +21,7 @@ export class OfflineSearchService implements SearchServiceInterface {
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedHistory = await sqliteStorage.getItem(SEARCH_HISTORY_KEY);
+      const storedHistory = await keyValueRepository.getItem(SEARCH_HISTORY_KEY);
       if (storedHistory) {
         this.searchHistory = JSON.parse(storedHistory);
         this.logger.info(`Loaded ${this.searchHistory.length} search history items`);
@@ -121,7 +121,7 @@ export class OfflineSearchService implements SearchServiceInterface {
    */
   async clearSearchHistory(): Promise<void> {
     this.searchHistory = [];
-    await sqliteStorage.removeItem(SEARCH_HISTORY_KEY);
+    await keyValueRepository.removeItem(SEARCH_HISTORY_KEY);
     this.logger.info('Cleared search history');
   }
 
@@ -140,7 +140,7 @@ export class OfflineSearchService implements SearchServiceInterface {
       this.searchHistory = this.searchHistory.slice(0, 50);
     }
 
-    sqliteStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(this.searchHistory)).catch(err => {
+    keyValueRepository.setItem(SEARCH_HISTORY_KEY, JSON.stringify(this.searchHistory)).catch(err => {
       this.logger.error('Failed to save search history', err);
     });
   }

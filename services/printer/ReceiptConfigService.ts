@@ -1,4 +1,4 @@
-import { storage } from '../storage/storage';
+import { keyValueRepository } from '../../repositories/KeyValueRepository';
 
 export interface ReceiptConfig {
   // Header configuration
@@ -162,7 +162,7 @@ export class ReceiptConfigService {
     if (this.initialized) return;
 
     try {
-      const savedConfig = await storage.getObject<ReceiptConfig>(RECEIPT_CONFIG_KEY);
+      const savedConfig = await keyValueRepository.getObject<ReceiptConfig>(RECEIPT_CONFIG_KEY);
       if (savedConfig) {
         this.config = { ...DEFAULT_RECEIPT_CONFIG, ...savedConfig };
       }
@@ -187,22 +187,22 @@ export class ReceiptConfigService {
       options: { ...this.config.options, ...updates.options },
       printerModel: { ...this.config.printerModel, ...updates.printerModel },
     };
-    await storage.setObject(RECEIPT_CONFIG_KEY, this.config);
+    await keyValueRepository.setObject(RECEIPT_CONFIG_KEY, this.config);
   }
 
   async updateHeader(header: Partial<ReceiptConfig['header']>): Promise<void> {
     this.config.header = { ...this.config.header, ...header };
-    await storage.setObject(RECEIPT_CONFIG_KEY, this.config);
+    await keyValueRepository.setObject(RECEIPT_CONFIG_KEY, this.config);
   }
 
   async updateFooter(footer: Partial<ReceiptConfig['footer']>): Promise<void> {
     this.config.footer = { ...this.config.footer, ...footer };
-    await storage.setObject(RECEIPT_CONFIG_KEY, this.config);
+    await keyValueRepository.setObject(RECEIPT_CONFIG_KEY, this.config);
   }
 
   async updateOptions(options: Partial<ReceiptConfig['options']>): Promise<void> {
     this.config.options = { ...this.config.options, ...options };
-    await storage.setObject(RECEIPT_CONFIG_KEY, this.config);
+    await keyValueRepository.setObject(RECEIPT_CONFIG_KEY, this.config);
   }
 
   async setPrinterModel(modelType: keyof typeof PRINTER_PRESETS): Promise<void> {
@@ -218,7 +218,7 @@ export class ReceiptConfigService {
         this.config.printerModel.characterWidth = Math.floor(this.config.printerModel.characterWidth * 0.67);
       }
 
-      await storage.setObject(RECEIPT_CONFIG_KEY, this.config);
+      await keyValueRepository.setObject(RECEIPT_CONFIG_KEY, this.config);
     }
   }
 

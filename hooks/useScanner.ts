@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { storage } from '../services/storage/storage';
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 import { ScannerServiceFactory, ScannerType as ScannerTypeEnum } from '../services/scanner/scannerServiceFactory';
 import { ScannerServiceInterface } from '../services/scanner/ScannerServiceInterface';
 import { LoggerFactory } from '../services/logger';
@@ -30,7 +30,7 @@ export const useScanner = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const settings = await storage.getObject<ScannerSettings>('scannerSettings');
+        const settings = await keyValueRepository.getObject<ScannerSettings>('scannerSettings');
         if (settings) {
           setScannerSettings(settings);
         }
@@ -56,7 +56,7 @@ export const useScanner = () => {
   // Save scanner settings to storage
   const saveSettings = async (settings: ScannerSettings) => {
     try {
-      await storage.setItem('scannerSettings', settings);
+      await keyValueRepository.setItem('scannerSettings', settings);
       setScannerSettings(settings);
       return true;
     } catch (error) {

@@ -1,5 +1,4 @@
-import { sqliteStorage } from '../services/storage/SQLiteStorageService';
-import { type SQLiteDatabase } from 'expo-sqlite';
+import { db } from '../utils/db';
 import { generateUUID } from '../utils/uuid';
 
 export interface Order {
@@ -14,16 +13,10 @@ export interface Order {
 }
 
 export class OrderRepository {
-  private db: SQLiteDatabase;
-
-  constructor() {
-    this.db = sqliteStorage.getDatabase();
-  }
-
   async create(order: Omit<Order, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
     const now = Date.now();
     const id = generateUUID();
-    const result = await this.db.runAsync(
+    const result = await db.runAsync(
       'INSERT INTO orders (id, customer_id, date, total, payment_method, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
       [id, order.customer_id, order.date, order.total, order.payment_method, order.status, now, now]
     );
@@ -31,11 +24,11 @@ export class OrderRepository {
   }
 
   async findById(id: string): Promise<Order | null> {
-    return await this.db.getFirstAsync<Order>('SELECT * FROM orders WHERE id = ?', [id]);
+    return await db.getFirstAsync<Order>('SELECT * FROM orders WHERE id = ?', [id]);
   }
 
   async findAll(): Promise<Order[]> {
-    return await this.db.getAllAsync<Order>('SELECT * FROM orders ORDER BY date DESC');
+    return await db.getAllAsync<Order>('SELECT * FROM orders ORDER BY date DESC');
   }
 
   async update(id: string, data: Partial<Order>): Promise<void> {
@@ -44,10 +37,10 @@ export class OrderRepository {
     const values = fields.map(key => data[key as keyof typeof data]);
     const statement = `UPDATE orders SET ${fields.map(field => `${field} = ?`).join(', ')}, updated_at = ? WHERE id = ?`;
 
-    await this.db.runAsync(statement, [...values, now, id]);
+    await db.runAsync(statement, [...values, now, id]);
   }
 
   async delete(id: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM orders WHERE id = ?', [id]);
+    await db.runAsync('DELETE FROM orders WHERE id = ?', [id]);
   }
 }

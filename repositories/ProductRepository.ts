@@ -1,5 +1,4 @@
-import { sqliteStorage } from '../services/storage/SQLiteStorageService';
-import { type SQLiteDatabase } from 'expo-sqlite';
+import { db } from '../utils/db';
 import { generateUUID } from '../utils/uuid';
 
 export interface Product {
@@ -16,16 +15,10 @@ export interface Product {
 }
 
 export class ProductRepository {
-  private db: SQLiteDatabase;
-
-  constructor() {
-    this.db = sqliteStorage.getDatabase();
-  }
-
   async create(product: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
     const now = Date.now();
     const id = generateUUID();
-    const result = await this.db.runAsync(
+    const result = await db.runAsync(
       'INSERT INTO products (id, name, description, price, sku, barcode, category_id, stock, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       [id, product.name, product.description, product.price, product.sku, product.barcode, product.category_id, product.stock, now, now]
     );
@@ -33,11 +26,11 @@ export class ProductRepository {
   }
 
   async findById(id: string): Promise<Product | null> {
-    return await this.db.getFirstAsync<Product>('SELECT * FROM products WHERE id = ?', [id]);
+    return await db.getFirstAsync<Product>('SELECT * FROM products WHERE id = ?', [id]);
   }
 
   async findAll(): Promise<Product[]> {
-    return await this.db.getAllAsync<Product>('SELECT * FROM products');
+    return await db.getAllAsync<Product>('SELECT * FROM products');
   }
 
   async update(id: string, data: Partial<Product>): Promise<void> {
@@ -46,10 +39,10 @@ export class ProductRepository {
     const values = fields.map(key => data[key as keyof typeof data]);
     const statement = `UPDATE products SET ${fields.map(field => `${field} = ?`).join(', ')}, updated_at = ? WHERE id = ?`;
 
-    await this.db.runAsync(statement, [...values, now, id]);
+    await db.runAsync(statement, [...values, now, id]);
   }
 
   async delete(id: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM products WHERE id = ?', [id]);
+    await db.runAsync('DELETE FROM products WHERE id = ?', [id]);
   }
 }

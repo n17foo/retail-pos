@@ -1,4 +1,4 @@
-import { storage } from '../storage/storage';
+import { keyValueRepository } from '../../repositories/KeyValueRepository';
 import { LocalOrder } from '../basket/BasketServiceInterface';
 import { receiptConfigService, ReceiptConfig } from './ReceiptConfigService';
 import { addMoney, multiplyMoney, roundMoney, subtractMoney, sumMoney } from '../../utils/money';
@@ -50,7 +50,7 @@ export class DailyReportService {
 
   async initialize(): Promise<void> {
     try {
-      const savedShift = await storage.getObject<ShiftData>(CURRENT_SHIFT_KEY);
+      const savedShift = await keyValueRepository.getObject<ShiftData>(CURRENT_SHIFT_KEY);
       if (savedShift && savedShift.status === 'open') {
         this.currentShift = {
           ...savedShift,
@@ -84,7 +84,7 @@ export class DailyReportService {
     };
 
     this.currentShift = shift;
-    await storage.setObject(CURRENT_SHIFT_KEY, shift);
+    await keyValueRepository.setObject(CURRENT_SHIFT_KEY, shift);
     return shift;
   }
 
@@ -98,13 +98,13 @@ export class DailyReportService {
     this.currentShift.status = 'closed';
 
     // Save to history
-    const history = (await storage.getObject<ShiftData[]>(SHIFT_HISTORY_KEY)) || [];
+    const history = (await keyValueRepository.getObject<ShiftData[]>(SHIFT_HISTORY_KEY)) || [];
     history.push(this.currentShift);
-    await storage.setObject(SHIFT_HISTORY_KEY, history);
+    await keyValueRepository.setObject(SHIFT_HISTORY_KEY, history);
 
     // Clear current shift
     const closedShift = { ...this.currentShift };
-    await storage.removeItem(CURRENT_SHIFT_KEY);
+    await keyValueRepository.removeItem(CURRENT_SHIFT_KEY);
     this.currentShift = null;
 
     return closedShift;
@@ -353,7 +353,7 @@ export class DailyReportService {
 
   async getShiftHistory(limit: number = 30): Promise<ShiftData[]> {
     try {
-      const history = (await storage.getObject<ShiftData[]>(SHIFT_HISTORY_KEY)) || [];
+      const history = (await keyValueRepository.getObject<ShiftData[]>(SHIFT_HISTORY_KEY)) || [];
       return history
         .map(s => ({
           ...s,

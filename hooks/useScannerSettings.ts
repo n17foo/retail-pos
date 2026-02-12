@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { storage } from '../services/storage/storage';
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 import { LoggerFactory } from '../services/logger';
 
 export interface ScannerSettings {
@@ -27,7 +27,7 @@ export const useScannerSettings = () => {
   const loadSettings = useCallback(async () => {
     try {
       setIsLoading(true);
-      const savedSettings = await storage.getObject<ScannerSettings>(SCANNER_SETTINGS_KEY);
+      const savedSettings = await keyValueRepository.getObject<ScannerSettings>(SCANNER_SETTINGS_KEY);
       if (savedSettings) {
         setScannerSettings({ ...DEFAULT_SCANNER_SETTINGS, ...savedSettings });
       }
@@ -46,7 +46,7 @@ export const useScannerSettings = () => {
   const saveSettings = useCallback(async (settings: ScannerSettings) => {
     try {
       setSaveStatus('saving');
-      await storage.setItem(SCANNER_SETTINGS_KEY, settings);
+      await keyValueRepository.setItem(SCANNER_SETTINGS_KEY, settings);
       setScannerSettings(settings);
       setSaveStatus('saved');
       logger.info('Scanner settings saved successfully');

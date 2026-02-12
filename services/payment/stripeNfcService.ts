@@ -1,6 +1,6 @@
 import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from './paymentServiceInterface';
 import { Platform } from 'react-native';
-import { storage } from '../storage/storage';
+import { keyValueRepository } from '../../repositories/KeyValueRepository';
 import { StripeTerminalBridgeManager } from '../../contexts/StripeTerminalBridge';
 
 /**
@@ -88,7 +88,7 @@ export class StripeNfcService implements PaymentServiceInterface {
       console.log('Testing Stripe NFC terminal connection...');
 
       // First check if Stripe NFC is enabled in settings
-      const enableNfc = (await storage.getItem('stripe_nfc_enableNfc')) === 'true';
+      const enableNfc = (await keyValueRepository.getItem('stripe_nfc_enableNfc')) === 'true';
       if (!enableNfc) {
         return {
           success: false,
@@ -114,7 +114,7 @@ export class StripeNfcService implements PaymentServiceInterface {
       }
 
       // Get settings
-      const useSimulatedReader = (await storage.getItem('stripe_nfc_useSimulatedReader')) === 'true';
+      const useSimulatedReader = (await keyValueRepository.getItem('stripe_nfc_useSimulatedReader')) === 'true';
       const discoveryMethod = useSimulatedReader ? 'simulated' : 'bluetooth';
 
       // Try to discover readers
@@ -193,7 +193,7 @@ export class StripeNfcService implements PaymentServiceInterface {
       console.log('Processing payment via Stripe NFC:', request);
 
       // Check if Stripe NFC is enabled
-      const enableNfc = (await storage.getItem('stripe_nfc_enableNfc')) === 'true';
+      const enableNfc = (await keyValueRepository.getItem('stripe_nfc_enableNfc')) === 'true';
       if (!enableNfc) {
         throw new Error('Stripe NFC is not enabled in settings');
       }
@@ -225,7 +225,7 @@ export class StripeNfcService implements PaymentServiceInterface {
           }
 
           // Get settings
-          const useSimulatedReader = (await storage.getItem('stripe_nfc_useSimulatedReader')) === 'true';
+          const useSimulatedReader = (await keyValueRepository.getItem('stripe_nfc_useSimulatedReader')) === 'true';
           const discoveryMethod = useSimulatedReader ? 'simulated' : 'bluetooth';
 
           // Try to discover readers
@@ -428,7 +428,7 @@ export class StripeNfcService implements PaymentServiceInterface {
     try {
       console.log(`Checking status of transaction: ${transactionId}`);
 
-      const apiKey = await storage.getItem('stripe_nfc_apiKey');
+      const apiKey = await keyValueRepository.getItem('stripe_nfc_apiKey');
 
       if (!apiKey) {
         throw new Error('Stripe API key not configured');
@@ -439,7 +439,7 @@ export class StripeNfcService implements PaymentServiceInterface {
       if (bridgeManager.bridge && bridgeManager.isTerminalInitialized()) {
         try {
           // Try to use bridge to get status if available
-          const backendUrl = await storage.getItem('stripe_nfc_backendUrl');
+          const backendUrl = await keyValueRepository.getItem('stripe_nfc_backendUrl');
           if (backendUrl) {
             const response = await fetch(`${backendUrl}/stripe/payment_intent/${transactionId}`, {
               method: 'GET',
@@ -518,8 +518,8 @@ export class StripeNfcService implements PaymentServiceInterface {
       }
 
       // If bridge doesn't work or payment is already processed, try API cancellation
-      const apiKey = await storage.getItem('stripe_nfc_apiKey');
-      const backendUrl = await storage.getItem('stripe_nfc_backendUrl');
+      const apiKey = await keyValueRepository.getItem('stripe_nfc_apiKey');
+      const backendUrl = await keyValueRepository.getItem('stripe_nfc_backendUrl');
 
       if (!apiKey) {
         throw new Error('Stripe API key not configured');
@@ -625,8 +625,8 @@ export class StripeNfcService implements PaymentServiceInterface {
       }
 
       // If bridge doesn't work, try API refund
-      const apiKey = await storage.getItem('stripe_nfc_apiKey');
-      const backendUrl = await storage.getItem('stripe_nfc_backendUrl');
+      const apiKey = await keyValueRepository.getItem('stripe_nfc_apiKey');
+      const backendUrl = await keyValueRepository.getItem('stripe_nfc_backendUrl');
 
       if (!apiKey) {
         throw new Error('Stripe API key not configured');

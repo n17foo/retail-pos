@@ -1,6 +1,6 @@
 import { InventoryServiceInterface, InventoryResult, InventoryUpdate, InventoryUpdateResult } from '../InventoryServiceInterface';
 import { LoggerFactory } from '../../logger';
-import { sqliteStorage } from '../../storage/SQLiteStorageService';
+import { keyValueRepository } from '../../../repositories/KeyValueRepository';
 
 const INVENTORY_STORAGE_KEY = 'offline_local_inventory';
 
@@ -20,7 +20,7 @@ export class OfflineInventoryService implements InventoryServiceInterface {
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedInventory = await sqliteStorage.getItem(INVENTORY_STORAGE_KEY);
+      const storedInventory = await keyValueRepository.getItem(INVENTORY_STORAGE_KEY);
       if (storedInventory) {
         const parsed = JSON.parse(storedInventory);
         this.inventory = new Map(
@@ -177,7 +177,7 @@ export class OfflineInventoryService implements InventoryServiceInterface {
    */
   async clearLocalInventory(): Promise<void> {
     this.inventory.clear();
-    await sqliteStorage.removeItem(INVENTORY_STORAGE_KEY);
+    await keyValueRepository.removeItem(INVENTORY_STORAGE_KEY);
     this.logger.info('Cleared all local inventory');
   }
 
@@ -213,7 +213,7 @@ export class OfflineInventoryService implements InventoryServiceInterface {
    */
   private async saveInventoryToStorage(): Promise<void> {
     const obj = Object.fromEntries(this.inventory);
-    await sqliteStorage.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(obj));
+    await keyValueRepository.setItem(INVENTORY_STORAGE_KEY, JSON.stringify(obj));
   }
 }
 

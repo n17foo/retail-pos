@@ -1,6 +1,6 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
-import { storage } from '../services/storage/storage';
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 import { LoggerFactory } from '../services/logger';
 import { ECommercePlatform, DEFAULT_PLATFORM } from '../utils/platforms';
 import { ServiceConfigBridge } from '../services/config/ServiceConfigBridge';
@@ -149,14 +149,14 @@ export const useEcommerceSettings = () => {
     try {
       setIsLoading(true);
       logger.info({ message: 'Loading e-commerce settings' });
-      const settings = await storage.getObject<ECommerceSettings>('ecommerceSettings');
+      const settings = await keyValueRepository.getObject<ECommerceSettings>('ecommerceSettings');
       if (settings) {
         setEcommerceSettings(settings);
         originalSettings.current = { ...settings };
         logger.info({ message: 'E-commerce settings loaded successfully' });
 
         // Also load currentPlatform from storage to match useEcommerceConfig behavior
-        const storedPlatform = await storage.getItem('ecommercePlatform');
+        const storedPlatform = await keyValueRepository.getItem('ecommercePlatform');
         if (storedPlatform) {
           setCurrentPlatform(storedPlatform as ECommercePlatform);
           setIsInitialized(true);
@@ -209,7 +209,7 @@ export const useEcommerceSettings = () => {
       logger.info({ message: 'Testing e-commerce connection', platform: ecommerceSettings.platform });
 
       // First save the current settings so they're available to the bridge
-      await storage.setObject<ECommerceSettings>('ecommerceSettings', ecommerceSettings);
+      await keyValueRepository.setObject<ECommerceSettings>('ecommerceSettings', ecommerceSettings);
 
       // Configure services from storage
       const configBridge = ServiceConfigBridge.getInstance();
@@ -240,13 +240,13 @@ export const useEcommerceSettings = () => {
   const saveSettings = useCallback(async () => {
     try {
       logger.info({ message: 'Saving e-commerce settings' });
-      await storage.setObject<ECommerceSettings>('ecommerceSettings', ecommerceSettings);
+      await keyValueRepository.setObject<ECommerceSettings>('ecommerceSettings', ecommerceSettings);
       setHasUnsavedChanges(false);
 
       // Update platform state when saving settings
       if (ecommerceSettings.enabled && ecommerceSettings.platform) {
         // Store platform selection
-        await storage.setItem('ecommercePlatform', ecommerceSettings.platform);
+        await keyValueRepository.setItem('ecommercePlatform', ecommerceSettings.platform);
         setCurrentPlatform(ecommerceSettings.platform as ECommercePlatform);
         setIsInitialized(true);
         logger.info({ message: 'E-commerce platform updated', platform: ecommerceSettings.platform });
@@ -261,7 +261,7 @@ export const useEcommerceSettings = () => {
         }
       } else {
         // If disabled, clear platform and reset config bridge
-        await storage.removeItem('ecommercePlatform');
+        await keyValueRepository.removeItem('ecommercePlatform');
         setCurrentPlatform(null);
         setIsInitialized(false);
         ServiceConfigBridge.getInstance().reset();

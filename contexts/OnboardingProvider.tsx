@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useMemo, ReactNode, useEffect } from 'react';
-import { storage } from '../services/storage/storage';
+import { keyValueRepository } from '../repositories/KeyValueRepository';
 
 const ONBOARDING_STATUS_KEY = 'onboarding_status';
 
@@ -17,7 +17,7 @@ export const OnboardingProvider = ({ children }: Readonly<{ children: ReactNode 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       try {
-        const status = await storage.getItem(ONBOARDING_STATUS_KEY);
+        const status = await keyValueRepository.getItem(ONBOARDING_STATUS_KEY);
         if (status === 'completed') {
           setIsOnboardedState(true);
         }
@@ -33,7 +33,7 @@ export const OnboardingProvider = ({ children }: Readonly<{ children: ReactNode 
 
   const setIsOnboarded = async (status: boolean) => {
     try {
-      await storage.setItem(ONBOARDING_STATUS_KEY, status ? 'completed' : 'pending');
+      await keyValueRepository.setItem(ONBOARDING_STATUS_KEY, status ? 'completed' : 'pending');
       setIsOnboardedState(status);
     } catch (error) {
       console.error('Failed to save onboarding status', error);

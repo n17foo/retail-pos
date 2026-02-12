@@ -1,7 +1,7 @@
 import { PlatformRefundServiceInterface } from './platformRefundServiceInterface';
 import { RefundData, RefundResult, RefundRecord } from '../refundServiceInterface';
 import { LoggerFactory } from '../../logger';
-import { sqliteStorage } from '../../storage/SQLiteStorageService';
+import { keyValueRepository } from '../../../repositories/KeyValueRepository';
 
 const REFUNDS_STORAGE_KEY = 'offline_local_refunds';
 
@@ -20,7 +20,7 @@ export class OfflineRefundService implements PlatformRefundServiceInterface {
    */
   async initialize(): Promise<boolean> {
     try {
-      const storedRefunds = await sqliteStorage.getItem(REFUNDS_STORAGE_KEY);
+      const storedRefunds = await keyValueRepository.getItem(REFUNDS_STORAGE_KEY);
       if (storedRefunds) {
         const parsed = JSON.parse(storedRefunds);
         this.refundHistory = new Map(Object.entries(parsed));
@@ -142,7 +142,7 @@ export class OfflineRefundService implements PlatformRefundServiceInterface {
    */
   private async saveToStorage(): Promise<void> {
     const obj = Object.fromEntries(this.refundHistory);
-    await sqliteStorage.setItem(REFUNDS_STORAGE_KEY, JSON.stringify(obj));
+    await keyValueRepository.setItem(REFUNDS_STORAGE_KEY, JSON.stringify(obj));
   }
 
   /**
@@ -150,7 +150,7 @@ export class OfflineRefundService implements PlatformRefundServiceInterface {
    */
   async clearLocalRefunds(): Promise<void> {
     this.refundHistory.clear();
-    await sqliteStorage.removeItem(REFUNDS_STORAGE_KEY);
+    await keyValueRepository.removeItem(REFUNDS_STORAGE_KEY);
     this.logger.info('Cleared all local refunds');
   }
 }

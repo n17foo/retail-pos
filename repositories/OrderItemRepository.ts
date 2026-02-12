@@ -1,5 +1,4 @@
-import { sqliteStorage } from '../services/storage/SQLiteStorageService';
-import { type SQLiteDatabase } from 'expo-sqlite';
+import { db } from '../utils/db';
 import { generateUUID } from '../utils/uuid';
 
 export interface OrderItem {
@@ -11,15 +10,9 @@ export interface OrderItem {
 }
 
 export class OrderItemRepository {
-  private db: SQLiteDatabase;
-
-  constructor() {
-    this.db = sqliteStorage.getDatabase();
-  }
-
   async create(item: Omit<OrderItem, 'id'>): Promise<string> {
     const id = generateUUID();
-    const result = await this.db.runAsync('INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES (?, ?, ?, ?, ?)', [
+    const result = await db.runAsync('INSERT INTO order_items (id, order_id, product_id, quantity, price) VALUES (?, ?, ?, ?, ?)', [
       id,
       item.order_id,
       item.product_id,
@@ -30,7 +23,7 @@ export class OrderItemRepository {
   }
 
   async findByOrderId(orderId: string): Promise<OrderItem[]> {
-    return await this.db.getAllAsync<OrderItem>('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
+    return await db.getAllAsync<OrderItem>('SELECT * FROM order_items WHERE order_id = ?', [orderId]);
   }
 
   async update(id: string, data: Partial<OrderItem>): Promise<void> {
@@ -38,14 +31,14 @@ export class OrderItemRepository {
     const values = fields.map(key => data[key as keyof typeof data]);
     const statement = `UPDATE order_items SET ${fields.map(field => `${field} = ?`).join(', ')} WHERE id = ?`;
 
-    await this.db.runAsync(statement, [...values, id]);
+    await db.runAsync(statement, [...values, id]);
   }
 
   async delete(id: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM order_items WHERE id = ?', [id]);
+    await db.runAsync('DELETE FROM order_items WHERE id = ?', [id]);
   }
 
   async deleteByOrderId(orderId: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM order_items WHERE order_id = ?', [orderId]);
+    await db.runAsync('DELETE FROM order_items WHERE order_id = ?', [orderId]);
   }
 }

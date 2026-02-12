@@ -1,4 +1,3 @@
-import { SQLiteStorageService } from '../storage/SQLiteStorageService';
 import { OrderServiceFactory } from '../order/orderServiceFactory';
 import { Order, OrderLineItem } from '../order/OrderServiceInterface';
 import { LoggerFactory } from '../logger';
@@ -14,70 +13,24 @@ import {
 } from './BasketServiceInterface';
 import { multiplyMoney, sumMoney, calculateTax, calculateLineTotal, roundMoney } from '../../utils/money';
 import { generateUUID } from '../../utils/uuid';
+import { basketRepository, BasketRow, LocalOrderRow } from '../../repositories/BasketRepository';
 
 /**
  * Default tax rate (8%)
  */
 const DEFAULT_TAX_RATE = 0.08;
 
-/** Shared DB row shape for baskets table */
-interface BasketRow {
-  id: string;
-  items: string;
-  subtotal: number;
-  tax: number;
-  total: number;
-  discount_amount: number | null;
-  discount_code: string | null;
-  customer_email: string | null;
-  customer_name: string | null;
-  note: string | null;
-  created_at: number;
-  updated_at: number;
-}
-
-/** Shared DB row shape for local_orders table */
-interface LocalOrderRow {
-  id: string;
-  platform_order_id: string | null;
-  platform: string | null;
-  items: string;
-  subtotal: number;
-  tax: number;
-  total: number;
-  discount_amount: number | null;
-  discount_code: string | null;
-  customer_email: string | null;
-  customer_name: string | null;
-  note: string | null;
-  payment_method: string | null;
-  payment_transaction_id: string | null;
-  cashier_id: string | null;
-  cashier_name: string | null;
-  status: string;
-  sync_status: string;
-  sync_error: string | null;
-  created_at: number;
-  updated_at: number;
-  paid_at: number | null;
-  synced_at: number | null;
-}
-
 /**
  * Basket service implementation
  * Manages basket state locally and syncs orders to platform
  */
 export class BasketService implements BasketServiceInterface {
-  private db: ReturnType<SQLiteStorageService['getDatabase']>;
   private logger = LoggerFactory.getInstance().createLogger('BasketService');
   private currentBasketId: string | null = null;
   private orderServiceFactory: OrderServiceFactory;
 
   async initialize(): Promise<void> {
     this.logger.info('Initializing basket service...');
-
-    // Wait for database to be fully initialized
-    this.db = SQLiteStorageService.getInstance().getDatabase();
 
     // Ensure we have a current basket
     await this.getOrCreateBasket();
@@ -97,10 +50,7 @@ export class BasketService implements BasketServiceInterface {
   private async getOrCreateBasket(): Promise<Basket> {
     try {
       // Try to get existing active basket
-      const existingBasket = await this.db.getFirstAsync<BasketRow>(
-        'SELECT * FROM baskets WHERE status = ? ORDER BY created_at DESC LIMIT 1',
-        ['active']
-      );
+      const existingBasket = await basketRepository.findActiveBasket();
 
       if (existingBasket) {
         this.currentBasketId = existingBasket.id;
@@ -109,16 +59,18 @@ export class BasketService implements BasketServiceInterface {
 
       // Create new basket
       const newBasketId = this.generateId();
-      const now = Date.now();
 
-      await this.db.runAsync(
-        `INSERT INTO baskets (id, items, subtotal, tax, total, status, created_at, updated_at) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [newBasketId, '[]', 0, 0, 0, 'active', now, now]
-      );
+      await basketRepository.createBasket({
+        id: newBasketId,
+        items: '[]',
+        subtotal: 0,
+        tax: 0,
+        total: 0,
+      });
 
       this.currentBasketId = newBasketId;
 
+      const now = Date.now();
       return {
         id: newBasketId,
         items: [],
@@ -174,28 +126,17 @@ export class BasketService implements BasketServiceInterface {
    * Update basket in database
    */
   private async updateBasketInDb(basket: Basket): Promise<void> {
-    const now = Date.now();
-    await this.db.runAsync(
-      `UPDATE baskets SET 
-        items = ?, subtotal = ?, tax = ?, total = ?, 
-        discount_amount = ?, discount_code = ?,
-        customer_email = ?, customer_name = ?, note = ?,
-        updated_at = ?
-       WHERE id = ?`,
-      [
-        JSON.stringify(basket.items),
-        basket.subtotal,
-        basket.tax,
-        basket.total,
-        basket.discountAmount ?? null,
-        basket.discountCode ?? null,
-        basket.customerEmail ?? null,
-        basket.customerName ?? null,
-        basket.note ?? null,
-        now,
-        basket.id,
-      ]
-    );
+    await basketRepository.updateBasket(basket.id, {
+      items: JSON.stringify(basket.items),
+      subtotal: basket.subtotal,
+      tax: basket.tax,
+      total: basket.total,
+      discountAmount: basket.discountAmount ?? null,
+      discountCode: basket.discountCode ?? null,
+      customerEmail: basket.customerEmail ?? null,
+      customerName: basket.customerName ?? null,
+      note: basket.note ?? null,
+    });
   }
 
   // ============ Basket Operations ============
@@ -265,13 +206,7 @@ export class BasketService implements BasketServiceInterface {
   async clearBasket(): Promise<void> {
     if (!this.currentBasketId) return;
 
-    const now = Date.now();
-    await this.db.runAsync(
-      `UPDATE baskets SET items = ?, subtotal = ?, tax = ?, total = ?, 
-       discount_amount = NULL, discount_code = NULL, updated_at = ?
-       WHERE id = ?`,
-      ['[]', 0, 0, 0, now, this.currentBasketId]
-    );
+    await basketRepository.clearBasket(this.currentBasketId);
   }
 
   async applyDiscount(code: string): Promise<Basket> {
@@ -358,42 +293,28 @@ export class BasketService implements BasketServiceInterface {
     };
 
     // Save to local orders table
-    await this.db.runAsync(
-      `INSERT INTO local_orders (
-        id, platform, items, subtotal, tax, total,
-        discount_amount, discount_code, customer_email, customer_name, note,
-        cashier_id, cashier_name,
-        status, sync_status, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        orderId,
-        platform ?? null,
-        JSON.stringify(basket.items),
-        basket.subtotal,
-        basket.tax,
-        basket.total,
-        basket.discountAmount ?? null,
-        basket.discountCode ?? null,
-        basket.customerEmail ?? null,
-        basket.customerName ?? null,
-        basket.note ?? null,
-        cashierId ?? null,
-        cashierName ?? null,
-        'pending',
-        'pending',
-        now,
-        now,
-      ]
-    );
+    await basketRepository.createLocalOrder({
+      id: orderId,
+      platform: platform ?? null,
+      items: JSON.stringify(basket.items),
+      subtotal: basket.subtotal,
+      tax: basket.tax,
+      total: basket.total,
+      discountAmount: basket.discountAmount ?? null,
+      discountCode: basket.discountCode ?? null,
+      customerEmail: basket.customerEmail ?? null,
+      customerName: basket.customerName ?? null,
+      note: basket.note ?? null,
+      cashierId: cashierId ?? null,
+      cashierName: cashierName ?? null,
+    });
 
     this.logger.info(`Created local order ${orderId} from basket`);
     return localOrder;
   }
 
   async markPaymentProcessing(orderId: string): Promise<LocalOrder> {
-    const now = Date.now();
-
-    await this.db.runAsync(`UPDATE local_orders SET status = ?, updated_at = ? WHERE id = ?`, ['processing', now, orderId]);
+    await basketRepository.updateOrderStatus(orderId, 'processing');
 
     const order = await this.getLocalOrder(orderId);
     if (!order) {
@@ -404,17 +325,9 @@ export class BasketService implements BasketServiceInterface {
   }
 
   async completePayment(orderId: string, paymentMethod: string, transactionId?: string): Promise<CheckoutResult> {
-    const now = Date.now();
-
     try {
       // Update order status to paid
-      await this.db.runAsync(
-        `UPDATE local_orders SET 
-          status = ?, payment_method = ?, payment_transaction_id = ?,
-          paid_at = ?, updated_at = ?
-         WHERE id = ?`,
-        ['paid', paymentMethod, transactionId ?? null, now, now, orderId]
-      );
+      await basketRepository.updateOrderPayment(orderId, paymentMethod, transactionId ?? null);
 
       // Clear the basket
       await this.clearBasket();
@@ -433,7 +346,7 @@ export class BasketService implements BasketServiceInterface {
       this.logger.error({ message: `Failed to complete payment for order ${orderId}` }, error as Error);
 
       // Mark order as failed
-      await this.db.runAsync(`UPDATE local_orders SET status = ?, updated_at = ? WHERE id = ?`, ['failed', now, orderId]);
+      await basketRepository.updateOrderStatus(orderId, 'failed');
 
       return {
         success: false,
@@ -444,9 +357,7 @@ export class BasketService implements BasketServiceInterface {
   }
 
   async cancelOrder(orderId: string): Promise<void> {
-    const now = Date.now();
-
-    await this.db.runAsync(`UPDATE local_orders SET status = ?, updated_at = ? WHERE id = ?`, ['cancelled', now, orderId]);
+    await basketRepository.updateOrderStatus(orderId, 'cancelled');
 
     this.logger.info(`Order ${orderId} cancelled`);
   }
@@ -504,13 +415,7 @@ export class BasketService implements BasketServiceInterface {
       const createdOrder = await orderService.createOrder(platformOrder);
 
       // Update local order with platform ID
-      const now = Date.now();
-      await this.db.runAsync(
-        `UPDATE local_orders SET 
-          platform_order_id = ?, sync_status = ?, synced_at = ?, updated_at = ?
-         WHERE id = ?`,
-        [createdOrder.id ?? createdOrder.platformOrderId, 'synced', now, now, orderId]
-      );
+      await basketRepository.updateOrderSyncSuccess(orderId, createdOrder.id ?? createdOrder.platformOrderId);
 
       this.logger.info(`Order ${orderId} synced to platform as ${createdOrder.id}`);
 
@@ -528,13 +433,7 @@ export class BasketService implements BasketServiceInterface {
 
       if (isRetryableError) {
         // For retryable errors, mark as pending and let the queue system handle retries
-        const now = Date.now();
-        await this.db.runAsync(`UPDATE local_orders SET sync_status = ?, sync_error = ?, updated_at = ? WHERE id = ?`, [
-          'pending', // Keep as pending so it can be retried
-          errorMessage,
-          now,
-          orderId,
-        ]);
+        await basketRepository.updateOrderSyncError(orderId, 'pending', errorMessage);
 
         this.logger.info(`Order ${orderId} queued for retry due to: ${errorMessage}`);
 
@@ -545,13 +444,7 @@ export class BasketService implements BasketServiceInterface {
         };
       } else {
         // For non-retryable errors (like 4xx client errors), mark as failed
-        const now = Date.now();
-        await this.db.runAsync(`UPDATE local_orders SET sync_status = ?, sync_error = ?, updated_at = ? WHERE id = ?`, [
-          'failed',
-          errorMessage,
-          now,
-          orderId,
-        ]);
+        await basketRepository.updateOrderSyncError(orderId, 'failed', errorMessage);
 
         return {
           success: false,
@@ -590,35 +483,17 @@ export class BasketService implements BasketServiceInterface {
   }
 
   async getLocalOrders(status?: LocalOrderStatus): Promise<LocalOrder[]> {
-    let query = 'SELECT * FROM local_orders';
-    const params: (string | null)[] = [];
-
-    if (status) {
-      query += ' WHERE status = ?';
-      params.push(status);
-    }
-
-    query += ' ORDER BY created_at DESC';
-
-    const rows = await this.db.getAllAsync<LocalOrderRow>(query, params);
-
+    const rows = await basketRepository.findLocalOrders(status);
     return rows.map(row => this.mapDbRowToLocalOrder(row));
   }
 
   async getUnsyncedOrders(): Promise<LocalOrder[]> {
-    const rows = await this.db.getAllAsync<LocalOrderRow>(
-      `SELECT * FROM local_orders 
-       WHERE status = ? AND sync_status != ? 
-       ORDER BY created_at ASC`,
-      ['paid', 'synced']
-    );
-
+    const rows = await basketRepository.findUnsyncedOrders();
     return rows.map(row => this.mapDbRowToLocalOrder(row));
   }
 
   async getLocalOrder(orderId: string): Promise<LocalOrder | null> {
-    const row = await this.db.getFirstAsync<LocalOrderRow>('SELECT * FROM local_orders WHERE id = ?', [orderId]);
-
+    const row = await basketRepository.findLocalOrderById(orderId);
     if (!row) return null;
     return this.mapDbRowToLocalOrder(row);
   }

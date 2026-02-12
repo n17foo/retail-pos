@@ -1,5 +1,4 @@
-import { sqliteStorage } from '../services/storage/SQLiteStorageService';
-import { type SQLiteDatabase } from 'expo-sqlite';
+import { db } from '../utils/db';
 
 interface Setting {
   key: string;
@@ -8,14 +7,8 @@ interface Setting {
 }
 
 export class SettingsRepository {
-  private db: SQLiteDatabase;
-
-  constructor() {
-    this.db = sqliteStorage.getDatabase();
-  }
-
   async getSetting<T>(key: string): Promise<T | null> {
-    const result = await this.db.getFirstAsync<Setting>('SELECT * FROM settings WHERE key = ?', [key]);
+    const result = await db.getFirstAsync<Setting>('SELECT * FROM settings WHERE key = ?', [key]);
     if (!result) {
       return null;
     }
@@ -30,18 +23,18 @@ export class SettingsRepository {
   async setSetting<T>(key: string, value: T): Promise<void> {
     const now = Date.now();
     const jsonValue = JSON.stringify(value);
-    await this.db.runAsync(
+    await db.runAsync(
       'INSERT INTO settings (key, value, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at',
       [key, jsonValue, now]
     );
   }
 
   async deleteSetting(key: string): Promise<void> {
-    await this.db.runAsync('DELETE FROM settings WHERE key = ?', [key]);
+    await db.runAsync('DELETE FROM settings WHERE key = ?', [key]);
   }
 
   async getAllSettings(): Promise<{ [key: string]: any }> {
-    const results = await this.db.getAllAsync<Setting>('SELECT * FROM settings');
+    const results = await db.getAllAsync<Setting>('SELECT * FROM settings');
     const settings: { [key: string]: any } = {};
     for (const row of results) {
       try {
