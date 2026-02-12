@@ -26,7 +26,7 @@ This document covers the full technical setup of RetailPOS for developers, DevOp
 ## Project Structure
 
 ```
-retail-pos/
+retailpos/
 ├── App.tsx                     # Root component — providers, SafeAreaView
 ├── index.js                    # Expo entry point
 ├── app.json                    # Expo configuration

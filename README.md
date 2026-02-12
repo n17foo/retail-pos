@@ -4,6 +4,8 @@
 
 A modern, cross-platform Point of Sale (POS) system built with React Native and Expo. Supports multiple e-commerce platforms, offline operation, and hardware integration.
 
+Website: [retailpos.org](https://retailpos.org)
+
 ## 🚀 Features
 
 - **Multi-Platform Support**: Shopify, WooCommerce, BigCommerce, Magento, Wix, PrestaShop, Squarespace, Sylius
@@ -46,8 +48,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/n17foo/retail-pos.git
-   cd retail-pos
+   git clone https://github.com/n17foo/retailpos.git
+   cd retailpos
    ```
 
 2. **Install dependencies**
@@ -90,7 +92,7 @@ yarn test:coverage
 ## 📁 Project Structure
 
 ```
-retail-pos/
+retailpos/
 ├── components/        # Reusable UI components
 ├── contexts/          # React contexts for global state
 ├── hooks/            # Custom React hooks
@@ -186,8 +188,8 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/n17foo/retail-pos/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/n17foo/retail-pos/discussions)
+- **Issues**: [GitHub Issues](https://github.com/n17foo/retailpos/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/n17foo/retailpos/discussions)
 - **Documentation**: [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ---

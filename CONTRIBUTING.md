@@ -34,7 +34,7 @@ Before you begin, ensure you have the following installed:
 2. Clone your fork locally:
    ```bash
    git clone https://github.com/YOUR_USERNAME/retail-pos.git
-   cd retail-pos
+   cd retailpos
    ```
 3. Add the upstream remote:
    ```bash
@@ -65,7 +65,7 @@ Before you begin, ensure you have the following installed:
 ### Project Structure
 
 ```
-retail-pos/
+retailpos/
 ├── components/        # Reusable UI components
 ├── contexts/          # React contexts for state management
 ├── hooks/            # Custom React hooks
