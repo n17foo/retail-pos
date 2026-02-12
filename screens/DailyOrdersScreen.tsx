@@ -158,12 +158,7 @@ const DailyOrdersScreen: React.FC<DailyOrdersScreenProps> = ({ navigation }) => 
   );
 
   const renderOrderItem = ({ item: order }: { item: LocalOrder }) => (
-    <OrderCard
-      order={order}
-      isSyncing={syncingOrderId === order.id}
-      onResync={handleResyncOrder}
-      onPrintReceipt={handlePrintReceipt}
-    />
+    <OrderCard order={order} isSyncing={syncingOrderId === order.id} onResync={handleResyncOrder} onPrintReceipt={handlePrintReceipt} />
   );
 
   const renderEmpty = () => (
@@ -243,12 +238,7 @@ const DailyOrdersScreen: React.FC<DailyOrdersScreenProps> = ({ navigation }) => 
         onClose={() => setShowShiftModal(false)}
       />
 
-      <ReportModal
-        visible={showReportModal}
-        report={currentReport}
-        onPrint={handlePrintReport}
-        onClose={() => setShowReportModal(false)}
-      />
+      <ReportModal visible={showReportModal} report={currentReport} onPrint={handlePrintReport} onClose={() => setShowReportModal(false)} />
     </View>
   );
 };

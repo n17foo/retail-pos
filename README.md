@@ -48,23 +48,27 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed technical documentation.
 ## 🚀 Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/n17foo/retailpos.git
    cd retailpos
    ```
 
 2. **Install dependencies**
+
    ```bash
    yarn install
    ```
 
 3. **Setup environment**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 4. **Start development server**
+
    ```bash
    yarn ios        # iOS simulator
    yarn android    # Android emulator

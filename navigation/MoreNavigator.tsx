@@ -5,6 +5,8 @@ import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import type { MoreStackParamList, MoreStackScreenProps } from './types';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../utils/theme';
+import { canAccessMoreMenuItem } from '../utils/roleAccess';
+import type { UserRole } from '../repositories/UserRepository';
 
 const SettingsScreen = lazy(() => import('../screens/SettingsScreen'));
 const RefundScreen = lazy(() => import('../screens/RefundScreen'));
@@ -22,53 +24,65 @@ const LazyFallback = () => (
 const Stack = createNativeStackNavigator<MoreStackParamList>();
 
 interface MoreMenuScreenProps {
+  userRole?: UserRole;
   onLogout: () => void;
 }
 
 /**
  * More Menu Screen - Shows list of additional options
  */
-const MoreMenuScreen: React.FC<MoreMenuScreenProps> = ({ onLogout }) => {
+const MoreMenuScreen: React.FC<MoreMenuScreenProps> = ({ userRole, onLogout }) => {
   const navigation = useNavigation<MoreStackScreenProps<'MoreMenu'>['navigation']>();
 
-  const menuItems = [
+  const allMenuItems = [
     {
+      key: 'DailyOrders' as const,
       icon: 'receipt-long' as const,
       label: 'Daily Orders',
       onPress: () => navigation.navigate('DailyOrders'),
       color: lightColors.info,
     },
     {
+      key: 'Settings' as const,
       icon: 'settings' as const,
       label: 'Settings',
       onPress: () => navigation.navigate('Settings'),
       color: lightColors.primary,
     },
     {
+      key: 'Users' as const,
       icon: 'people' as const,
       label: 'User Management',
       onPress: () => navigation.navigate('Users'),
       color: lightColors.secondary,
     },
     {
+      key: 'Refund' as const,
       icon: 'receipt-long' as const,
       label: 'Refunds',
       onPress: () => navigation.navigate('Refund'),
       color: lightColors.warning,
     },
     {
+      key: 'Printer' as const,
       icon: 'print' as const,
       label: 'Printer',
       onPress: () => navigation.navigate('Printer'),
       color: lightColors.info,
     },
     {
+      key: 'PaymentTerminal' as const,
       icon: 'payment' as const,
       label: 'Payment Terminal',
       onPress: () => navigation.navigate('PaymentTerminal', {}),
       color: lightColors.success,
     },
+  ];
+
+  const menuItems = [
+    ...allMenuItems.filter(item => canAccessMoreMenuItem(userRole, item.key)),
     {
+      key: 'Logout' as const,
       icon: 'logout' as const,
       label: 'Logout',
       onPress: onLogout,
@@ -95,6 +109,7 @@ const MoreMenuScreen: React.FC<MoreMenuScreenProps> = ({ onLogout }) => {
 };
 
 interface MoreNavigatorProps {
+  userRole?: UserRole;
   onLogout: () => void;
 }
 
@@ -102,7 +117,7 @@ interface MoreNavigatorProps {
  * More Stack Navigator
  * Contains Daily Orders, Settings, Refund, Printer, and PaymentTerminal screens
  */
-export const MoreNavigator: React.FC<MoreNavigatorProps> = ({ onLogout }) => {
+export const MoreNavigator: React.FC<MoreNavigatorProps> = ({ userRole, onLogout }) => {
   return (
     <Stack.Navigator
       id="MoreStack"
@@ -114,7 +129,7 @@ export const MoreNavigator: React.FC<MoreNavigatorProps> = ({ onLogout }) => {
       }}
     >
       <Stack.Screen name="MoreMenu" options={{ headerShown: false }}>
-        {props => <MoreMenuScreen {...props} onLogout={onLogout} />}
+        {props => <MoreMenuScreen {...props} userRole={userRole} onLogout={onLogout} />}
       </Stack.Screen>
       <Stack.Screen name="DailyOrders" options={{ title: 'Daily Orders' }}>
         {props => (

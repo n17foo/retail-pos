@@ -62,9 +62,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ onGoBack, onSelectProduct }
     searchProducts(historyItem, filterOptions);
   };
 
-  const renderProductItem = ({ item }: { item: SearchProduct }) => (
-    <ProductResultItem product={item} onSelect={handleSelectProduct} />
-  );
+  const renderProductItem = ({ item }: { item: SearchProduct }) => <ProductResultItem product={item} onSelect={handleSelectProduct} />;
 
   const renderContent = () => {
     if (isLoading) {

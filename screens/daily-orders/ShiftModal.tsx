@@ -12,24 +12,14 @@ interface ShiftModalProps {
   onClose: () => void;
 }
 
-const ShiftModal: React.FC<ShiftModalProps> = ({
-  visible,
-  mode,
-  cashAmount,
-  isProcessing,
-  onCashAmountChange,
-  onSubmit,
-  onClose,
-}) => {
+const ShiftModal: React.FC<ShiftModalProps> = ({ visible, mode, cashAmount, isProcessing, onCashAmountChange, onSubmit, onClose }) => {
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>{mode === 'open' ? 'Open Shift' : 'Close Shift'}</Text>
           <Text style={styles.modalDescription}>
-            {mode === 'open'
-              ? 'Enter the opening cash amount in the drawer.'
-              : 'Count and enter the closing cash amount in the drawer.'}
+            {mode === 'open' ? 'Enter the opening cash amount in the drawer.' : 'Count and enter the closing cash amount in the drawer.'}
           </Text>
 
           <Text style={styles.inputLabel}>Cash Amount ($)</Text>
@@ -51,9 +41,7 @@ const ShiftModal: React.FC<ShiftModalProps> = ({
               onPress={onSubmit}
               disabled={isProcessing}
             >
-              <Text style={styles.modalSubmitText}>
-                {isProcessing ? 'Processing...' : mode === 'open' ? 'Open Shift' : 'Close Shift'}
-              </Text>
+              <Text style={styles.modalSubmitText}>{isProcessing ? 'Processing...' : mode === 'open' ? 'Open Shift' : 'Close Shift'}</Text>
             </TouchableOpacity>
           </View>
         </View>

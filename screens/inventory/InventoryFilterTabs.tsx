@@ -21,14 +21,10 @@ const InventoryFilterTabs: React.FC<InventoryFilterTabsProps> = ({ filter, items
         <Text style={[styles.filterTabText, filter === 'all' && styles.activeFilterTabText]}>All ({items.length})</Text>
       </TouchableOpacity>
       <TouchableOpacity style={[styles.filterTab, filter === 'low' && styles.activeFilterTab]} onPress={() => onFilterChange('low')}>
-        <Text style={[styles.filterTabText, filter === 'low' && styles.activeFilterTabText]}>
-          Low Stock ({lowStockCount})
-        </Text>
+        <Text style={[styles.filterTabText, filter === 'low' && styles.activeFilterTabText]}>Low Stock ({lowStockCount})</Text>
       </TouchableOpacity>
       <TouchableOpacity style={[styles.filterTab, filter === 'out' && styles.activeFilterTab]} onPress={() => onFilterChange('out')}>
-        <Text style={[styles.filterTabText, filter === 'out' && styles.activeFilterTabText]}>
-          Out of Stock ({outOfStockCount})
-        </Text>
+        <Text style={[styles.filterTabText, filter === 'out' && styles.activeFilterTabText]}>Out of Stock ({outOfStockCount})</Text>
       </TouchableOpacity>
     </View>
   );

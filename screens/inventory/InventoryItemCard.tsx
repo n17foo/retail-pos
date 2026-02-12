@@ -79,12 +79,7 @@ const InventoryItemCard: React.FC<InventoryItemCardProps> = ({
             onPress={() => onSaveQuantity(item.productId, item.variantId)}
             loading={inventoryLoading}
           />
-          <Button
-            title="Cancel"
-            size="sm"
-            variant="ghost"
-            onPress={onCancelEdit}
-          />
+          <Button title="Cancel" size="sm" variant="ghost" onPress={onCancelEdit} />
         </View>
       ) : (
         <View style={styles.actionContainer}>

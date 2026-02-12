@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Open source documentation and contribution guidelines
 - Code of Conduct for community standards
 - Security policy for vulnerability reporting
@@ -15,11 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UUID utility for React Native compatibility
 
 ### Changed
+
 - Updated README to be developer-focused
 - Improved require cycle resolution in service architecture
 - Enhanced TypeScript compilation and linting
 
 ### Fixed
+
 - Crypto module compatibility issues for Expo/React Native
 - Double setState bug in ecommerce settings hook
 - Memory leaks in category and search hooks
@@ -28,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - 2024-01-XX
 
 ### Added
+
 - Complete rewrite with React Native and Expo
 - Multi-platform e-commerce support (Shopify, WooCommerce, BigCommerce, etc.)
 - Offline mode with local SQLite storage
@@ -39,11 +43,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Receipt printing and barcode scanning
 
 ### Changed
+
 - Migration from previous architecture to clean architecture pattern
 - Improved state management with Zustand
 - Enhanced error handling and logging
 
 ### Removed
+
 - Legacy platform-specific implementations
 
 ## [1.x.x] - Previous Versions

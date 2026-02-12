@@ -6,6 +6,8 @@ import OrderScreen from '../screens/OrderScreen';
 import { MoreNavigator } from './MoreNavigator';
 import type { MainTabParamList } from './types';
 import { lightColors, typography, spacing } from '../utils/theme';
+import { canAccessTab } from '../utils/roleAccess';
+import type { UserRole } from '../repositories/UserRepository';
 
 const BarcodeScannerScreen = lazy(() => import('../screens/BarcodeScannerScreen').then(m => ({ default: m.BarcodeScannerScreen })));
 const SearchScreen = lazy(() => import('../screens/SearchScreen'));
@@ -21,6 +23,7 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 
 interface MainTabNavigatorProps {
   username: string;
+  userRole?: UserRole;
   onLogout: () => void;
 }
 
@@ -28,7 +31,7 @@ interface MainTabNavigatorProps {
  * Main Tab Navigator
  * Bottom tab navigation for the main app after login
  */
-export const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ username, onLogout }) => {
+export const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ username, userRole, onLogout }) => {
   // Handler for barcode scan success
   const handleScanSuccess = (productId: string) => {
     // TODO: Add product to cart and navigate to Order tab
@@ -94,19 +97,21 @@ export const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ username, on
         )}
       </Tab.Screen>
 
-      <Tab.Screen
-        name="Inventory"
-        options={{
-          tabBarIcon: ({ color, size }) => <MaterialIcons name="inventory" size={size} color={color} />,
-          tabBarLabel: 'Inventory',
-        }}
-      >
-        {() => (
-          <Suspense fallback={<LazyFallback />}>
-            <InventoryScreen />
-          </Suspense>
-        )}
-      </Tab.Screen>
+      {canAccessTab(userRole, 'Inventory') && (
+        <Tab.Screen
+          name="Inventory"
+          options={{
+            tabBarIcon: ({ color, size }) => <MaterialIcons name="inventory" size={size} color={color} />,
+            tabBarLabel: 'Inventory',
+          }}
+        >
+          {() => (
+            <Suspense fallback={<LazyFallback />}>
+              <InventoryScreen />
+            </Suspense>
+          )}
+        </Tab.Screen>
+      )}
 
       <Tab.Screen
         name="More"
@@ -115,7 +120,7 @@ export const MainTabNavigator: React.FC<MainTabNavigatorProps> = ({ username, on
           tabBarLabel: 'More',
         }}
       >
-        {props => <MoreNavigator {...props} onLogout={onLogout} />}
+        {props => <MoreNavigator {...props} userRole={userRole} onLogout={onLogout} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
