@@ -214,7 +214,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - ✅ UI integrations: Customer search modal, notification system, error boundary
 - ✅ Service wiring: Audit logging, notifications, refund + returns merge
 - ✅ Accessibility audit: Full screen reader support across all components
-- ✅ Clean compile + 55/55 tests passing
+- ✅ Clean compile + 198/198 tests passing
 
 ## 🔒 Security
 
