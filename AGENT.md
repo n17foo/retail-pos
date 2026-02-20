@@ -9,6 +9,9 @@ RetailPOS/
 ├── assets/                 # Static assets (images, icons, fonts)
 ├── components/             # Reusable UI components
 ├── contexts/               # React Context providers
+├── docs/                   # Feature documentation (flow-based format)
+│   ├── features/           # One .md per feature area
+│   └── README.md           # Index of all feature docs
 ├── electron/               # Electron desktop app configuration
 ├── hooks/                  # Custom React hooks
 ├── locales/                # Internationalization (i18n) files
@@ -20,25 +23,33 @@ RetailPOS/
 │   ├── order/              # Order-related screens
 │   └── onboarding/         # Onboarding flow screens
 ├── services/               # Business logic and API integrations
-│   ├── auth/              # Authentication service + pluggable providers
+│   ├── audit/              # AuditLogService — KV-backed event log + CSV export
+│   ├── auth/               # Authentication service + pluggable providers
 │   ├── basket/             # Shopping cart (BasketService — CRUD only)
 │   ├── checkout/           # CheckoutService (payment, order queries)
 │   ├── config/             # POSConfigService + ServiceConfigBridge
-│   ├── drawer/             # Cash drawer peripheral (decoupled from printer)
+│   ├── customer/           # Platform customer lookup (8 platforms + factory)
 │   ├── category/           # Category management
+│   ├── discount/           # Platform discount/coupon validation (8 platforms + factory)
+│   ├── drawer/             # Cash drawer peripheral (decoupled from printer)
+│   ├── giftcard/           # Platform gift card services (8 platforms + factory)
 │   ├── inventory/          # Inventory tracking
+│   ├── localapi/           # Multi-register local API (server/client/discovery/sync)
 │   ├── logger/             # LoggerFactory + pluggable LogTransport providers
+│   ├── notifications/      # NotificationService (singleton, listener pattern)
 │   ├── order/              # Order processing
 │   ├── payment/            # Payment processing (disconnect is async-compatible)
 │   ├── printer/            # Receipt printing + openDrawer() ESC/POS
 │   ├── product/            # Product management
-│   ├── scanner/            # Barcode scanning + onDisconnect callback
+│   ├── refund/             # Refund service (8 platforms + factory)
+│   ├── returns/            # ReturnService (process returns, optional refund orchestration)
+│   ├── scanner/            # Barcode + QR scanning (4 types: camera, BT, USB, QR hardware)
 │   ├── search/             # Search functionality
 │   ├── storage/            # SQLite storage
 │   ├── sync/               # OrderSyncService + BackgroundSyncService (exponential backoff)
+│   ├── tax/                # TaxProfileService (CRUD, default rate, seed defaults)
 │   └── [domain]/           # Other domain services
 │       └── platforms/      # Platform-specific implementations
-├── types/                  # Shared TypeScript types (basket.ts, order.ts)
 └── utils/                  # Utility functions and helpers
 ---
 
@@ -57,6 +68,28 @@ yarn install
 - **Required**: Node.js v22
 - **Recommended**: Use `nvm` to manage Node versions
 - **Why v22**: Required for Expo SDK 53 compatibility
+
+### Lint & Format (Pre-Commit)
+
+A **husky** pre-commit hook runs **lint-staged** automatically on every `git commit`:
+
+- `*.{ts,tsx,js,jsx}` → `eslint --fix` + `prettier --write`
+- `*.{json,md}` → `prettier --write`
+
+This catches lint and formatting errors before they reach CI. To run manually:
+
+```bash
+yarn lint        # tsc --noEmit + eslint (check only)
+yarn lint:fix    # tsc --noEmit + eslint --fix
+yarn format      # prettier --write on all files
+```
+
+Configuration lives in:
+
+- `eslint.config.js` — flat config with TypeScript, React, React Native, Prettier plugins
+- `.prettierrc` or Prettier defaults — code formatting rules
+- `package.json` → `"lint-staged"` — per-extension commands
+- `.husky/pre-commit` → `npx lint-staged`
 
 ---
 
@@ -313,6 +346,32 @@ Auth methods are split into two modes based on the selected e-commerce platform:
 - Magstripe/RFID readers are USB HID devices that send keystrokes — captured via a hidden `TextInput`
 - All offline providers store credentials in SQLite via `UserRepository` or `KeyValueRepository`
 
+### Scanner Architecture (`services/scanner/`)
+
+Four scanner types, each implementing `ScannerServiceInterface`:
+
+| Type        | Enum                      | Service                    | Use Case                    |
+| ----------- | ------------------------- | -------------------------- | --------------------------- |
+| Camera      | `ScannerType.CAMERA`      | `CameraScannerService`     | Mobile/tablet (Expo Camera) |
+| Bluetooth   | `ScannerType.BLUETOOTH`   | `BluetoothScannerService`  | BLE barcode scanners        |
+| USB         | `ScannerType.USB`         | `USBScannerService`        | USB HID barcode scanners    |
+| QR Hardware | `ScannerType.QR_HARDWARE` | `QRHardwareScannerService` | Desktop QR readers (USB/BT) |
+
+**Key files:**
+
+- `ScannerServiceInterface.ts` — common interface (`connect`, `disconnect`, `startScanListener`, `discoverDevices`)
+- `scannerServiceFactory.ts` — singleton factory, maps `ScannerType` → service instance (real or mock via `USE_MOCK_SCANNER`)
+- `mock/` — mock implementations for each type (simulated scan data)
+- `QRHardwareScannerService.ts` — dedicated QR code reader for desktop; USB scanners act as HID keyboard input (data terminated by Enter key)
+
+**Hooks:**
+
+- `useScanner` — manages settings, connection, discovery, test; maps string type to `ScannerType` enum via `toFactoryType()`
+- `useBarcodeScanner` — processes scanned data, product lookup, alerts
+- `useScannerSettings` — persists `{ enabled, type, deviceId }` to `KeyValueRepository`
+
+**UI:** Settings and onboarding both use a segmented type picker (Camera, Bluetooth, USB, QR Hardware) with contextual hints.
+
 ### Background Sync
 
 - `OrderSyncService` — per-order retry count, `MAX_SYNC_RETRIES()` enforcement
@@ -545,7 +604,7 @@ export default FeatureSettingsTab;
 
 ---
 
-## � Money & Currency Calculations
+## 💸 Money & Currency Calculations
 
 **All monetary math MUST use `utils/money.ts`** to avoid IEEE 754 floating-point errors (e.g. `0.1 + 0.2 !== 0.3`).
 
@@ -586,7 +645,7 @@ npx jest utils/__tests__/money.test.ts
 
 ---
 
-## �🗄️ Data Layer
+## 🗄️ Data Layer
 
 ### SQLite Storage
 
@@ -788,4 +847,4 @@ describe('Button', () => {
 
 ---
 
-_Last updated: February 13, 2026_
+_Last updated: February 20, 2026_

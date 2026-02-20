@@ -10,6 +10,8 @@ docs/
 │   ├── onboarding.md      # First-time setup wizard (online & offline paths)
 │   ├── login.md            # Authentication (PIN, biometric, password, card, RFID, platform)
 │   ├── orders.md           # Browse products, build cart, checkout, sync to platform
+│   ├── basket.md           # Shopping cart CRUD, totals, discounts, customer attachment
+│   ├── checkout.md         # Order creation, payment processing, audit logging
 │   ├── products.md         # Unified product catalog, variants, search, sync
 │   ├── customer.md         # Platform customer search & order attachment
 │   ├── payments.md         # Card terminals, Stripe NFC, refunds, voids
@@ -41,6 +43,8 @@ Each feature doc follows this structure:
 | Setup      | `onboarding.md` | Online (10 steps) / Offline (11 steps) setup wizard                         |
 | Auth       | `login.md`      | PIN, biometric, password, MagStripe, RFID/NFC, platform login               |
 | Sales      | `orders.md`     | Browse → cart → checkout → sync to platform                                 |
+| Basket     | `basket.md`     | Add/remove items, quantity, discounts, customer, notes                      |
+| Checkout   | `checkout.md`   | Start checkout, payment, cancel, order queries, post-checkout sync          |
 | Catalog    | `products.md`   | Load, search, filter, variants, pagination, sync                            |
 | Customers  | `customer.md`   | Search platform customers, attach to orders                                 |
 | Payments   | `payments.md`   | Terminal connection, card payment, Stripe NFC, refund, void                 |
