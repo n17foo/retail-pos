@@ -16,6 +16,8 @@
     "desktop:build-mac": "expo export --platform web && electron-builder --mac --publish=never",
     "desktop:build-linux": "expo export --platform web && electron-builder --linux --publish=never",
     "test": "jest --no-coverage",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "latest": "yarn upgrade --latest && npx expo install --fix",
     "doctor": "npx expo-doctor",
     "lint": "npx tsc --noEmit && eslint . --ext .js,.jsx,.ts,.tsx",
