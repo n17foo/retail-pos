@@ -59,7 +59,7 @@ const POSConfigSettingsTab: React.FC = () => {
       });
       setDirty(false);
       Alert.alert(t('common.saved'), t('settings.posConfig.saved'));
-    } catch (err) {
+    } catch {
       Alert.alert(t('common.error'), t('settings.posConfig.saveError'));
     } finally {
       setSaving(false);

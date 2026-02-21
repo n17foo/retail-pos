@@ -1,9 +1,9 @@
-import { PlatformRefundServiceInterface, PlatformCredentials, RefundApiClient } from './PlatformRefundServiceInterface';
-import { RefundData, RefundResult, RefundRecord } from '../RefundServiceInterface';
+import { PlatformRefundServiceInterface, PlatformCredentials } from './PlatformRefundServiceInterface';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
 import { SecretsServiceFactory } from '../../secrets/SecretsService';
 import { SecretsServiceInterface } from '../../secrets/SecretsServiceInterface';
+import { RefundData, RefundResult, RefundRecord } from '../ReturnService';
 import { getPlatformToken, withTokenRefresh } from '../../token/TokenUtils';
 import { TokenType } from '../../token/TokenServiceInterface';
 import { TokenInitializer } from '../../token/TokenInitializer';
@@ -79,47 +79,6 @@ export class BigCommerceRefundService implements PlatformRefundServiceInterface 
   }
 
   /**
-   * Create an HTTP client for BigCommerce API
-   * @param credentials BigCommerce API credentials
-   * @returns HTTP client object
-   */
-  private async createBigCommerceApiClient(_credentials: PlatformCredentials): Promise<RefundApiClient> {
-    // Get the access token from the token management system
-    const accessToken = await getPlatformToken(ECommercePlatform.BIGCOMMERCE, TokenType.ACCESS);
-
-    if (!accessToken) {
-      this.logger.error('Failed to get BigCommerce access token');
-      throw new Error('Failed to get BigCommerce access token');
-    }
-
-    return {
-      post: async (endpoint: string, data: unknown) => {
-        this.logger.info(`Making API call to BigCommerce ${endpoint}`);
-
-        // In a real implementation, this would make an authenticated API call
-        // const response = await fetch(`${credentials.apiUrl}${endpoint}`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'X-Auth-Token': accessToken,
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify(data)
-        // });
-
-        // For now, simulate a successful response
-        const payload = data as Record<string, unknown>;
-        return {
-          data: {
-            id: `bigcommerce-refund-${Date.now()}`,
-            orderId: payload.orderId,
-            status: 'COMPLETED',
-          },
-        };
-      },
-    };
-  }
-
-  /**
    * Process a BigCommerce refund directly using the API
    * @param orderId Order ID to refund
    * @param refundData Refund details
@@ -127,30 +86,54 @@ export class BigCommerceRefundService implements PlatformRefundServiceInterface 
   private async processBigCommerceRefund(orderId: string, refundData: RefundData): Promise<RefundResult> {
     try {
       const credentials = await this.getBigCommerceCredentials();
-
       if (!credentials) {
         throw new Error('Failed to retrieve BigCommerce API credentials');
       }
 
-      // Create API client
-      const apiClient = await this.createBigCommerceApiClient(credentials);
+      const accessToken = await getPlatformToken(ECommercePlatform.BIGCOMMERCE, TokenType.ACCESS);
+      if (!accessToken) {
+        throw new Error('Failed to get BigCommerce access token');
+      }
 
-      // Format the request data
+      const endpoint = `${credentials.apiUrl}/stores/${credentials.storeHash || ''}/v3/orders/${orderId}/payment_actions/refunds`;
+
       const requestData = {
-        items: refundData.items?.map(item => ({
-          item_id: item.lineItemId,
-          quantity: item.quantity,
-          amount: item.amount,
-        })),
+        items:
+          refundData.items?.map(item => ({
+            item_type: 'PRODUCT',
+            item_id: Number(item.lineItemId),
+            quantity: item.quantity,
+            amount: item.amount,
+          })) || [],
         reason: refundData.reason || 'Refunded via RetailPOS',
-        amount: refundData.amount,
+        payments: [
+          {
+            provider_id: 'custom',
+            amount: refundData.amount || 0,
+            offline: true,
+          },
+        ],
       };
 
-      // Make API call
-      const response = await apiClient.post(`/orders/${orderId}/refunds`, requestData);
+      this.logger.info(`Processing BigCommerce refund for order ${orderId} at ${endpoint}`);
 
-      // Process response
-      const refundId = String(response.data.id);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'X-Auth-Token': accessToken,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`BigCommerce refund API returned ${response.status}: ${errorBody}`);
+      }
+
+      const data = await response.json();
+      const refundId = String(data.data?.id || `bigcommerce-refund-${Date.now()}`);
 
       return {
         success: true,

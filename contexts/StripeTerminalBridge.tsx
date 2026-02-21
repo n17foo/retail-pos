@@ -10,13 +10,7 @@ interface Reader {
   label?: string;
   [key: string]: unknown;
 }
-interface StripeError {
-  message?: string;
-  code?: string;
-  [key: string]: unknown;
-}
 type CommonError = { message?: string; code?: string };
-type PaymentIntent = { id: string; status: string; amount: number };
 
 // Types for our bridge
 interface StripeTerminalBridgeState {
@@ -123,28 +117,14 @@ export const StripeTerminalBridgeProvider: React.FC<{ children: ReactNode }> = (
 
     const {
       initialize,
-      discoverReaders,
-      createPaymentIntent,
-      collectPaymentMethod,
-      processPayment,
-      cancelPaymentIntent,
+      _discoverReaders,
+      _collectPaymentMethod,
+      _processPayment,
+      _cancelPaymentIntent,
       connectedReader,
-      discoveredReaders,
-      disconnectReader,
+      _discoveredReaders,
+      _disconnectReader,
     } = terminal;
-
-    // Define function to connect to a bluetooth reader
-    const connectBluetoothReader = async ({ readerId, locationId }: { readerId: string; locationId: string }) => {
-      if (!terminal || !terminal.connectBluetoothReader) {
-        console.error('Stripe Terminal connectBluetoothReader not available');
-        return { error: { message: 'Stripe Terminal connectBluetoothReader not available' } };
-      }
-
-      return terminal.connectBluetoothReader({
-        serialNumber: readerId,
-        locationId: locationId,
-      });
-    };
 
     // Initialize once on component mount
     useEffect(() => {

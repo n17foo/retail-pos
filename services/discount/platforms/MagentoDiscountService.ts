@@ -46,7 +46,7 @@ export class MagentoDiscountService extends BaseDiscountService {
     return { 'Content-Type': 'application/json', Authorization: `Bearer ${token || ''}` };
   }
 
-  async validateCoupon(code: string, basketTotal: number, _items: BasketItem[]): Promise<CouponValidationResult> {
+  async validateCoupon(code: string, _basketTotal: number, _items: BasketItem[]): Promise<CouponValidationResult> {
     if (!this.initialized) return { valid: false, error: 'Discount service not initialized' };
     try {
       return await withTokenRefresh(ECommercePlatform.MAGENTO, async () => {

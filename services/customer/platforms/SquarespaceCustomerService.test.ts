@@ -37,7 +37,6 @@ jest.mock('../../logger/LoggerFactory', () => ({
   },
 }));
 
-import secretsService from '../../secrets/SecretsService';
 import { getPlatformToken } from '../../token/TokenUtils';
 import { withTokenRefresh } from '../../token/TokenIntegration';
 import { ECommercePlatform } from '../../../utils/platforms';

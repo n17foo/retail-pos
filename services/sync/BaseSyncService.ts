@@ -1,12 +1,4 @@
-import {
-  SyncDirection,
-  SyncEntityType,
-  SyncError,
-  SyncOperationResult,
-  SyncOptions,
-  SyncServiceInterface,
-  SyncStatus,
-} from './SyncServiceInterface';
+import { SyncEntityType, SyncOperationResult, SyncOptions, SyncServiceInterface, SyncStatus } from './SyncServiceInterface';
 import { v4 as uuidv4 } from 'uuid';
 
 /**

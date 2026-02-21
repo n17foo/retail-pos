@@ -46,7 +46,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   }, [onSearch, onClear]);
 
   /** Allow parent to focus this input programmatically */
-  const focus = useCallback(() => {
+  const _focus = useCallback(() => {
     inputRef.current?.focus();
   }, []);
 

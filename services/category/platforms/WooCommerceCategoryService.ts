@@ -2,6 +2,7 @@
 import { Category } from '../CategoryServiceInterface';
 import { BaseCategoryService } from './BaseCategoryService';
 import { PlatformConfigRequirements } from './PlatformCategoryServiceInterface';
+import { createBasicAuthHeader } from '../../../utils/base64';
 
 /**
  * WooCommerce-specific category service implementation
@@ -223,11 +224,8 @@ export class WooCommerceCategoryService extends BaseCategoryService {
    * WooCommerce REST API uses Basic Auth
    */
   private getAuthHeaders(): Record<string, string> {
-    const credentials = `${this.config.apiKey}:${this.config.apiSecret}`;
-    const encodedCredentials = Buffer.from(credentials).toString('base64');
-
     return {
-      Authorization: `Basic ${encodedCredentials}`,
+      Authorization: createBasicAuthHeader(this.config.apiKey || '', this.config.apiSecret || ''),
       'Content-Type': 'application/json',
     };
   }

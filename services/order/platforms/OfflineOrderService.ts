@@ -15,9 +15,7 @@ export class OfflineOrderService implements PlatformOrderServiceInterface {
   private orders: Order[] = [];
   private logger = LoggerFactory.getInstance().createLogger('OfflineOrderService');
 
-  constructor(config?: PlatformOrderConfig) {
-    // Offline service doesn't need online configuration
-  }
+  constructor(_config?: PlatformOrderConfig) {}
 
   /**
    * Initialize the offline order service

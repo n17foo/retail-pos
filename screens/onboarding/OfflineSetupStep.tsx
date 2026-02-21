@@ -36,8 +36,6 @@ const DEFAULT_CONFIG: OfflineStoreConfig = {
   currency: 'GBP',
 };
 
-const CURRENCY_CODES = CURRENCIES.map(c => c.code);
-
 const OfflineSetupStep: React.FC<OfflineSetupStepProps> = ({ onBack, onComplete, config, setConfig }) => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(null);

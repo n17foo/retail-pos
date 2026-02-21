@@ -22,9 +22,10 @@ export const ESC_POS_COMMANDS = {
   NEWLINE: [0x0a], // Line feed
 };
 
-// Helper function to convert string to byte array
+// Helper function to convert string to byte array (React Native compatible)
 export function stringToBytes(text: string): number[] {
-  return Array.from(Buffer.from(text, 'utf8'));
+  const encoder = new TextEncoder();
+  return Array.from(encoder.encode(text));
 }
 
 /**
@@ -62,7 +63,7 @@ export interface BasePrinterService {
    * Format receipt data into ESC/POS command buffer
    * @param data Receipt data
    */
-  formatReceiptBuffer(data: ReceiptData): Buffer;
+  formatReceiptBuffer(data: ReceiptData): Uint8Array;
 
   /**
    * Send an ESC/POS drawer kick pulse to open the cash drawer.
@@ -90,13 +91,13 @@ export abstract class AbstractPrinterService implements BasePrinterService {
   async openDrawer(pin: 2 | 5 = 2): Promise<boolean> {
     if (!this._isConnected) return false;
     const cmd = pin === 5 ? ESC_POS_COMMANDS.DRAWER_KICK_PIN5 : ESC_POS_COMMANDS.DRAWER_KICK_PIN2;
-    return this.sendBytes(Buffer.from(cmd));
+    return this.sendBytes(new Uint8Array(cmd));
   }
 
   /**
    * Send raw bytes to the printer. Override in concrete implementations.
    */
-  protected async sendBytes(_data: Buffer): Promise<boolean> {
+  protected async sendBytes(_data: Uint8Array): Promise<boolean> {
     return false;
   }
 
@@ -119,7 +120,7 @@ export abstract class AbstractPrinterService implements BasePrinterService {
    * Format receipt data into ESC/POS command buffer
    * @param data Receipt data
    */
-  formatReceiptBuffer(data: ReceiptData): Buffer {
+  formatReceiptBuffer(data: ReceiptData): Uint8Array {
     const cs = data.currencySymbol || '£';
     let commands: number[] = [];
 
@@ -228,6 +229,6 @@ export abstract class AbstractPrinterService implements BasePrinterService {
     // Cut receipt
     commands.push(...ESC_POS_COMMANDS.CUT);
 
-    return Buffer.from(commands);
+    return new Uint8Array(commands);
   }
 }

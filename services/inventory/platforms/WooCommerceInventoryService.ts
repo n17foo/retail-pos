@@ -1,6 +1,7 @@
 import { InventoryResult, InventoryUpdate, InventoryUpdateResult } from '../InventoryServiceInterface';
-import { PlatformInventoryConfig, PlatformConfigRequirements } from './PlatformInventoryServiceInterface';
+import { PlatformConfigRequirements } from './PlatformInventoryServiceInterface';
 import { BaseInventoryService } from './BaseInventoryService';
+import { createBasicAuthHeader } from '../../../utils/base64';
 
 /**
  * WooCommerce-specific inventory service implementation
@@ -172,11 +173,8 @@ export class WooCommerceInventoryService extends BaseInventoryService {
    * WooCommerce uses Basic Authentication
    */
   protected getAuthHeaders(): Record<string, string> {
-    const credentials = `${this.config.apiKey}:${this.config.apiSecret}`;
-    const encodedCredentials = Buffer.from(credentials).toString('base64');
-
     return {
-      Authorization: `Basic ${encodedCredentials}`,
+      Authorization: createBasicAuthHeader(this.config.apiKey || '', this.config.apiSecret || ''),
       Accept: 'application/json',
     };
   }

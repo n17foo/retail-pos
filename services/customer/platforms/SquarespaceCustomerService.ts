@@ -7,7 +7,6 @@ import { TokenType } from '../../token/TokenServiceInterface';
 import { TokenInitializer } from '../../token/TokenInitializer';
 import { withTokenRefresh } from '../../token/TokenIntegration';
 import { LoggerFactory } from '../../logger/LoggerFactory';
-import secretsService from '../../secrets/SecretsService';
 
 export class SquarespaceCustomerService extends BaseCustomerService {
   constructor() {

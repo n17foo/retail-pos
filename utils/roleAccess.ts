@@ -9,7 +9,7 @@ import { UserRole } from '../repositories/UserRepository';
  */
 
 type TabName = 'Order' | 'Scan' | 'Search' | 'Inventory' | 'More';
-type MoreMenuItem = 'OrderHistory' | 'Settings' | 'Users' | 'Refund' | 'Printer' | 'PaymentTerminal' | 'SyncQueue' | 'Reports';
+type MoreMenuItem = 'OrderHistory' | 'Settings' | 'Users' | 'Returns' | 'Printer' | 'PaymentTerminal' | 'SyncQueue' | 'Reports';
 
 const TAB_ACCESS: Record<UserRole, TabName[]> = {
   admin: ['Order', 'Scan', 'Search', 'Inventory', 'More'],
@@ -18,8 +18,8 @@ const TAB_ACCESS: Record<UserRole, TabName[]> = {
 };
 
 const MORE_MENU_ACCESS: Record<UserRole, MoreMenuItem[]> = {
-  admin: ['OrderHistory', 'Settings', 'Users', 'Refund', 'Printer', 'PaymentTerminal', 'SyncQueue', 'Reports'],
-  manager: ['OrderHistory', 'Settings', 'Refund', 'Printer', 'PaymentTerminal', 'SyncQueue', 'Reports'],
+  admin: ['OrderHistory', 'Settings', 'Users', 'Returns', 'Printer', 'PaymentTerminal', 'SyncQueue', 'Reports'],
+  manager: ['OrderHistory', 'Settings', 'Returns', 'Printer', 'PaymentTerminal', 'SyncQueue', 'Reports'],
   cashier: ['OrderHistory', 'Printer', 'PaymentTerminal'],
 };
 

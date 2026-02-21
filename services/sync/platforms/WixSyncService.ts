@@ -1,4 +1,4 @@
-import { SyncServiceInterface, SyncOptions, SyncStatus, SyncOperationResult, SyncEntityType, SyncDirection } from '../SyncServiceInterface';
+import { SyncServiceInterface, SyncOptions, SyncStatus, SyncEntityType, SyncDirection } from '../SyncServiceInterface';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
@@ -72,7 +72,7 @@ export class WixSyncService implements SyncServiceInterface {
   /**
    * Get the history of sync operations
    */
-  async getSyncHistory(entityType?: SyncEntityType, limit?: number, offset?: number): Promise<SyncStatus[]> {
+  async getSyncHistory(_entityType?: SyncEntityType, _limit?: number, _offset?: number): Promise<SyncStatus[]> {
     return [];
   }
 

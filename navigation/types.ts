@@ -31,13 +31,13 @@ export type MainTabParamList = {
 };
 
 /**
- * More Stack - Settings, Refunds, etc (accessible from More tab)
+ * More Stack - Settings, Returns, etc (accessible from More tab)
  */
 export type MoreStackParamList = {
   MoreMenu: undefined;
   Settings: undefined;
   Users: undefined;
-  Refund: undefined;
+  Returns: undefined;
   Printer: undefined;
   PaymentTerminal: { amount?: number; items?: { id: string; name: string; price: number; quantity: number }[] };
   OrderHistory: undefined;

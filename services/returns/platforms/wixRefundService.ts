@@ -1,5 +1,5 @@
-import { PlatformRefundServiceInterface, PlatformCredentials, RefundApiClient } from './PlatformRefundServiceInterface';
-import { RefundData, RefundResult, RefundRecord } from '../RefundServiceInterface';
+import { PlatformRefundServiceInterface, PlatformCredentials } from './PlatformRefundServiceInterface';
+import { RefundData, RefundResult, RefundRecord } from '../ReturnService';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
 import { SecretsServiceFactory } from '../../secrets/SecretsService';
@@ -66,45 +66,6 @@ export class WixRefundService implements PlatformRefundServiceInterface {
   }
 
   /**
-   * Create a Wix HTTP client
-   * @param credentials Wix API credentials
-   * @returns HTTP client object
-   */
-  private async createWixApiClient(_credentials: PlatformCredentials): Promise<RefundApiClient> {
-    // Get the access token from the token management system
-    const accessToken = await getPlatformToken(ECommercePlatform.WIX, TokenType.ACCESS);
-
-    if (!accessToken) {
-      this.logger.error('Failed to get Wix access token');
-      throw new Error('Failed to get Wix access token');
-    }
-    return {
-      post: async (endpoint: string, data: unknown) => {
-        this.logger.info(`Making API call to Wix ${endpoint}`);
-
-        // In a real implementation, this would make an authenticated API call
-        // const response = await fetch(`${credentials.apiUrl}${endpoint}`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Authorization': `Bearer ${accessToken}`,
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify(data)
-        // });
-
-        // For now, simulate a successful response
-        return {
-          data: {
-            id: `wix-refund-${Date.now()}`,
-            orderId: (data as Record<string, unknown>).orderId,
-            status: 'SUCCESS',
-          },
-        };
-      },
-    };
-  }
-
-  /**
    * Process a Wix refund directly using the API
    * @param orderId Order ID to refund
    * @param refundData Refund details
@@ -112,32 +73,55 @@ export class WixRefundService implements PlatformRefundServiceInterface {
   private async processWixRefundDirectly(orderId: string, refundData: RefundData): Promise<RefundResult> {
     try {
       const credentials = await this.getWixCredentials();
-
       if (!credentials) {
         throw new Error('Failed to retrieve Wix API credentials');
       }
 
-      // Create API client
-      const apiClient = await this.createWixApiClient(credentials);
+      const accessToken = await getPlatformToken(ECommercePlatform.WIX, TokenType.ACCESS);
+      if (!accessToken) {
+        throw new Error('Failed to get Wix access token');
+      }
 
-      // Format the request data
+      // Wix eCommerce Refunds API
+      const endpoint = 'https://www.wixapis.com/ecom/v1/refunds/create';
+
       const requestData = {
-        orderId,
-        amount: refundData.amount || 0,
-        reason: refundData.reason || 'Refunded via RetailPOS',
-        items:
-          refundData.items?.map(item => ({
-            lineItemId: item.lineItemId,
-            quantity: item.quantity,
-            amount: item.amount,
-          })) || [],
+        refund: {
+          orderId,
+          amount: {
+            amount: String(refundData.amount || 0),
+          },
+          reason: refundData.reason || 'Refunded via RetailPOS',
+          details: {
+            items:
+              refundData.items?.map(item => ({
+                lineItemId: item.lineItemId,
+                quantity: item.quantity,
+                amount: String(item.amount || 0),
+              })) || [],
+          },
+        },
       };
 
-      // Make API call
-      const response = await apiClient.post('/api/v1/orders/refunds', requestData);
+      this.logger.info(`Processing Wix refund for order ${orderId}`);
 
-      // Process response
-      const refundId = String(response.data.id);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: accessToken,
+          'Content-Type': 'application/json',
+          'wix-site-id': credentials.siteId || '',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Wix refund API returned ${response.status}: ${errorBody}`);
+      }
+
+      const data = await response.json();
+      const refundId = String(data.refund?.id || `wix-refund-${Date.now()}`);
 
       return {
         success: true,

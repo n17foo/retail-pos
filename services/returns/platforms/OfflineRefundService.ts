@@ -1,5 +1,5 @@
 import { PlatformRefundServiceInterface } from './PlatformRefundServiceInterface';
-import { RefundData, RefundResult, RefundRecord } from '../RefundServiceInterface';
+import { RefundData, RefundResult, RefundRecord } from '../ReturnService';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 import { keyValueRepository } from '../../../repositories/KeyValueRepository';
 

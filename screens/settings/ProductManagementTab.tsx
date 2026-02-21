@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal, Image } from 'react-native';
 import { useOfflineProducts, Product } from '../../hooks/useOfflineProducts';
 import { useOfflineCategories } from '../../hooks/useOfflineCategories';
@@ -29,7 +29,7 @@ const emptyFormData: ProductFormData = {
 
 const ProductManagementTab: React.FC = () => {
   const currency = useCurrency();
-  const { products, isLoading, error, loadProducts, createProduct, updateProduct, deleteProduct } = useOfflineProducts();
+  const { products, isLoading, error, createProduct, updateProduct, deleteProduct } = useOfflineProducts();
   const { categories } = useOfflineCategories();
 
   const [showModal, setShowModal] = useState(false);

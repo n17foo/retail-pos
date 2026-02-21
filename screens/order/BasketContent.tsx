@@ -14,14 +14,13 @@ import { PlatformCustomer } from '../../services/customer/CustomerServiceInterfa
 interface BasketContentProps {
   platform?: ECommercePlatform;
   onCheckout?: () => void;
-  onPrintReceipt?: (orderId: string) => void;
 }
 
 /**
  * Basket content component that can be used both inline (sidebar) and in a SwipeablePanel.
  * Replaces Alert-based checkout with a proper CheckoutModal.
  */
-export const BasketContent: React.FC<BasketContentProps> = ({ platform, onCheckout, onPrintReceipt }) => {
+export const BasketContent: React.FC<BasketContentProps> = ({ platform, onCheckout }) => {
   const currency = useCurrency();
   const {
     isLoading,

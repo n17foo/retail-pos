@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Category } from '../services/category/CategoryServiceInterface';
-import { OfflineCategoryService, offlineCategoryService } from '../services/category/platforms/OfflineCategoryService';
+import { offlineCategoryService } from '../services/category/platforms/OfflineCategoryService';
 import { useLogger } from './useLogger';
 
 interface UseOfflineCategoriesReturn {

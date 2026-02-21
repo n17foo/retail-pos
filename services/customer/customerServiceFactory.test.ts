@@ -1,10 +1,4 @@
 import { customerServiceFactory } from './CustomerServiceFactory';
-import { BigCommerceCustomerService } from './platforms/BigCommerceCustomerService';
-import { MagentoCustomerService } from './platforms/MagentoCustomerService';
-import { SyliusCustomerService } from './platforms/SyliusCustomerService';
-import { WixCustomerService } from './platforms/WixCustomerService';
-import { PrestaShopCustomerService } from './platforms/PrestaShopCustomerService';
-import { SquarespaceCustomerService } from './platforms/SquarespaceCustomerService';
 import { ECommercePlatform } from '../../utils/platforms';
 
 // Mock logger to avoid transitive expo-sqlite dependency

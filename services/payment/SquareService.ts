@@ -5,16 +5,12 @@ import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from './Paym
 type SquareSDKModule = Record<string, (...args: any[]) => any>;
 let SQIPCore: SquareSDKModule;
 let SQIPCardEntry: SquareSDKModule;
-let SQIPApplePay: SquareSDKModule;
-let SQIPGooglePay: SquareSDKModule;
 
 try {
   // Import Square SDK v1.x named exports
   const squareSdk = require('react-native-square-in-app-payments');
   SQIPCore = squareSdk.SQIPCore;
   SQIPCardEntry = squareSdk.SQIPCardEntry;
-  SQIPApplePay = squareSdk.SQIPApplePay;
-  SQIPGooglePay = squareSdk.SQIPGooglePay;
 } catch (error) {
   console.warn('Square SDK not available, running in mock mode:', error);
 }
@@ -99,7 +95,7 @@ export class SquareService implements PaymentServiceInterface {
       console.log(`Processing payment of $${request.amount.toFixed(2)} with Square`);
 
       // Start card entry using SQIPCardEntry
-      const cardEntryResult = await new Promise<Record<string, unknown>>((resolve, reject) => {
+      await new Promise<Record<string, unknown>>((resolve, reject) => {
         // Configure the card entry flow with callbacks
         const cardEntryConfig = {
           collectPostalCode: false,
@@ -207,7 +203,7 @@ export class SquareService implements PaymentServiceInterface {
   /**
    * Issue a refund - in a real implementation, would be done via backend
    */
-  public async refundTransaction(transactionId: string, amount: number): Promise<PaymentResponse> {
+  public async refundTransaction(transactionId: string, _amount: number): Promise<PaymentResponse> {
     return {
       success: true,
       transactionId,

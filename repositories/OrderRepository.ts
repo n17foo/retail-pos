@@ -1,5 +1,4 @@
 import { db } from '../utils/db';
-import { generateUUID } from '../utils/uuid';
 
 /** DB row shape for the unified orders table */
 export interface OrderRow {

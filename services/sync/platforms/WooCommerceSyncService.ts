@@ -6,7 +6,7 @@ import { InventoryServiceFactory } from '../../inventory/InventoryServiceFactory
 import { CategoryServiceFactory } from '../../category/CategoryServiceFactory';
 import { OrderServiceFactory } from '../../order/OrderServiceFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
-import { Buffer } from 'buffer';
+import { createBasicAuthHeader } from '../../../utils/base64';
 
 /**
  * WooCommerce-specific sync service implementation
@@ -65,7 +65,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
 
     try {
       // Create auth header for WooCommerce
-      const authString = `Basic ${Buffer.from(`${this.apiKey}:${this.apiSecret}`).toString('base64')}`;
+      const authString = createBasicAuthHeader(this.apiKey, this.apiSecret);
 
       // Make a simple API call to test the connection
       const url = this.getWooCommerceApiUrl('system_status');
@@ -116,7 +116,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
       ];
 
       // Create auth header for WooCommerce
-      const authString = `Basic ${Buffer.from(`${this.apiKey}:${this.apiSecret}`).toString('base64')}`;
+      const authString = createBasicAuthHeader(this.apiKey, this.apiSecret);
 
       // Register each webhook
       const results = await Promise.all(
@@ -172,7 +172,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
 
     try {
       // Create auth header for WooCommerce
-      const authString = `Basic ${Buffer.from(`${this.apiKey}:${this.apiSecret}`).toString('base64')}`;
+      const authString = createBasicAuthHeader(this.apiKey, this.apiSecret);
 
       // Delete each registered webhook
       const results = await Promise.all(
@@ -304,7 +304,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const productService = ProductServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
+    const _productService = ProductServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
 
     try {
       if (options.direction === SyncDirection.POS_TO_ECOMMERCE) {
@@ -387,7 +387,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const inventoryService = InventoryServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
+    const _inventoryService = InventoryServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
 
     try {
       if (options.direction === SyncDirection.POS_TO_ECOMMERCE) {
@@ -436,7 +436,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const categoryService = CategoryServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
+    const _categoryService = CategoryServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
 
     try {
       if (options.direction === SyncDirection.ECOMMERCE_TO_POS) {
@@ -500,7 +500,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const orderService = OrderServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
+    const _orderService = OrderServiceFactory.getInstance().getService(ECommercePlatform.WOOCOMMERCE);
 
     try {
       if (options.direction === SyncDirection.ECOMMERCE_TO_POS) {

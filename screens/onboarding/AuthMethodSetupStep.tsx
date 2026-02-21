@@ -103,7 +103,7 @@ const AuthMethodSetupStep: React.FC<AuthMethodSetupStepProps> = ({ onBack, onCom
       }
 
       onComplete();
-    } catch (err) {
+    } catch {
       Alert.alert('Error', 'Failed to save authentication settings. Please try again.');
     } finally {
       setSaving(false);

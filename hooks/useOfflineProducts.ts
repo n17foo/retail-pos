@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Product } from '../services/product/ProductServiceInterface';
-import { OfflineProductService, offlineProductService } from '../services/product/platforms/OfflineProductService';
+import { offlineProductService } from '../services/product/platforms/OfflineProductService';
 import { useLogger } from './useLogger';
 
 interface UseOfflineProductsReturn {

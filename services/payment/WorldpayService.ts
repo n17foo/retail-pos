@@ -40,14 +40,6 @@ enum DeviceStatus {
   ERROR = 'ERROR',
 }
 
-// Define custom interfaces for types not exported by the SDK
-interface TransactionStatus {
-  transactionId: string;
-  status: string;
-  responseCode: string;
-  responseMessage?: string;
-}
-
 // Define a proper error class for Worldpay errors
 class WorldpayError extends Error {
   code: string;

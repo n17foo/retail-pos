@@ -38,7 +38,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
   const tapAnimation = new Animated.Value(1);
 
   // States
-  const [connecting, setConnecting] = useState(false);
+  const [_connecting, _setConnecting] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('ready');
@@ -48,7 +48,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
   const { processPayment, disconnect, isTerminalConnected, getConnectedDeviceId, getCurrentProvider } = usePayment();
 
   // Check if we're using Stripe NFC
-  const isStripeNfc = getCurrentProvider() === PaymentProvider.STRIPE_NFC;
+  const _isStripeNfc = getCurrentProvider() === PaymentProvider.STRIPE_NFC;
 
   // Start the tap animation
   useEffect(() => {

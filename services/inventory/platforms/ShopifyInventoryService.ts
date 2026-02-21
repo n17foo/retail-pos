@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw platform API response mapping */
 import { InventoryResult, InventoryUpdate, InventoryUpdateResult } from '../InventoryServiceInterface';
-import { PlatformInventoryConfig, PlatformConfigRequirements } from './PlatformInventoryServiceInterface';
+import { PlatformConfigRequirements } from './PlatformInventoryServiceInterface';
 import { BaseInventoryService } from './BaseInventoryService';
 import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 

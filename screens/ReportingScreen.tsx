@@ -5,7 +5,6 @@ import { lightColors, spacing, typography, borderRadius, elevation } from '../ut
 import { formatMoney } from '../utils/money';
 import { useReporting } from '../hooks/useReporting';
 import { useCurrency } from '../hooks/useCurrency';
-import { SalesByPeriod, CashierPerformance, PaymentBreakdown } from '../services/reporting/ReportingService';
 
 type DateRange = 'today' | 'yesterday' | 'week' | 'month';
 

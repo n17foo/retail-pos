@@ -3,9 +3,7 @@ import { BasePlatformSyncService } from './BasePlatformSyncService';
 import { PlatformSyncConfig, PlatformSyncConfigRequirements } from './PlatformSyncServiceInterface';
 
 import { ProductServiceFactory } from '../../product/ProductServiceFactory';
-import { InventoryServiceFactory } from '../../inventory/InventoryServiceFactory';
 import { CategoryServiceFactory } from '../../category/CategoryServiceFactory';
-import { OrderServiceFactory } from '../../order/OrderServiceFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
 import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 
@@ -387,8 +385,6 @@ export class ShopifySyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const inventoryService = InventoryServiceFactory.getInstance().getService(ECommercePlatform.SHOPIFY);
-
     try {
       if (options.direction === SyncDirection.POS_TO_ECOMMERCE) {
         // Similar implementation to products sync
@@ -471,8 +467,6 @@ export class ShopifySyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const orderService = OrderServiceFactory.getInstance().getService(ECommercePlatform.SHOPIFY);
-
     try {
       // Similar implementation to products sync
       if (options.direction === SyncDirection.ECOMMERCE_TO_POS) {

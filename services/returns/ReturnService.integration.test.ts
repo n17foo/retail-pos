@@ -37,13 +37,49 @@ jest.mock('../../repositories/OrderItemRepository', () => ({
   })),
 }));
 
-const mockGetRefundServiceForPlatform = jest.fn();
-jest.mock('../refund/RefundServiceFactory', () => ({
-  RefundServiceFactory: {
-    getInstance: jest.fn(() => ({
-      getRefundServiceForPlatform: mockGetRefundServiceForPlatform,
-    })),
-  },
+const mockProcessRefund = jest.fn();
+const mockRefundInit = jest.fn().mockResolvedValue(true);
+const mockRefundIsInit = jest.fn().mockReturnValue(true);
+const mockGetRefundHistory = jest.fn().mockResolvedValue([]);
+
+const mockPlatformRefundImpl = () => ({
+  processRefund: mockProcessRefund,
+  initialize: mockRefundInit,
+  isInitialized: mockRefundIsInit,
+  getRefundHistory: mockGetRefundHistory,
+});
+
+jest.mock('./platforms/shopifyRefundService', () => ({
+  ShopifyRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/wooCommerceRefundService', () => ({
+  WooCommerceRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/magentoRefundService', () => ({
+  MagentoRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/bigCommerceRefundService', () => ({
+  BigCommerceRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/syliusRefundService', () => ({
+  SyliusRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/wixRefundService', () => ({
+  WixRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/PrestaShopRefundService', () => ({
+  PrestaShopRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/SquarespaceRefundService', () => ({
+  SquarespaceRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
+jest.mock('./platforms/OfflineRefundService', () => ({
+  OfflineRefundService: jest.fn().mockImplementation(() => ({
+    processRefund: jest.fn().mockResolvedValue({ success: true, refundId: 'offline-refund-1', timestamp: new Date() }),
+    initialize: jest.fn().mockResolvedValue(true),
+    isInitialized: jest.fn().mockReturnValue(true),
+    getRefundHistory: jest.fn().mockResolvedValue([]),
+  })),
 }));
 
 jest.mock('../audit/AuditLogService', () => ({
@@ -79,10 +115,7 @@ describe('ReturnService - Integration Tests', () => {
       mockCreate.mockResolvedValue('return-1');
       mockUpdateStatus.mockResolvedValue(undefined);
 
-      const mockRefundResult = { success: true, refundId: 'refund-123' };
-      mockGetRefundServiceForPlatform.mockReturnValue({
-        processEcommerceRefund: jest.fn().mockResolvedValue(mockRefundResult),
-      });
+      mockProcessRefund.mockResolvedValue({ success: true, refundId: 'refund-123', timestamp: new Date() });
 
       const result = await returnService.processReturn({
         orderId: 'order-1',
@@ -94,6 +127,9 @@ describe('ReturnService - Integration Tests', () => {
       expect(result.success).toBe(true);
       expect(result.returnIds).toEqual(['return-1']);
       expect(result.refundId).toBe('refund-123');
+
+      // Verify platform refund was called
+      expect(mockProcessRefund).toHaveBeenCalled();
 
       // Verify audit logging
       expect(auditLogService.log).toHaveBeenCalledWith(
@@ -130,8 +166,8 @@ describe('ReturnService - Integration Tests', () => {
       expect(result.returnIds).toEqual(['return-1']);
       expect(result.refundId).toBeUndefined();
 
-      // Refund service should not be called
-      expect(mockGetRefundServiceForPlatform).not.toHaveBeenCalled();
+      // Platform refund service should not be called
+      expect(mockProcessRefund).not.toHaveBeenCalled();
     });
 
     it('should handle return processing failure', async () => {

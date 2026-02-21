@@ -98,7 +98,6 @@ describe('MagentoDiscountService', () => {
         is_active: true,
       };
 
-      let callCount = 0;
       global.fetch = jest
         .fn()
         .mockImplementationOnce(() =>
@@ -147,7 +146,6 @@ describe('MagentoDiscountService', () => {
         is_active: true,
       };
 
-      let callCount = 0;
       global.fetch = jest
         .fn()
         .mockImplementationOnce(() =>

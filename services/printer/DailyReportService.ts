@@ -1,6 +1,6 @@
 import { keyValueRepository } from '../../repositories/KeyValueRepository';
 import { LocalOrder } from '../basket/BasketServiceInterface';
-import { receiptConfigService, ReceiptConfig } from './ReceiptConfigService';
+import { receiptConfigService } from './ReceiptConfigService';
 import { addMoney, multiplyMoney, roundMoney, subtractMoney, sumMoney } from '../../utils/money';
 import { getCurrencySymbol } from '../../utils/currency';
 

@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Alert, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../utils/theme';
 import { formatMoney } from '../utils/money';
-import { useRefund } from '../hooks/useRefund';
-import { RefundRecord } from '../services/refund/RefundServiceInterface';
+import { useReturns } from '../hooks/useReturns';
+import { RefundRecord } from '../services/returns/ReturnService';
 import { Button } from '../components/Button';
 import Input from '../components/Input';
 import { useCurrency } from '../hooks/useCurrency';
 
-interface RefundScreenProps {
+interface ReturnsScreenProps {
   onGoBack?: () => void;
 }
 
-const RefundScreen: React.FC<RefundScreenProps> = ({ onGoBack }) => {
+const ReturnsScreen: React.FC<ReturnsScreenProps> = ({ onGoBack }) => {
   const currency = useCurrency();
-  const { isInitialized, isLoading, error, processPaymentRefund, processEcommerceRefund, getRefundHistory } = useRefund();
+  const { isInitialized, isLoading, error, processPaymentRefund, processEcommerceRefund, getRefundHistory } = useReturns();
   const [refundType, setRefundType] = useState<'payment' | 'ecommerce'>('payment');
   const [orderId, setOrderId] = useState('');
   const [transactionId, setTransactionId] = useState('');
@@ -54,7 +54,7 @@ const RefundScreen: React.FC<RefundScreenProps> = ({ onGoBack }) => {
     setSuccessMsg(null);
 
     if (!isInitialized) {
-      setFormError('Refund service is not initialized.');
+      setFormError('Returns service is not initialized.');
       return;
     }
 
@@ -137,7 +137,7 @@ const RefundScreen: React.FC<RefundScreenProps> = ({ onGoBack }) => {
             <MaterialIcons name="arrow-back" size={24} color={lightColors.primary} />
           </TouchableOpacity>
         )}
-        <Text style={styles.title}>Process Refund</Text>
+        <Text style={styles.title}>Returns & Refunds</Text>
       </View>
 
       {(error || formError) && (
@@ -393,4 +393,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RefundScreen;
+export default ReturnsScreen;

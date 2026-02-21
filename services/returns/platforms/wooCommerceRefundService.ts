@@ -1,11 +1,10 @@
-import { PlatformRefundServiceInterface, PlatformCredentials, RefundApiClient } from './PlatformRefundServiceInterface';
-import { RefundData, RefundResult, RefundRecord } from '../RefundServiceInterface';
+import { PlatformRefundServiceInterface, PlatformCredentials } from './PlatformRefundServiceInterface';
+import { RefundData, RefundResult, RefundRecord } from '../ReturnService';
 import { LoggerFactory } from '../../logger/LoggerFactory';
-import { ECommercePlatform } from '../../../utils/platforms';
 import { SecretsServiceFactory } from '../../secrets/SecretsService';
 import { SecretsServiceInterface } from '../../secrets/SecretsServiceInterface';
-import { getPlatformToken } from '../../token/TokenUtils';
-import { TokenType } from '../../token/TokenServiceInterface';
+import { createBasicAuthHeader } from '../../../utils/base64';
+import { WOOCOMMERCE_API_VERSION } from '../../config/apiVersions';
 
 /**
  * WooCommerce-specific implementation of the refund service
@@ -69,45 +68,6 @@ export class WooCommerceRefundService implements PlatformRefundServiceInterface 
   }
 
   /**
-   * Create a WooCommerce HTTP client
-   * @param credentials WooCommerce API credentials
-   * @returns HTTP client object
-   */
-  private async createWooCommerceApiClient(_credentials: PlatformCredentials): Promise<RefundApiClient> {
-    // Get the access token from the token management system
-    const accessToken = await getPlatformToken(ECommercePlatform.WOOCOMMERCE, TokenType.ACCESS);
-
-    if (!accessToken) {
-      this.logger.error('Failed to get WooCommerce access token');
-      throw new Error('Failed to get WooCommerce access token');
-    }
-    return {
-      post: async (endpoint: string, data: unknown) => {
-        this.logger.info(`Making API call to WooCommerce ${endpoint}`);
-
-        // In a real implementation, this would make an authenticated API call
-        // const response = await fetch(`${credentials.apiUrl}${endpoint}`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Authorization': `Bearer ${accessToken}`,
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify(data)
-        // });
-
-        // For now, simulate a successful response
-        return {
-          data: {
-            id: `wc-refund-${Date.now()}`,
-            order_id: (data as Record<string, unknown>).order_id,
-            status: 'completed',
-          },
-        };
-      },
-    };
-  }
-
-  /**
    * Process a WooCommerce refund directly using the API
    * @param orderId Order ID to refund
    * @param refundData Refund details
@@ -115,33 +75,44 @@ export class WooCommerceRefundService implements PlatformRefundServiceInterface 
   private async processWooCommerceRefund(orderId: string, refundData: RefundData): Promise<RefundResult> {
     try {
       const credentials = await this.getWooCommerceCredentials();
-
       if (!credentials) {
         throw new Error('Failed to retrieve WooCommerce API credentials');
       }
 
-      // Create API client
-      const apiClient = await this.createWooCommerceApiClient(credentials);
+      const endpoint = `${credentials.apiUrl}/wp-json/${WOOCOMMERCE_API_VERSION}/orders/${orderId}/refunds`;
 
-      // Format the request data
       const requestData = {
         api_refund: true,
-        order_id: orderId,
-        amount: refundData.amount || 0,
+        amount: String(refundData.amount || 0),
         reason: refundData.reason || 'Refunded via RetailPOS',
         line_items:
           refundData.items?.map(item => ({
-            line_item_id: item.lineItemId,
+            id: item.lineItemId,
             quantity: item.quantity,
-            refund_total: item.amount,
+            refund_total: String(item.amount || 0),
           })) || [],
       };
 
-      // Make API call
-      const response = await apiClient.post(`/wp-json/wc/v3/orders/${orderId}/refunds`, requestData);
+      this.logger.info(`Processing WooCommerce refund for order ${orderId} at ${endpoint}`);
 
-      // Process response
-      const refundId = String(response.data.id);
+      const authHeader = createBasicAuthHeader(credentials.apiKey || '', credentials.apiSecret || '');
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: authHeader,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`WooCommerce refund API returned ${response.status}: ${errorBody}`);
+      }
+
+      const data = await response.json();
+      const refundId = String(data.id || `wc-refund-${Date.now()}`);
 
       return {
         success: true,

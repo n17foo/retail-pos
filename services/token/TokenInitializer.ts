@@ -33,7 +33,6 @@ export class TokenInitializer {
     try {
       this.logger.info('Initializing token providers for all platforms');
 
-      const tokenServiceFactory = TokenServiceFactory.getInstance();
       const platforms = Object.values(ECommercePlatform);
 
       const results = await Promise.all(

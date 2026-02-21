@@ -8,7 +8,7 @@ import { UnifiedCategory } from '../../services/category/types';
 
 export const Category: React.FC = () => {
   const { selectedCategory, setSelectedCategory, setSelectedCategoryName, isLeftPanelOpen, setIsLeftPanelOpen } = useCategoryContext();
-  const { displayCategories, currentCategory, canNavigateUp, navigateTo, navigateUp, navigateToRoot, hasChildren, isLoading } =
+  const { displayCategories, currentCategory, canNavigateUp, navigateTo, navigateUp, navigateToRoot, hasChildren } =
     useCategoryNavigation();
 
   const handleCategorySelect = (category: UnifiedCategory) => {

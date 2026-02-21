@@ -108,17 +108,58 @@ export class TokenServiceFactory {
 
         const { username, password, apiUrl } = JSON.parse(credentials);
 
-        // Here you would make an actual API call to Magento to get a token
-        // For demonstration, we're simulating a successful response
+        // Make actual API call to Magento to get access token
         if (tokenType === TokenType.ACCESS) {
+          const tokenResponse = await fetch(`${apiUrl}/rest/V1/integration/admin/token`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username,
+              password,
+            }),
+          });
+
+          if (!tokenResponse.ok) {
+            throw new Error(`Magento API authentication failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
+          }
+
+          const accessToken = await tokenResponse.json();
+          if (typeof accessToken !== 'string') {
+            throw new Error('Invalid token response from Magento API');
+          }
+
           return {
-            token: `magento-${tokenType}-${Date.now()}`,
-            expiresAt: Date.now() + 3600 * 1000, // 1 hour expiration
+            token: accessToken,
+            expiresAt: Date.now() + 3600 * 1000, // 1 hour expiration (typical for Magento tokens)
           };
         } else if (tokenType === TokenType.REFRESH) {
+          // Magento doesn't have refresh tokens in the same way, but we can return the same access token
+          // In a production system, you might want to cache and reuse tokens
+          const tokenResponse = await fetch(`${apiUrl}/rest/V1/integration/admin/token`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username,
+              password,
+            }),
+          });
+
+          if (!tokenResponse.ok) {
+            throw new Error(`Magento API authentication failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
+          }
+
+          const refreshToken = await tokenResponse.json();
+          if (typeof refreshToken !== 'string') {
+            throw new Error('Invalid token response from Magento API');
+          }
+
           return {
-            token: `magento-${tokenType}-${Date.now()}`,
-            expiresAt: Date.now() + 30 * 24 * 3600 * 1000, // 30 days expiration
+            token: refreshToken,
+            expiresAt: Date.now() + 24 * 3600 * 1000, // 24 hours for refresh token
           };
         }
 

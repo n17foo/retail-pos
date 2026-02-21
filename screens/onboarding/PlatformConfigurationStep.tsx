@@ -283,41 +283,6 @@ const PlatformConfigurationStep: React.FC<PlatformConfigurationStepProps> = ({ p
     </View>
   );
 
-  const renderCustomForm = () => (
-    <View style={styles.formContainer}>
-      <View style={styles.infoBox}>
-        <Text style={styles.infoTitle}>Local-Only Mode</Text>
-        <Text style={styles.infoText}>
-          This mode works offline without connecting to an online store. Simply provide a public URL where your menu/products JSON can be
-          downloaded.
-        </Text>
-        <Text style={styles.infoText}>
-          Features: Download menu, create orders, print receipts.
-          {'\n'}Not available: Online sync, refunds to platform, inventory sync.
-        </Text>
-      </View>
-
-      <Text style={styles.inputLabel}>Menu Download URL *</Text>
-      <TextInput
-        style={styles.input}
-        value={config.menuUrl || ''}
-        onChangeText={value => updateConfig('menuUrl', value)}
-        placeholder="https://example.com/menu.json"
-        autoCapitalize="none"
-        keyboardType="url"
-      />
-      <Text style={styles.helpText}>JSON format: {`{ "products": [...], "categories": [...] }`}</Text>
-
-      <Text style={styles.inputLabel}>Store Name (Optional)</Text>
-      <TextInput
-        style={styles.input}
-        value={config.storeName || ''}
-        onChangeText={value => updateConfig('storeName', value)}
-        placeholder="My Local Store"
-      />
-    </View>
-  );
-
   const renderForm = () => {
     switch (platformId) {
       case 'shopify':

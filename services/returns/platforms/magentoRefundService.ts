@@ -1,11 +1,12 @@
-import { PlatformRefundServiceInterface, PlatformCredentials, RefundApiClient } from './PlatformRefundServiceInterface';
-import { RefundData, RefundResult, RefundRecord } from '../RefundServiceInterface';
+import { PlatformRefundServiceInterface, PlatformCredentials } from './PlatformRefundServiceInterface';
+import { RefundData, RefundResult, RefundRecord } from '../ReturnService';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
 import { SecretsServiceFactory } from '../../secrets/SecretsService';
 import { SecretsServiceInterface } from '../../secrets/SecretsServiceInterface';
 import { getPlatformToken } from '../../token/TokenUtils';
 import { TokenType } from '../../token/TokenServiceInterface';
+import { MAGENTO_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Magento-specific implementation of the refund service
@@ -69,72 +70,6 @@ export class MagentoRefundService implements PlatformRefundServiceInterface {
   }
 
   /**
-   * Create an HTTP client for Magento API
-   * @param credentials Magento API credentials
-   * @returns HTTP client object
-   */
-  private async createMagentoApiClient(_credentials: PlatformCredentials): Promise<RefundApiClient> {
-    // Get the access token from the token management system
-    const accessToken = await getPlatformToken(ECommercePlatform.MAGENTO, TokenType.ACCESS);
-
-    if (!accessToken) {
-      this.logger.error('Failed to get Magento access token');
-      throw new Error('Failed to get Magento access token');
-    }
-
-    // In a real implementation, this would create an Axios client or similar
-    // with proper authentication headers and base URL config
-    return {
-      post: async (endpoint: string, data: unknown) => {
-        this.logger.info(`Making API call to Magento ${endpoint}`);
-
-        // Here you would actually make the API call with proper auth headers
-        // const response = await axios.post(`${credentials.apiUrl}${endpoint}`, data, {
-        //   headers: {
-        //     'Authorization': `Bearer ${accessToken}`,
-        //     'Content-Type': 'application/json'
-        //   }
-        // });
-
-        // For now, simulate a successful response
-        return {
-          data: {
-            id: `magento-refund-${Date.now()}`,
-            order_number: (data as Record<string, unknown>).order_number,
-            status: 'complete',
-          },
-        };
-      },
-    };
-  }
-
-  /**
-   * Prepare refund request data for Magento API
-   * @param orderId Order ID to refund
-   * @param refundData Refund data from our app
-   * @returns Formatted refund request for Magento API
-   */
-  private prepareRefundRequest(orderId: string, refundData: RefundData): Record<string, unknown> {
-    // Transform our internal refund data to Magento's expected format
-    return {
-      items:
-        refundData.items?.map(item => ({
-          order_item_id: item.lineItemId,
-          qty: item.quantity,
-          amount: item.amount || 0,
-        })) || [],
-      notify: true,
-      refund_shipping: 0, // Add proper field if needed in RefundData interface
-      adjustment_positive: 0, // Add proper field if needed in RefundData interface
-      adjustment_negative: 0, // Add proper field if needed in RefundData interface
-      comment: {
-        comment: refundData.note || refundData.reason || 'Refund processed via RetailPOS',
-        is_visible_on_front: true,
-      },
-    };
-  }
-
-  /**
    * Process a refund directly with the Magento API
    * @param orderId The order ID to refund
    * @param refundData The refund data
@@ -142,30 +77,56 @@ export class MagentoRefundService implements PlatformRefundServiceInterface {
    */
   private async processMagentoRefund(orderId: string, refundData: RefundData): Promise<RefundResult> {
     try {
-      this.logger.info(`Processing direct Magento API refund for order ${orderId}`);
-
-      // Get Magento API credentials from secrets service
       const credentials = await this.getMagentoCredentials();
-
       if (!credentials) {
         throw new Error('Failed to retrieve Magento API credentials');
       }
 
-      // Create API client
-      const apiClient = await this.createMagentoApiClient(credentials);
-
-      // Prepare refund request data
-      const refundRequest = this.prepareRefundRequest(orderId, refundData);
-
-      // Make API call to Magento's refund endpoint
-      const response = await apiClient.post(`/orders/${orderId}/refunds`, refundRequest);
-
-      // Validate response
-      if (!response.data || !response.data.refund_id) {
-        throw new Error('Invalid response from Magento API');
+      const accessToken = await getPlatformToken(ECommercePlatform.MAGENTO, TokenType.ACCESS);
+      if (!accessToken) {
+        throw new Error('Failed to get Magento access token');
       }
 
-      const refundId = String(response.data.refund_id);
+      const endpoint = `${credentials.apiUrl}/rest/${MAGENTO_API_VERSION}/order/${orderId}/refund`;
+
+      const requestData = {
+        items:
+          refundData.items?.map(item => ({
+            order_item_id: item.lineItemId,
+            qty: item.quantity,
+          })) || [],
+        notify: true,
+        arguments: {
+          adjustment_positive: 0,
+          adjustment_negative: 0,
+          shipping_amount: 0,
+          extension_attributes: {},
+        },
+        comment: {
+          comment: refundData.note || refundData.reason || 'Refund processed via RetailPOS',
+          is_visible_on_front: 1,
+        },
+      };
+
+      this.logger.info(`Processing Magento refund for order ${orderId} at ${endpoint}`);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Magento refund API returned ${response.status}: ${errorBody}`);
+      }
+
+      const data = await response.json();
+      // Magento returns the credit memo ID directly
+      const refundId = String(data || `magento-refund-${Date.now()}`);
 
       return {
         success: true,

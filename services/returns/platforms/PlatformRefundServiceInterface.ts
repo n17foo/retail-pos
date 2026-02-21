@@ -1,4 +1,4 @@
-import { RefundData, RefundResult, RefundRecord } from '../RefundServiceInterface';
+import { RefundData, RefundResult, RefundRecord } from '../ReturnService';
 
 /**
  * Parsed platform API credentials retrieved from the secrets store

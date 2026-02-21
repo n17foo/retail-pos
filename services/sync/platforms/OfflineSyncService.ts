@@ -75,7 +75,7 @@ export class OfflineSyncService implements SyncServiceInterface {
   /**
    * Get the history of sync operations (empty for offline mode)
    */
-  async getSyncHistory(entityType?: SyncEntityType, limit?: number, offset?: number): Promise<SyncStatus[]> {
+  async getSyncHistory(_entityType?: SyncEntityType, _limit?: number, _offset?: number): Promise<SyncStatus[]> {
     return [];
   }
 

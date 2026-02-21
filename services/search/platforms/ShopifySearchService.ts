@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw platform API response mapping */
 import { SearchOptions, SearchProduct } from '../SearchServiceInterface';
-import { ProductQueryOptions, Product, ProductResult } from '../../product/ProductServiceInterface';
+import { ProductQueryOptions, ProductResult } from '../../product/ProductServiceInterface';
 import { PlatformConfigRequirements, PlatformSearchConfig } from './PlatformSearchServiceInterface';
 import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 
@@ -150,8 +150,6 @@ export class ShopifySearchService extends BaseSearchService {
       const data = await response.json();
 
       // Extract pagination info from headers or response body
-      const linkHeader = response.headers.get('Link');
-      const hasNextPage = linkHeader && linkHeader.includes('rel="next"');
       const totalPages = parseInt(response.headers.get('X-Shopify-API-Total-Pages') || '1');
       const totalItems = parseInt(response.headers.get('X-Shopify-API-Total-Items') || '0');
 

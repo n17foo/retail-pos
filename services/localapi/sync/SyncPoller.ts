@@ -1,5 +1,4 @@
 import { localApiConfig } from '../LocalApiConfig';
-import { localApiClient } from '../LocalApiClient';
 import { syncEventBus } from './SyncEventBus';
 import { SyncEvent } from './SyncEventTypes';
 import { LoggerFactory } from '../../logger/LoggerFactory';

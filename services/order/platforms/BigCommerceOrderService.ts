@@ -2,7 +2,6 @@
 import { Order } from '../OrderServiceInterface';
 import { PlatformOrderConfig, PlatformConfigRequirements } from './PlatformOrderServiceInterface';
 import { BaseOrderService } from './BaseOrderService';
-import { BIGCOMMERCE_API_VERSION } from '../../config/apiVersions';
 import { QueuedApiService } from '../../queue/QueuedApiService';
 
 /**
@@ -207,13 +206,6 @@ export class BigCommerceOrderService extends BaseOrderService {
    * Map our order format to BigCommerce's format
    */
   private mapToBigCommerceOrder(order: Order): any {
-    // Map customer info
-    const customer = {
-      email: order.customerEmail,
-      first_name: order.customerName?.split(' ')[0] || '',
-      last_name: order.customerName?.split(' ').slice(1).join(' ') || '',
-    };
-
     // Map addresses
     const billing_address = order.billingAddress
       ? {

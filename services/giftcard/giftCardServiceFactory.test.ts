@@ -1,11 +1,4 @@
 import { giftCardServiceFactory } from './GiftCardServiceFactory';
-import { WooCommerceGiftCardService } from './platforms/WooCommerceGiftCardService';
-import { BigCommerceGiftCardService } from './platforms/BigCommerceGiftCardService';
-import { MagentoGiftCardService } from './platforms/MagentoGiftCardService';
-import { SyliusGiftCardService } from './platforms/SyliusGiftCardService';
-import { WixGiftCardService } from './platforms/WixGiftCardService';
-import { PrestaShopGiftCardService } from './platforms/PrestaShopGiftCardService';
-import { SquarespaceGiftCardService } from './platforms/SquarespaceGiftCardService';
 import { ECommercePlatform } from '../../utils/platforms';
 
 // Mock logger to avoid transitive expo-sqlite dependency

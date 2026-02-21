@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../utils/theme';
 import { formatMoney } from '../utils/money';
 import { Button } from './Button';

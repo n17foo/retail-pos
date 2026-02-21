@@ -1,4 +1,4 @@
-import { SyncDirection, SyncEntityType, SyncOperationResult, SyncOptions, SyncServiceInterface, SyncStatus } from './SyncServiceInterface';
+import { SyncOperationResult, SyncOptions, SyncServiceInterface, SyncStatus } from './SyncServiceInterface';
 import { BaseSyncService } from './BaseSyncService';
 import { ECommercePlatform } from '../../utils/platforms';
 

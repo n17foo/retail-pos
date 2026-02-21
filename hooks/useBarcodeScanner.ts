@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { CameraView, type BarcodeScanningResult } from 'expo-camera';
+import { type BarcodeScanningResult } from 'expo-camera';
 import { ScannerType, ScannerServiceFactory } from '../services/scanner/ScannerServiceFactory';
 import { ScannerServiceInterface } from '../services/scanner/ScannerServiceInterface';
 import { formatMoney } from '../utils/money';
@@ -180,7 +180,7 @@ export const useBarcodeScanner = ({ scannerSettings, products, onScanSuccess }: 
           scanListenerRef.current = listenerId;
         }
       });
-    } catch (error) {
+    } catch {
       showScannerAlert('Error', `Failed to connect to ${scannerSettings.type} scanner.`);
     } finally {
       setConnecting(false);

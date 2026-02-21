@@ -155,18 +155,18 @@ export class SquarespaceProductService extends BaseProductService {
     });
   }
 
-  async createProduct(product: Product): Promise<Product> {
+  async createProduct(_product: Product): Promise<Product> {
     // Squarespace doesn't support product creation via API
     // Products must be created through the Squarespace dashboard
     throw new Error('Squarespace API does not support product creation. Please create products through the Squarespace dashboard.');
   }
 
-  async updateProduct(productId: string, productData: Partial<Product>): Promise<Product> {
+  async updateProduct(_productId: string, _productData: Partial<Product>): Promise<Product> {
     // Squarespace has limited product update capabilities via API
     throw new Error('Squarespace API has limited product update support. Please update products through the Squarespace dashboard.');
   }
 
-  async deleteProduct(productId: string): Promise<boolean> {
+  async deleteProduct(): Promise<boolean> {
     // Squarespace doesn't support product deletion via API
     throw new Error('Squarespace API does not support product deletion. Please delete products through the Squarespace dashboard.');
   }

@@ -3,9 +3,18 @@ import { orderRepository } from '../../repositories/OrderRepository';
 import { OrderItemRepository } from '../../repositories/OrderItemRepository';
 import { LoggerFactory } from '../logger/LoggerFactory';
 import { auditLogService } from '../audit/AuditLogService';
-import { RefundServiceFactory } from '../refund/RefundServiceFactory';
 import { ECommercePlatform } from '../../utils/platforms';
 import { notificationService } from '../notifications/NotificationService';
+import { PlatformRefundServiceInterface } from '../returns/platforms/PlatformRefundServiceInterface';
+import { ShopifyRefundService } from '../returns/platforms/shopifyRefundService';
+import { WooCommerceRefundService } from '../returns/platforms/wooCommerceRefundService';
+import { MagentoRefundService } from '../returns/platforms/magentoRefundService';
+import { BigCommerceRefundService } from '../returns/platforms/bigCommerceRefundService';
+import { SyliusRefundService } from '../returns/platforms/syliusRefundService';
+import { WixRefundService } from '../returns/platforms/wixRefundService';
+import { PrestaShopRefundService } from '../returns/platforms/PrestaShopRefundService';
+import { SquarespaceRefundService } from '../returns/platforms/SquarespaceRefundService';
+import { OfflineRefundService } from '../returns/platforms/OfflineRefundService';
 
 export interface ReturnItem {
   id: string;
@@ -73,14 +82,57 @@ export interface ProcessReturnResult {
   error?: string;
 }
 
+// ── Refund types (unified into ReturnService) ──────────────────────────────
+
+export interface RefundData {
+  items?: Array<{
+    lineItemId: string;
+    quantity: number;
+    amount?: number;
+    restockInventory?: boolean;
+  }>;
+  amount?: number;
+  reason?: string;
+  note?: string;
+}
+
+export interface RefundResult {
+  success: boolean;
+  refundId?: string;
+  amount?: number;
+  error?: string;
+  timestamp: Date;
+}
+
+export interface RefundRecord {
+  id: string;
+  orderId: string;
+  transactionId?: string;
+  amount: number;
+  items?: Array<{
+    lineItemId: string;
+    quantity: number;
+    amount: number;
+  }>;
+  reason?: string;
+  note?: string;
+  status: 'pending' | 'completed' | 'failed';
+  source: 'ecommerce' | 'payment_terminal';
+  timestamp: Date;
+}
+
 /**
- * Service for processing returns and stock adjustments.
- * Returns are recorded locally and can optionally restock inventory.
+ * Unified service for processing returns and refunds.
+ * Returns are recorded locally and can optionally trigger platform refunds.
+ * Refunds can also be processed independently (e.g. payment terminal refunds).
  */
 export class ReturnService {
   private static instance: ReturnService;
   private logger = LoggerFactory.getInstance().createLogger('ReturnService');
   private orderItemRepo = new OrderItemRepository();
+  private platformRefundServices: Map<ECommercePlatform, PlatformRefundServiceInterface> = new Map();
+  private offlineRefundService: OfflineRefundService | null = null;
+  private refundInitialized = false;
 
   private constructor() {}
 
@@ -133,17 +185,20 @@ export class ReturnService {
       if (input.issueRefund) {
         const platform = input.platform ?? (order.platform as ECommercePlatform | undefined);
         try {
-          const refundService = RefundServiceFactory.getInstance().getRefundServiceForPlatform(platform ?? undefined);
-          const refundResult = await refundService.processEcommerceRefund(order.platform_order_id || input.orderId, {
-            amount: Math.round(totalRefund * 100) / 100,
-            reason: input.items[0]?.reason ?? 'POS return',
-            items: input.items.map(i => ({
-              lineItemId: i.orderItemId || i.productId,
-              quantity: i.quantity,
-              amount: i.refundAmount,
-              restockInventory: i.restock,
-            })),
-          });
+          const refundResult = await this.processRefund(
+            order.platform_order_id || input.orderId,
+            {
+              amount: Math.round(totalRefund * 100) / 100,
+              reason: input.items[0]?.reason ?? 'POS return',
+              items: input.items.map(i => ({
+                lineItemId: i.orderItemId || i.productId,
+                quantity: i.quantity,
+                amount: i.refundAmount,
+                restockInventory: i.restock,
+              })),
+            },
+            platform ?? undefined
+          );
           if (refundResult.success) {
             refundId = refundResult.refundId;
             this.logger.info(`Platform refund issued: ${refundId}`);
@@ -244,6 +299,169 @@ export class ReturnService {
         };
       })
       .filter(item => item.returnableQuantity > 0);
+  }
+
+  // ── Refund capabilities ──────────────────────────────────────────────────
+
+  /**
+   * Initialize the refund subsystem.
+   * Called lazily on first refund operation if not called explicitly.
+   */
+  async initializeRefundService(): Promise<boolean> {
+    if (this.refundInitialized) return true;
+    try {
+      this.offlineRefundService = new OfflineRefundService();
+      await this.offlineRefundService.initialize();
+      this.refundInitialized = true;
+      this.logger.info('Refund subsystem initialized');
+      return true;
+    } catch (error) {
+      this.logger.error({ message: 'Failed to initialize refund subsystem' }, error instanceof Error ? error : new Error(String(error)));
+      return false;
+    }
+  }
+
+  /**
+   * Get or create a platform-specific refund service.
+   */
+  private getPlatformRefundService(platform: ECommercePlatform): PlatformRefundServiceInterface {
+    if (this.platformRefundServices.has(platform)) {
+      return this.platformRefundServices.get(platform)!;
+    }
+
+    let service: PlatformRefundServiceInterface;
+    switch (platform) {
+      case ECommercePlatform.SHOPIFY:
+        service = new ShopifyRefundService();
+        break;
+      case ECommercePlatform.WOOCOMMERCE:
+        service = new WooCommerceRefundService();
+        break;
+      case ECommercePlatform.MAGENTO:
+        service = new MagentoRefundService();
+        break;
+      case ECommercePlatform.BIGCOMMERCE:
+        service = new BigCommerceRefundService();
+        break;
+      case ECommercePlatform.SYLIUS:
+        service = new SyliusRefundService();
+        break;
+      case ECommercePlatform.WIX:
+        service = new WixRefundService();
+        break;
+      case ECommercePlatform.PRESTASHOP:
+        service = new PrestaShopRefundService();
+        break;
+      case ECommercePlatform.SQUARESPACE:
+        service = new SquarespaceRefundService();
+        break;
+      default:
+        service = this.offlineRefundService ?? new OfflineRefundService();
+        break;
+    }
+
+    this.platformRefundServices.set(platform, service);
+    return service;
+  }
+
+  /**
+   * Process a refund for an e-commerce order on the given platform.
+   * If no platform is provided, falls back to offline/local refund.
+   */
+  async processRefund(orderId: string, refundData: RefundData, platform?: ECommercePlatform): Promise<RefundResult> {
+    try {
+      if (!this.refundInitialized) {
+        await this.initializeRefundService();
+      }
+
+      const service = platform
+        ? this.getPlatformRefundService(platform)
+        : (this.offlineRefundService ?? this.getPlatformRefundService(ECommercePlatform.OFFLINE));
+
+      if (!service.isInitialized()) {
+        await service.initialize();
+      }
+
+      this.logger.info(`Processing refund for order ${orderId} via ${platform || 'offline'}`);
+      return await service.processRefund(orderId, refundData);
+    } catch (error) {
+      this.logger.error(
+        { message: `Error processing refund for order ${orderId}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date(),
+      };
+    }
+  }
+
+  /**
+   * Process a payment terminal refund (offline / local).
+   */
+  async processPaymentRefund(transactionId: string, amount: number, reason?: string): Promise<RefundResult> {
+    try {
+      if (!this.refundInitialized) {
+        await this.initializeRefundService();
+      }
+
+      const service = this.offlineRefundService ?? new OfflineRefundService();
+      if (!service.isInitialized()) {
+        await service.initialize();
+      }
+
+      this.logger.info(`Processing payment refund for transaction ${transactionId}`);
+      return await service.processRefund(transactionId, {
+        amount,
+        reason: reason || 'Payment terminal refund',
+      });
+    } catch (error) {
+      this.logger.error(
+        { message: `Error processing payment refund for transaction ${transactionId}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        timestamp: new Date(),
+      };
+    }
+  }
+
+  /**
+   * Get refund history for an order.
+   */
+  async getRefundHistory(orderId: string, platform?: ECommercePlatform): Promise<RefundRecord[]> {
+    try {
+      if (!this.refundInitialized) {
+        await this.initializeRefundService();
+      }
+
+      const service = platform
+        ? this.getPlatformRefundService(platform)
+        : (this.offlineRefundService ?? this.getPlatformRefundService(ECommercePlatform.OFFLINE));
+
+      if (!service.isInitialized()) {
+        await service.initialize();
+      }
+
+      return await service.getRefundHistory(orderId);
+    } catch (error) {
+      this.logger.error(
+        { message: `Error getting refund history for order ${orderId}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Configure a platform refund service (called by ServiceConfigBridge).
+   */
+  configurePlatformRefund(platform: ECommercePlatform, _config: Record<string, unknown>): void {
+    this.getPlatformRefundService(platform);
+    this.logger.info(`Refund service configured for ${platform}`);
   }
 }
 

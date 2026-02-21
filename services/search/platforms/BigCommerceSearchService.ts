@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw platform API response mapping */
 import { SearchOptions, SearchProduct } from '../SearchServiceInterface';
-import { ProductQueryOptions, Product, ProductResult } from '../../product/ProductServiceInterface';
+import { ProductQueryOptions, ProductResult } from '../../product/ProductServiceInterface';
 import { PlatformConfigRequirements, PlatformSearchConfig } from './PlatformSearchServiceInterface';
 import { BaseSearchService } from './BaseSearchService';
 import { BIGCOMMERCE_API_VERSION } from '../../config/apiVersions';

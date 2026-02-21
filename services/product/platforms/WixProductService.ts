@@ -413,7 +413,7 @@ export class WixProductService extends BaseProductService {
       brand: product.vendor,
       media: {
         items:
-          product.images?.map((image, index) => ({
+          product.images?.map(image => ({
             image: {
               url: image.url,
               altText: image.alt,

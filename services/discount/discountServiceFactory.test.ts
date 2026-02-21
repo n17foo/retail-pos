@@ -1,10 +1,4 @@
 import { discountServiceFactory } from './DiscountServiceFactory';
-import { BigCommerceDiscountService } from './platforms/BigCommerceDiscountService';
-import { MagentoDiscountService } from './platforms/MagentoDiscountService';
-import { SyliusDiscountService } from './platforms/SyliusDiscountService';
-import { WixDiscountService } from './platforms/WixDiscountService';
-import { PrestaShopDiscountService } from './platforms/PrestaShopDiscountService';
-import { SquarespaceDiscountService } from './platforms/SquarespaceDiscountService';
 import { ECommercePlatform } from '../../utils/platforms';
 
 // Mock logger to avoid transitive expo-sqlite dependency

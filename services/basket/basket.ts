@@ -1,5 +1,3 @@
-import { ECommercePlatform } from '../../utils/platforms';
-
 /**
  * Represents an item in the basket
  */

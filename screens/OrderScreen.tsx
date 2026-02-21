@@ -17,14 +17,13 @@ import { useResponsive, getProductColumns, getSidebarWidths } from '../hooks/use
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 interface OrderScreenProps {
-  onLogout?: () => void;
   username?: string;
 }
 
 const OrderScreen: React.FC<OrderScreenProps> = ({ username = 'User' }) => {
   const { selectedCategory, selectedCategoryName, setSelectedCategory, setSelectedCategoryName } = useCategoryContext();
   const { cartItems, cartItemsMap, addToCart, updateQuantity, itemCount } = useBasketContext();
-  const { isMobile, isTabletOrDesktop, width } = useResponsive();
+  const { isTabletOrDesktop, width } = useResponsive();
   const [searchQuery, setSearchQuery] = useState('');
 
   // eCommerce integration

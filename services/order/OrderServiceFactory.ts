@@ -1,4 +1,4 @@
-import { OrderServiceInterface, Order } from './OrderServiceInterface';
+import { OrderServiceInterface } from './OrderServiceInterface';
 import { ShopifyOrderService } from './platforms/ShopifyOrderService';
 import { WooCommerceOrderService } from './platforms/WooCommerceOrderService';
 import { BigCommerceOrderService } from './platforms/BigCommerceOrderService';

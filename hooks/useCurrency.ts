@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useEcommerceSettings } from './useEcommerceSettings';
-import { getCurrencySymbol, getCurrencyInfo } from '../utils/currency';
+import { getCurrencyInfo } from '../utils/currency';
 
 /**
  * Hook that returns currency information for the currently configured currency.

@@ -11,12 +11,11 @@ import { CheckoutModal, PaymentMethod } from '../../components/CheckoutModal';
 
 interface BasketProps {
   onCheckout?: () => void;
-  onPaymentTerminal?: (orderId: string, amount: number) => void;
   onPrintReceipt?: (orderId: string) => void;
   platform?: ECommercePlatform;
 }
 
-export const Basket: React.FC<BasketProps> = ({ onCheckout, onPaymentTerminal, onPrintReceipt, platform }) => {
+export const Basket: React.FC<BasketProps> = ({ onCheckout, onPrintReceipt, platform }) => {
   const currency = useCurrency();
   const { t } = useTranslate();
   const {
@@ -33,7 +32,6 @@ export const Basket: React.FC<BasketProps> = ({ onCheckout, onPaymentTerminal, o
     startCheckout,
     markPaymentProcessing,
     completePayment,
-    currentOrder,
     itemCount,
     unsyncedOrdersCount,
     syncAllPendingOrders,

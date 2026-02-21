@@ -1,4 +1,4 @@
-import { orderRepository, OrderRow } from '../../repositories/OrderRepository';
+import { orderRepository } from '../../repositories/OrderRepository';
 import { LoggerFactory } from '../logger/LoggerFactory';
 
 export interface SalesSummary {

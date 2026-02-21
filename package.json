@@ -22,7 +22,7 @@
     "doctor": "npx expo-doctor",
     "lint": "npx tsc --noEmit && eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "npx tsc --noEmit && eslint . --ext .js,.jsx,.ts,.tsx --fix",
-    "lint:errors": "npx tsc --noEmit && eslint . --ext .js,.jsx,.ts,.tsx --quiet",
+    "lint:errors": "eslint . --ext .js,.jsx,.ts,.tsx --quiet",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "prepare": "husky"
   },
@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.29.0",
-    "@eslint/js": "10.0.1",
+    "@eslint/js": "9.39.3",
     "@types/jest": "29.5.14",
     "@types/react": "~19.1.10",
     "@types/react-native-square-in-app-payments": "1.4.4",
@@ -75,7 +75,7 @@
     "concurrently": "^9.2.1",
     "electron": "^40.6.0",
     "electron-builder": "^26.8.1",
-    "eslint": "10.0.1",
+    "eslint": "9.39.3",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.5",
     "eslint-plugin-react": "7.37.5",

@@ -70,7 +70,7 @@ export const useScannerSettings = () => {
   }, []);
 
   // Test scanner connection
-  const testConnection = useCallback(async (settings: ScannerSettings) => {
+  const testConnection = useCallback(async (_settings: ScannerSettings) => {
     try {
       // TODO: Implement actual scanner connection test
       // This is a placeholder implementation

@@ -22,9 +22,9 @@ import { CategoryServiceInterface } from '../category/CategoryServiceInterface';
 import { OrderServiceInterface } from '../order/OrderServiceInterface';
 import { InventoryServiceInterface } from '../inventory/InventoryServiceInterface';
 import { SearchServiceInterface } from '../search/SearchServiceInterface';
-import { RefundServiceInterface } from '../refund/RefundServiceInterface';
 import { BasketServiceInterface } from '../basket/BasketServiceInterface';
 import { TokenServiceInterface } from '../token/TokenServiceInterface';
+import { ReturnService } from '../returns/ReturnService';
 
 // Domain service factories
 import { ProductServiceFactory } from '../product/ProductServiceFactory';
@@ -32,7 +32,6 @@ import { CategoryServiceFactory } from '../category/CategoryServiceFactory';
 import { OrderServiceFactory } from '../order/OrderServiceFactory';
 import { InventoryServiceFactory } from '../inventory/InventoryServiceFactory';
 import { SearchServiceFactory } from '../search/SearchServiceFactory';
-import { RefundServiceFactory } from '../refund/RefundServiceFactory';
 import { BasketServiceFactory } from '../basket/BasketServiceFactory';
 import { TokenServiceFactory } from '../token/TokenServiceFactory';
 
@@ -56,8 +55,8 @@ export interface PlatformServices {
   inventory: InventoryServiceInterface;
   /** Product search */
   search: SearchServiceInterface;
-  /** Refund processing */
-  refund: RefundServiceInterface;
+  /** Returns & refund processing */
+  returns: ReturnService;
   /** Basket / checkout */
   basket: BasketServiceInterface;
   /** Token management */
@@ -118,7 +117,7 @@ export class PlatformServiceRegistry {
       order: OrderServiceFactory.getInstance().getService(platform),
       inventory: InventoryServiceFactory.getInstance().getService(platform),
       search: SearchServiceFactory.getInstance().getService(),
-      refund: RefundServiceFactory.getInstance().getRefundServiceForPlatform(platform),
+      returns: ReturnService.getInstance(),
       basket: this.getBasketServiceSync(),
       token: TokenServiceFactory.getInstance().getService(),
     };
@@ -150,8 +149,8 @@ export class PlatformServiceRegistry {
     return SearchServiceFactory.getInstance().getService();
   }
 
-  public getRefundService(platform: ECommercePlatform): RefundServiceInterface {
-    return this.getServices(platform).refund;
+  public getReturnService(): ReturnService {
+    return ReturnService.getInstance();
   }
 
   public async getBasketService(): Promise<BasketServiceInterface> {

@@ -56,7 +56,7 @@ export class SquarespaceOrderService extends BaseOrderService {
     };
   }
 
-  async createOrder(order: Order): Promise<Order> {
+  async createOrder(_order: Order): Promise<Order> {
     // Squarespace doesn't support order creation via API
     // Orders are created through the Squarespace checkout process
     throw new Error('Squarespace API does not support order creation. Orders must be placed through the Squarespace storefront.');

@@ -1,4 +1,4 @@
-import { SyncServiceInterface, SyncStatus } from '../SyncServiceInterface';
+import { SyncServiceInterface } from '../SyncServiceInterface';
 
 /**
  * Configuration requirements for platform sync services

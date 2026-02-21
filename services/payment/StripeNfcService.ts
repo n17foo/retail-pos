@@ -2,6 +2,7 @@ import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from './Paym
 import { Platform } from 'react-native';
 import { keyValueRepository } from '../../repositories/KeyValueRepository';
 import { StripeTerminalBridgeManager } from '../../contexts/StripeTerminalBridge';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Implementation of Stripe NFC Tap to Pay service
@@ -13,6 +14,7 @@ export class StripeNfcService implements PaymentServiceInterface {
   private deviceId: string | null = null;
   private currentTransactionId: string | null = null;
   private isInitialized: boolean = false;
+  private logger = LoggerFactory.getInstance().createLogger('StripeNfcService');
 
   private constructor() {
     console.log('Stripe NFC Tap to Pay service initialized');
@@ -49,7 +51,7 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   private initializeStripeSDK = async (): Promise<boolean> => {
     try {
-      console.log('Initializing Stripe Terminal SDK...');
+      this.logger.info('Initializing Stripe Terminal SDK...');
 
       // Check if the bridge is initialized and available
       const bridgeManager = StripeTerminalBridgeManager.getInstance();
@@ -366,6 +368,7 @@ export class StripeNfcService implements PaymentServiceInterface {
       const bridgeManager = StripeTerminalBridgeManager.getInstance();
       return bridgeManager.isReaderConnected();
     } catch (error) {
+      this.logger.error('Error checking NFC reader connection:', error);
       // If there's an error accessing the bridge, fall back to our local state
       return this.isConnected;
     }

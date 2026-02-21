@@ -98,10 +98,6 @@ const OnboardingScreen: React.FC = () => {
     setCurrentStep('admin_user');
   };
 
-  const handleNextFromAdminUserOffline = () => {
-    setCurrentStep('staff_setup');
-  };
-
   const handleNextFromStaffSetup = () => {
     setCurrentStep('payment_provider_setup');
   };

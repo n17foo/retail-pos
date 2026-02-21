@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Modal } from 'react-native';
 import { useUsers, User, UserRole } from '../../hooks/useUsers';
 import PinKeypad from '../../components/PinKeypad';
 import PinDisplay from '../../components/PinDisplay';
@@ -20,8 +20,7 @@ interface UserFormData {
 }
 
 const UsersSettingsTab: React.FC = () => {
-  const { users, isLoading, error, loadUsers, createUser, updateUser, updatePin, deactivateUser, activateUser, deleteUser, isPinUnique } =
-    useUsers();
+  const { users, isLoading, error, loadUsers, createUser, updateUser, updatePin, deactivateUser, activateUser, isPinUnique } = useUsers();
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -200,30 +199,8 @@ const UsersSettingsTab: React.FC = () => {
         onPress: async () => {
           try {
             await action(user.id);
-          } catch (err) {
+          } catch {
             Alert.alert('Error', `Failed to ${actionName} user`);
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleDeleteUser = (user: User) => {
-    if (user.role === 'admin') {
-      Alert.alert('Warning', 'Deleting an admin user may lock you out of the system.');
-    }
-
-    Alert.alert('Delete User', `Are you sure you want to permanently delete ${user.name}? This action cannot be undone.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteUser(user.id);
-            Alert.alert('Success', 'User deleted successfully.');
-          } catch (err) {
-            Alert.alert('Error', 'Failed to delete user');
           }
         },
       },

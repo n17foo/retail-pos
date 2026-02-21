@@ -35,7 +35,7 @@ export class PinAuthProvider implements AuthMethodProvider {
       }
 
       return { success: false, error: 'Invalid PIN. Please try again.' };
-    } catch (err) {
+    } catch {
       return { success: false, error: 'Authentication failed. Please try again.' };
     }
   }

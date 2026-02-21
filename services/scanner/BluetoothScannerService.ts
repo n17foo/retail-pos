@@ -1,6 +1,7 @@
 import { ScannerServiceInterface } from './ScannerServiceInterface';
 import { BleManager, Device } from 'react-native-ble-plx';
 import { LoggerFactory } from '../logger/LoggerFactory';
+import { decodeBase64 } from '../../utils/base64';
 
 /**
  * Bluetooth scanner service implementation using BLE
@@ -100,8 +101,7 @@ export class BluetoothScannerService implements ScannerServiceInterface {
 
         if (characteristic?.value) {
           // Decode the base64 value to get the barcode text
-          const buffer = Buffer.from(characteristic.value, 'base64');
-          const barcodeData = buffer.toString('utf8');
+          const barcodeData = decodeBase64(characteristic.value);
 
           // Call the callback with the barcode data
           callback(barcodeData);

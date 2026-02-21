@@ -1,11 +1,6 @@
 import { SyncDirection, SyncEntityType, SyncError, SyncOperationResult, SyncOptions } from '../SyncServiceInterface';
 import { BasePlatformSyncService } from './BasePlatformSyncService';
 import { PlatformSyncConfig, PlatformSyncConfigRequirements } from './PlatformSyncServiceInterface';
-import { ProductServiceFactory } from '../../product/ProductServiceFactory';
-import { InventoryServiceFactory } from '../../inventory/InventoryServiceFactory';
-import { CategoryServiceFactory } from '../../category/CategoryServiceFactory';
-import { OrderServiceFactory } from '../../order/OrderServiceFactory';
-import { ECommercePlatform } from '../../../utils/platforms';
 
 /**
  * BigCommerce-specific sync service implementation
@@ -286,8 +281,6 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const productService = ProductServiceFactory.getInstance().getService(ECommercePlatform.BIGCOMMERCE);
-
     try {
       if (options.direction === SyncDirection.POS_TO_ECOMMERCE) {
         // Handle POS to BigCommerce sync
@@ -371,8 +364,6 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const inventoryService = InventoryServiceFactory.getInstance().getService(ECommercePlatform.BIGCOMMERCE);
-
     try {
       // BigCommerce handles inventory as part of products, so this sync is simpler
       if (options.direction === SyncDirection.POS_TO_ECOMMERCE) {
@@ -414,8 +405,6 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const categoryService = CategoryServiceFactory.getInstance().getService(ECommercePlatform.BIGCOMMERCE);
-
     try {
       if (options.direction === SyncDirection.ECOMMERCE_TO_POS) {
         // Get categories from BigCommerce
@@ -494,8 +483,6 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
     options: SyncOptions,
     stats: { successful: number; failed: number; skipped: number; errors: SyncError[]; warnings: string[]; entityCount: number }
   ): Promise<void> {
-    const orderService = OrderServiceFactory.getInstance().getService(ECommercePlatform.BIGCOMMERCE);
-
     try {
       if (options.direction === SyncDirection.ECOMMERCE_TO_POS) {
         // Simulate fetching orders from BigCommerce

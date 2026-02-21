@@ -63,7 +63,7 @@ export abstract class BaseCategoryService implements PlatformCategoryServiceInte
    * Default implementation of create category
    * Can be overridden by platform services
    */
-  async createCategory?(category: Omit<Category, 'id'>): Promise<Category> {
+  async createCategory?(_category: Omit<Category, 'id'>): Promise<Category> {
     throw new Error('Create category not implemented for this platform');
   }
 
@@ -71,7 +71,7 @@ export abstract class BaseCategoryService implements PlatformCategoryServiceInte
    * Default implementation of update category
    * Can be overridden by platform services
    */
-  async updateCategory?(categoryId: string, categoryData: Partial<Category>): Promise<Category> {
+  async updateCategory?(_categoryId: string, _categoryData: Partial<Category>): Promise<Category> {
     throw new Error('Update category not implemented for this platform');
   }
 
@@ -79,7 +79,7 @@ export abstract class BaseCategoryService implements PlatformCategoryServiceInte
    * Default implementation of delete category
    * Can be overridden by platform services
    */
-  async deleteCategory?(categoryId: string): Promise<boolean> {
+  async deleteCategory?(_categoryId: string): Promise<boolean> {
     throw new Error('Delete category not implemented for this platform');
   }
 }

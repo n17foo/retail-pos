@@ -28,7 +28,7 @@ const PrinterSettingsTab: React.FC = () => {
   } = usePrinterSettings();
 
   // Local state to track if we have unsaved changes
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [_hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Track if we've already initialized
   const initialized = useRef(false);
@@ -57,21 +57,6 @@ const PrinterSettingsTab: React.FC = () => {
       setHasUnsavedChanges(false);
     }
   }, [printerSettings]);
-
-  // Save changes handler
-  const saveChanges = useCallback(async () => {
-    if (hasUnsavedChanges) {
-      console.log('Saving printer settings changes');
-      await saveSettings(printerSettings);
-    }
-  }, [printerSettings, hasUnsavedChanges, saveSettings]);
-
-  // Cancel changes handler
-  const cancelChanges = useCallback(() => {
-    console.log('Cancelling printer settings changes');
-    handlePrinterSettingsChange(deepCopy(originalSettings.current));
-    setHasUnsavedChanges(false);
-  }, [handlePrinterSettingsChange]);
 
   // Update settings and mark as changed
   const updateSettings = useCallback(

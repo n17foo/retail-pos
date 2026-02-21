@@ -1,5 +1,5 @@
 import { TouchableOpacity, View, Text, StyleSheet, FlatList } from 'react-native';
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { lightColors, spacing, typography, borderRadius } from '../../utils/theme';
 import { useCategoryContext } from '../../contexts/CategoryProvider';

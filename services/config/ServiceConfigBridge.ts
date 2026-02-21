@@ -288,12 +288,11 @@ export class ServiceConfigBridge {
   }
 
   /**
-   * Configure RefundServiceFactory with platform settings
+   * Configure refund service within ReturnService with platform settings
    */
   private configureRefundService(platform: ECommercePlatform, config: Record<string, unknown>): void {
-    const { RefundServiceFactory } = require('../refund/RefundServiceFactory');
-    const factory = RefundServiceFactory.getInstance();
-    factory.configureService(platform, config);
+    const { ReturnService } = require('../returns/ReturnService');
+    ReturnService.getInstance().configurePlatformRefund(platform, config);
     this.logger.info(`RefundService configured for ${platform}`);
   }
 

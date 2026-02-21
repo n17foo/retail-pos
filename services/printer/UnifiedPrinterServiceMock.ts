@@ -100,9 +100,10 @@ export class UnifiedPrinterServiceMock extends AbstractPrinterService {
   /**
    * Format receipt buffer (not used in mock)
    */
-  formatReceiptBuffer(data: ReceiptData): Buffer {
+  formatReceiptBuffer(data: ReceiptData): Uint8Array {
     // In a real implementation, this would format the receipt data into a buffer
-    return Buffer.from(JSON.stringify(data));
+    const encoder = new TextEncoder();
+    return encoder.encode(JSON.stringify(data));
   }
 
   /**

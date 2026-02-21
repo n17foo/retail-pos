@@ -36,7 +36,7 @@ const formatDate = (timestamp: number): string => {
   return new Date(timestamp).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
-const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = ({ navigation }) => {
+const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
   const { getLocalOrders, syncOrderToPlatform, getSyncQueueStatus, unsyncedOrdersCount } = useBasketContext();
   const { user } = useAuthContext();
   const { currentShift, openShift, closeShift, generateReport, getReportLines, getReceiptLines } = useDailyReport();
@@ -48,7 +48,7 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = ({ navigation }) =
 
   // Orders state
   const [orders, setOrders] = useState<LocalOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [syncingOrderId, setSyncingOrderId] = useState<string | null>(null);
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView } from 'react-native';
-import { useReceiptConfig, ReceiptConfig } from '../../hooks/useReceiptConfig';
+import { useReceiptConfig } from '../../hooks/useReceiptConfig';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
 import { useTranslate } from '../../hooks/useTranslate';
 
@@ -21,7 +21,7 @@ const PAPER_WIDTHS: { value: 58 | 80; label: string }[] = [
 
 const ReceiptSettingsTab: React.FC = () => {
   const { t } = useTranslate();
-  const { config, isLoading, error, updateHeader, updateFooter, updateOptions, setPrinterModel, reload } = useReceiptConfig();
+  const { config, isLoading, error, updateHeader, updateFooter, updateOptions, setPrinterModel } = useReceiptConfig();
 
   const [localHeader, setLocalHeader] = useState(config.header);
   const [localFooter, setLocalFooter] = useState(config.footer);

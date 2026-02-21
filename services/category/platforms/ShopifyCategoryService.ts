@@ -2,6 +2,7 @@
 import { Category } from '../CategoryServiceInterface';
 import { BaseCategoryService } from './BaseCategoryService';
 import { PlatformConfigRequirements } from './PlatformCategoryServiceInterface';
+import { SHOPIFY_API_VERSION } from '../../config/apiVersions';
 
 /**
  * Shopify-specific category service implementation
@@ -28,7 +29,7 @@ export class ShopifyCategoryService extends BaseCategoryService {
 
     try {
       // Use API version from config or default to a stable version
-      const apiVersion = this.config.apiVersion || '2023-01';
+      const apiVersion = this.config.apiVersion || SHOPIFY_API_VERSION;
 
       // Shopify uses collections for categorization
       // First, get custom collections
@@ -81,7 +82,7 @@ export class ShopifyCategoryService extends BaseCategoryService {
 
     try {
       // Use API version from config or default to a stable version
-      const apiVersion = this.config.apiVersion || '2023-01';
+      const apiVersion = this.config.apiVersion || SHOPIFY_API_VERSION;
 
       // Try to get as custom collection first
       const customUrl = `${this.config.storeUrl}/admin/api/${apiVersion}/custom_collections/${categoryId}.json`;
@@ -131,7 +132,7 @@ export class ShopifyCategoryService extends BaseCategoryService {
 
     try {
       // Use API version from config or default to a stable version
-      const apiVersion = this.config.apiVersion || '2023-01';
+      const apiVersion = this.config.apiVersion || SHOPIFY_API_VERSION;
       const url = `${this.config.storeUrl}/admin/api/${apiVersion}/custom_collections.json`;
 
       // Format category data for Shopify
@@ -183,7 +184,7 @@ export class ShopifyCategoryService extends BaseCategoryService {
       // Smart collections can't be updated through the API in the same way
       // For this example, we'll focus on custom collections
 
-      const apiVersion = this.config.apiVersion || '2023-01';
+      const apiVersion = this.config.apiVersion || SHOPIFY_API_VERSION;
       const url = `${this.config.storeUrl}/admin/api/${apiVersion}/custom_collections/${categoryId}.json`;
 
       // Format category data for Shopify
@@ -241,7 +242,7 @@ export class ShopifyCategoryService extends BaseCategoryService {
       }
 
       // Use API version from config or default to a stable version
-      const apiVersion = this.config.apiVersion || '2023-01';
+      const apiVersion = this.config.apiVersion || SHOPIFY_API_VERSION;
 
       // Try to delete as custom collection first
       let url = `${this.config.storeUrl}/admin/api/${apiVersion}/custom_collections/${categoryId}.json`;

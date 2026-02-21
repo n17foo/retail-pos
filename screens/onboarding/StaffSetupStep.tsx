@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
-import { useUsers, UserRole, CreateUserInput } from '../../hooks/useUsers';
+import { useUsers, UserRole } from '../../hooks/useUsers';
 import PinKeypad from '../../components/PinKeypad';
 import PinDisplay from '../../components/PinDisplay';
 
@@ -27,7 +27,7 @@ const ROLE_INFO: Record<UserRole, { label: string; description: string; icon: st
 };
 
 const StaffSetupStep: React.FC<StaffSetupStepProps> = ({ onBack, onComplete }) => {
-  const { createUser, isPinUnique, users, loadUsers } = useUsers();
+  const { createUser, isPinUnique } = useUsers();
 
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [isAdding, setIsAdding] = useState(false);

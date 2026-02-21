@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw platform API response mapping */
 import { Order } from '../OrderServiceInterface';
-import { RefundData, RefundResult } from '../../refund/RefundServiceInterface';
 
 /**
  * Configuration requirements for platform order services

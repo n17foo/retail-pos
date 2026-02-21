@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw platform API response mapping */
 import { SearchOptions, SearchProduct } from '../SearchServiceInterface';
-import { ProductQueryOptions, Product, ProductResult } from '../../product/ProductServiceInterface';
+import { ProductQueryOptions, ProductResult } from '../../product/ProductServiceInterface';
 import { PlatformConfigRequirements, PlatformSearchConfig } from './PlatformSearchServiceInterface';
 import { BaseSearchService } from './BaseSearchService';
 import { createBasicAuthHeader } from '../../../utils/base64';
@@ -131,7 +131,6 @@ export class WooCommerceSearchService extends BaseSearchService {
 
       if (options.category) {
         // In WooCommerce, we need to get category ID from name
-        const categories = await this.getCategories();
         const categoryId = await this.getCategoryIdByName(options.category);
         if (categoryId) {
           queryParams.append('category', categoryId);

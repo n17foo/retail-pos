@@ -1,5 +1,5 @@
-import { PlatformRefundServiceInterface, PlatformCredentials, RefundApiClient } from './PlatformRefundServiceInterface';
-import { RefundData, RefundResult, RefundRecord } from '../RefundServiceInterface';
+import { PlatformRefundServiceInterface, PlatformCredentials } from './PlatformRefundServiceInterface';
+import { RefundData, RefundResult, RefundRecord } from '../ReturnService';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 import { ECommercePlatform } from '../../../utils/platforms';
 import { SecretsServiceFactory } from '../../secrets/SecretsService';
@@ -66,45 +66,6 @@ export class SyliusRefundService implements PlatformRefundServiceInterface {
   }
 
   /**
-   * Create a Sylius HTTP client
-   * @param credentials Sylius API credentials
-   * @returns HTTP client object
-   */
-  private async createSyliusApiClient(_credentials: PlatformCredentials): Promise<RefundApiClient> {
-    // Get the access token from the token management system
-    const accessToken = await getPlatformToken(ECommercePlatform.SYLIUS, TokenType.ACCESS);
-
-    if (!accessToken) {
-      this.logger.error('Failed to get Sylius access token');
-      throw new Error('Failed to get Sylius access token');
-    }
-    return {
-      post: async (endpoint: string, data: unknown) => {
-        this.logger.info(`Making API call to Sylius ${endpoint}`);
-
-        // In a real implementation, this would make an authenticated API call
-        // const response = await fetch(`${credentials.apiUrl}${endpoint}`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Authorization': `Bearer ${accessToken}`,
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify(data)
-        // });
-
-        // For now, simulate a successful response
-        return {
-          data: {
-            id: `sylius-refund-${Date.now()}`,
-            order_number: (data as Record<string, unknown>).orderNumber,
-            status: 'completed',
-          },
-        };
-      },
-    };
-  }
-
-  /**
    * Process a Sylius refund directly using the API
    * @param orderId Order ID to refund
    * @param refundData Refund details
@@ -112,33 +73,47 @@ export class SyliusRefundService implements PlatformRefundServiceInterface {
   private async processSyliusRefund(orderId: string, refundData: RefundData): Promise<RefundResult> {
     try {
       const credentials = await this.getSyliusCredentials();
-
       if (!credentials) {
         throw new Error('Failed to retrieve Sylius API credentials');
       }
 
-      // Create API client
-      const apiClient = await this.createSyliusApiClient(credentials);
+      const accessToken = await getPlatformToken(ECommercePlatform.SYLIUS, TokenType.ACCESS);
+      if (!accessToken) {
+        throw new Error('Failed to get Sylius access token');
+      }
 
-      // Format the request data
+      // Sylius Refund Plugin endpoint
+      const endpoint = `${credentials.apiUrl}/api/v2/shop/orders/${orderId}/refunds`;
+
       const requestData = {
-        orderNumber: orderId,
-        paymentMethod: 'manual',
-        amount: refundData.amount || 0,
+        amount: Math.round((refundData.amount || 0) * 100), // Sylius uses cents
         reason: refundData.reason || 'Refunded via RetailPOS',
-        items:
+        units:
           refundData.items?.map(item => ({
-            orderItemId: item.lineItemId,
-            quantity: item.quantity,
-            amount: item.amount,
+            orderItemUnitId: item.lineItemId,
+            amount: Math.round((item.amount || 0) * 100),
           })) || [],
       };
 
-      // Make API call
-      const response = await apiClient.post('/api/v1/orders/refunds', requestData);
+      this.logger.info(`Processing Sylius refund for order ${orderId} at ${endpoint}`);
 
-      // Process response
-      const refundId = String(response.data.id);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/ld+json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Sylius refund API returned ${response.status}: ${errorBody}`);
+      }
+
+      const data = await response.json();
+      const refundId = String(data.id || data['@id'] || `sylius-refund-${Date.now()}`);
 
       return {
         success: true,

@@ -14,8 +14,7 @@ const SCANNER_TYPE_KEYS = [
 
 const ScannerSettingsTab: React.FC = () => {
   const { t } = useTranslate();
-  const { scannerSettings, handleScannerSettingsChange, saveSettings, testConnection, isLoading, error, saveStatus, loadSettings } =
-    useScannerSettings();
+  const { scannerSettings, saveSettings, testConnection, isLoading, error, saveStatus, loadSettings } = useScannerSettings();
 
   // Local state for form values
   const [formValues, setFormValues] = useState<ScannerSettings>(scannerSettings);

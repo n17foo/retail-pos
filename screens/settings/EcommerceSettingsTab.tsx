@@ -82,11 +82,6 @@ const EcommerceSettingsTab: React.FC = () => {
     [updateSettings]
   );
 
-  // Handle test connection
-  const handleTestConnection = useCallback(async () => {
-    await testEcommerceConnection();
-  }, [testEcommerceConnection]);
-
   // Handle save
   const handleSave = useCallback(async () => {
     const success = await saveChanges();
@@ -410,7 +405,7 @@ const EcommerceSettingsTab: React.FC = () => {
                       t('common.success'),
                       t('settings.ecommerce.downloadSuccess', { products: productCount, categories: categoryCount })
                     );
-                  } catch (error) {
+                  } catch {
                     Alert.alert(t('common.error'), t('settings.ecommerce.downloadError'));
                   }
                 }}

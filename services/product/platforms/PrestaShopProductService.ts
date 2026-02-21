@@ -8,9 +8,6 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 import { createBasicAuthHeader } from '../../../utils/base64';
 
-// PrestaShop API version - typically doesn't change
-const PRESTASHOP_API_VERSION = '1';
-
 /**
  * PrestaShop-specific implementation of the product service
  * Supports PrestaShop Web Services API

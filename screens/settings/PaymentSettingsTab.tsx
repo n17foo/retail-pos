@@ -316,7 +316,7 @@ const PaymentSettingsTab = () => {
               await saveSettings(paymentSettings);
               // Then test connection
               await testPaymentConnection();
-            } catch (err) {
+            } catch {
               Alert.alert(t('common.error'), t('settings.payment.connectionTestFailed'));
             }
           }}

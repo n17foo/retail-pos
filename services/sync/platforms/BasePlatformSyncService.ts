@@ -49,7 +49,7 @@ export abstract class BasePlatformSyncService extends BaseSyncService implements
    * @param webhookUrl URL to receive webhook events
    * @returns Promise resolving to true if registration was successful
    */
-  async registerSyncWebhooks(webhookUrl: string): Promise<boolean> {
+  async registerSyncWebhooks(_webhookUrl: string): Promise<boolean> {
     // Default implementation - should be overridden by subclasses
     console.warn(`${this.constructor.name}.registerSyncWebhooks is not implemented`);
     return false;
