@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoggerFactory } from '../services/logger/LoggerFactory';
 
@@ -23,10 +24,11 @@ export const useTranslate = () => {
    * @param params Optional parameters for interpolation
    * @returns Translated string
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- react-i18next t() has complex overloads
-  const translate = (key: string, options?: any): string => {
+
+  const translate = (key: string, options?: unknown): string => {
     // Get the translation
-    const translated = t(key, options);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- react-i18next t() has complex overloads
+    const translated = t(key, options as any);
 
     // Check if the translation is the same as the key (which indicates missing translation)
     if (translated === key && key.indexOf(':') < 0 && key.indexOf('.') < 0) {
@@ -56,10 +58,13 @@ export const useTranslate = () => {
    * @param language Language code to change to
    * @returns Promise that resolves when language is changed
    */
-  const changeLanguage = async (language: string): Promise<void> => {
-    logger.info(`Changing language to: ${language}`);
-    await i18n.changeLanguage(language);
-  };
+  const changeLanguage = useCallback(
+    async (language: string): Promise<void> => {
+      logger.info(`Changing language to: ${language}`);
+      await i18n.changeLanguage(language);
+    },
+    [i18n, logger]
+  );
 
   /**
    * Check if the current language is right-to-left

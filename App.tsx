@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { StatusBar, StyleSheet, I18nManager } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -28,13 +28,20 @@ const AppContent = () => {
   const { changeLanguage } = useTranslate();
   const logger = useLogger('AppContent');
 
+  // Stable refs so the mount-only effect always calls the latest versions
+  // without needing them in the dependency array (which would cause re-runs)
+  const changeLanguageRef = useRef(changeLanguage);
+  const loggerRef = useRef(logger);
+  changeLanguageRef.current = changeLanguage;
+  loggerRef.current = logger;
+
   // Handle language changes when app starts or locale changes
   useEffect(() => {
     let isMounted = true;
 
     const handleLocalizationChange = async () => {
       try {
-        logger.info({ message: '[Localization] Starting localization change handler' });
+        loggerRef.current.info({ message: '[Localization] Starting localization change handler' });
         const defaultLocale = 'en';
         let locale = defaultLocale;
         let currentLocaleTag = defaultLocale; // For RTL check
@@ -54,7 +61,7 @@ const AppContent = () => {
           }
         }
 
-        logger.info({ message: `[Localization] Using locale: ${locale}, languageTag: ${currentLocaleTag}` });
+        loggerRef.current.info({ message: `[Localization] Using locale: ${locale}, languageTag: ${currentLocaleTag}` });
 
         if (isMounted) {
           // Check for RTL using the full language tag
@@ -67,11 +74,11 @@ const AppContent = () => {
 
           // Change language if supported
           if (SUPPORTED_LANGUAGE_CODES.includes(locale as LanguageCode)) {
-            await changeLanguage(locale);
+            await changeLanguageRef.current(locale);
           }
         }
       } catch (error) {
-        logger.error(
+        loggerRef.current.error(
           { message: '[Localization] Error handling localization change' },
           error instanceof Error ? error : new Error(String(error))
         );
@@ -80,7 +87,7 @@ const AppContent = () => {
 
     // Initial setup
     handleLocalizationChange().catch(error => {
-      logger.error(
+      loggerRef.current.error(
         { message: '[Localization] Failed to handle localization change' },
         error instanceof Error ? error : new Error(String(error))
       );
@@ -88,12 +95,18 @@ const AppContent = () => {
 
     // Load dynamic POS config from settings DB (tax rate, store info, etc.)
     posConfig.load().catch(err => {
-      logger.error({ message: 'Failed to load POS config — using defaults' }, err instanceof Error ? err : new Error(String(err)));
+      loggerRef.current.error(
+        { message: 'Failed to load POS config — using defaults' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     // Load auth method config (primary method, allowed methods)
     authConfig.load().catch(err => {
-      logger.error({ message: 'Failed to load auth config — using PIN default' }, err instanceof Error ? err : new Error(String(err)));
+      loggerRef.current.error(
+        { message: 'Failed to load auth config — using PIN default' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     // Initialize sync queue manager
@@ -108,7 +121,7 @@ const AppContent = () => {
       backgroundSyncService.stop();
       queueManager.dispose();
     };
-  }, [changeLanguage, logger]);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
