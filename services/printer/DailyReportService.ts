@@ -3,6 +3,7 @@ import { LocalOrder } from '../basket/BasketServiceInterface';
 import { receiptConfigService } from './ReceiptConfigService';
 import { addMoney, multiplyMoney, roundMoney, subtractMoney, sumMoney } from '../../utils/money';
 import { getCurrencySymbol } from '../../utils/currency';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 export interface ShiftData {
   id: string;
@@ -38,6 +39,7 @@ const SHIFT_HISTORY_KEY = 'shift_history';
 
 export class DailyReportService {
   private static instance: DailyReportService;
+  private logger = LoggerFactory.getInstance().createLogger('DailyReportService');
   private currentShift: ShiftData | null = null;
 
   private constructor() {}
@@ -60,7 +62,7 @@ export class DailyReportService {
         };
       }
     } catch (error) {
-      console.error('Failed to load current shift:', error);
+      this.logger.error({ message: 'Failed to load current shift:' }, error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -375,7 +377,7 @@ export class DailyReportService {
         .slice(-limit)
         .reverse();
     } catch (error) {
-      console.error('Failed to load shift history:', error);
+      this.logger.error({ message: 'Failed to load shift history:' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }

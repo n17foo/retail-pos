@@ -54,13 +54,13 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
       });
 
       if (!response.ok) {
-        console.error('BigCommerce connection test failed:', response.statusText);
+        this.logger.error({ message: `BigCommerce connection test failed: ${response.statusText}` });
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error testing BigCommerce connection:', error);
+      this.logger.error({ message: 'Error testing BigCommerce connection' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -120,14 +120,17 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
             });
 
             if (!response.ok) {
-              console.error(`Failed to register BigCommerce webhook for ${scope}:`, response.statusText);
+              this.logger.error({ message: `Failed to register BigCommerce webhook for ${scope}: ${response.statusText}` });
               return null;
             }
 
             const data = await response.json();
             return data.data?.id;
           } catch (error) {
-            console.error(`Error registering BigCommerce webhook for ${scope}:`, error);
+            this.logger.error(
+              { message: `Error registering BigCommerce webhook for ${scope}` },
+              error instanceof Error ? error : new Error(String(error))
+            );
             return null;
           }
         })
@@ -138,7 +141,7 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
 
       return this.webhookIds.length > 0;
     } catch (error) {
-      console.error('Error registering BigCommerce webhooks:', error);
+      this.logger.error({ message: 'Error registering BigCommerce webhooks' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -170,7 +173,10 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
 
             return response.ok;
           } catch (error) {
-            console.error(`Error unregistering BigCommerce webhook ${webhookId}:`, error);
+            this.logger.error(
+              { message: `Error unregistering BigCommerce webhook ${webhookId}` },
+              error instanceof Error ? error : new Error(String(error))
+            );
             return false;
           }
         })
@@ -182,7 +188,7 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
       // Return true if all webhooks were successfully deleted
       return results.every(Boolean);
     } catch (error) {
-      console.error('Error unregistering BigCommerce webhooks:', error);
+      this.logger.error({ message: 'Error unregistering BigCommerce webhooks' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -268,7 +274,10 @@ export class BigCommerceSyncService extends BasePlatformSyncService {
 
       this.completeSyncOperation(syncId, result);
     } catch (error) {
-      console.error(`Error in BigCommerce sync operation ${syncId}:`, error);
+      this.logger.error(
+        { message: `Error in BigCommerce sync operation ${syncId}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw error;
     }
   }

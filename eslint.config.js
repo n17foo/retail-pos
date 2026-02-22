@@ -104,7 +104,7 @@ module.exports = [
       'no-undef': 'off',
 
       // General
-      'no-console': ['error', { allow: ['warn', 'error'] }],
+      'no-console': ['error'],
     },
   },
   prettierConfig,

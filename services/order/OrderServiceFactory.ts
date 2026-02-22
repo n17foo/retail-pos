@@ -11,6 +11,7 @@ import { OfflineOrderService } from './platforms/OfflineOrderService';
 import { PlatformOrderConfig, PlatformOrderServiceInterface } from './platforms/PlatformOrderServiceInterface';
 import { CompositeOrderService } from './platforms/CompositeOrderService';
 import { ECommercePlatform } from '../../utils/platforms';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Factory for creating order service instances
@@ -18,6 +19,7 @@ import { ECommercePlatform } from '../../utils/platforms';
  */
 export class OrderServiceFactory {
   private static instance: OrderServiceFactory;
+  private logger = LoggerFactory.getInstance().createLogger('OrderServiceFactory');
   private offlineDefaultService: OrderServiceInterface;
   private shopifyService: ShopifyOrderService | null = null;
   private wooCommerceService: WooCommerceOrderService | null = null;
@@ -58,7 +60,10 @@ export class OrderServiceFactory {
         if (!this.shopifyService) {
           this.shopifyService = new ShopifyOrderService(config);
           this.shopifyService.initialize().catch(err => {
-            console.error('Failed to initialize Shopify order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Shopify order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.shopifyService;
@@ -67,7 +72,10 @@ export class OrderServiceFactory {
         if (!this.wooCommerceService) {
           this.wooCommerceService = new WooCommerceOrderService(config);
           this.wooCommerceService.initialize().catch(err => {
-            console.error('Failed to initialize WooCommerce order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize WooCommerce order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.wooCommerceService;
@@ -76,7 +84,10 @@ export class OrderServiceFactory {
         if (!this.bigCommerceService) {
           this.bigCommerceService = new BigCommerceOrderService(config);
           this.bigCommerceService.initialize().catch(err => {
-            console.error('Failed to initialize BigCommerce order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize BigCommerce order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.bigCommerceService;
@@ -85,7 +96,10 @@ export class OrderServiceFactory {
         if (!this.magentoService) {
           this.magentoService = new MagentoOrderService(config);
           this.magentoService.initialize().catch(err => {
-            console.error('Failed to initialize Magento order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Magento order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.magentoService;
@@ -94,7 +108,10 @@ export class OrderServiceFactory {
         if (!this.syliusService) {
           this.syliusService = new SyliusOrderService(config);
           this.syliusService.initialize().catch(err => {
-            console.error('Failed to initialize Sylius order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Sylius order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.syliusService;
@@ -103,7 +120,7 @@ export class OrderServiceFactory {
         if (!this.wixService) {
           this.wixService = new WixOrderService(config);
           this.wixService.initialize().catch(err => {
-            console.error('Failed to initialize Wix order service:', err);
+            this.logger.error({ message: 'Failed to initialize Wix order service:' }, err instanceof Error ? err : new Error(String(err)));
           });
         }
         return this.wixService;
@@ -112,7 +129,10 @@ export class OrderServiceFactory {
         if (!this.prestaShopService) {
           this.prestaShopService = new PrestaShopOrderService(config);
           this.prestaShopService.initialize().catch(err => {
-            console.error('Failed to initialize PrestaShop order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize PrestaShop order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.prestaShopService;
@@ -121,7 +141,10 @@ export class OrderServiceFactory {
         if (!this.squarespaceService) {
           this.squarespaceService = new SquarespaceOrderService(config);
           this.squarespaceService.initialize().catch(err => {
-            console.error('Failed to initialize Squarespace order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Squarespace order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.squarespaceService;
@@ -130,13 +153,16 @@ export class OrderServiceFactory {
         if (!this.offlineService) {
           this.offlineService = new OfflineOrderService(config);
           this.offlineService.initialize().catch(err => {
-            console.error('Failed to initialize Offline order service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Offline order service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.offlineService;
 
       default:
-        console.warn(`Platform ${platform} not supported for orders, using offline order service`);
+        this.logger.warn({ message: `Platform ${platform} not supported for orders, using offline order service` });
         return this.offlineDefaultService;
     }
   }
@@ -200,68 +226,95 @@ export class OrderServiceFactory {
       case ECommercePlatform.SHOPIFY:
         this.shopifyService = new ShopifyOrderService(config);
         this.shopifyService.initialize().catch(err => {
-          console.error('Failed to initialize Shopify order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Shopify order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.WOOCOMMERCE:
         this.wooCommerceService = new WooCommerceOrderService(config);
         this.wooCommerceService.initialize().catch(err => {
-          console.error('Failed to initialize WooCommerce order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize WooCommerce order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.BIGCOMMERCE:
         this.bigCommerceService = new BigCommerceOrderService(config);
         this.bigCommerceService.initialize().catch(err => {
-          console.error('Failed to initialize BigCommerce order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize BigCommerce order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.MAGENTO:
         this.magentoService = new MagentoOrderService(config);
         this.magentoService.initialize().catch(err => {
-          console.error('Failed to initialize Magento order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Magento order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.SYLIUS:
         this.syliusService = new SyliusOrderService(config);
         this.syliusService.initialize().catch(err => {
-          console.error('Failed to initialize Sylius order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Sylius order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.WIX:
         this.wixService = new WixOrderService(config);
         this.wixService.initialize().catch(err => {
-          console.error('Failed to initialize Wix order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Wix order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.PRESTASHOP:
         this.prestaShopService = new PrestaShopOrderService(config);
         this.prestaShopService.initialize().catch(err => {
-          console.error('Failed to initialize PrestaShop order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize PrestaShop order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.SQUARESPACE:
         this.squarespaceService = new SquarespaceOrderService(config);
         this.squarespaceService.initialize().catch(err => {
-          console.error('Failed to initialize Squarespace order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Squarespace order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.OFFLINE:
         this.offlineService = new OfflineOrderService(config);
         this.offlineService.initialize().catch(err => {
-          console.error('Failed to initialize Offline order service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Offline order service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       default:
-        console.warn(`Platform ${platform} not supported for configuration`);
+        this.logger.warn({ message: `Platform ${platform} not supported for configuration` });
     }
 
     // Reset composite service so it picks up new configurations

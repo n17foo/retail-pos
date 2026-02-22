@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- raw platform API response mapping */
 import { Order } from '../OrderServiceInterface';
 import { PlatformOrderServiceInterface, PlatformConfigRequirements, PlatformOrderConfig } from './PlatformOrderServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Base abstract class for platform-specific order service implementations
@@ -9,6 +10,7 @@ import { PlatformOrderServiceInterface, PlatformConfigRequirements, PlatformOrde
 export abstract class BaseOrderService implements PlatformOrderServiceInterface {
   protected initialized: boolean = false;
   protected config: PlatformOrderConfig;
+  protected logger = LoggerFactory.getInstance().createLogger(this.constructor.name);
 
   /**
    * Creates a new platform order service

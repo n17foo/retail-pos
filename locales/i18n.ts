@@ -1,6 +1,7 @@
 import { initReactI18next } from 'react-i18next';
 import i18n, { InitOptions } from 'i18next';
 import * as Localization from 'expo-localization';
+import { LoggerFactory } from '../services/logger/LoggerFactory';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
@@ -26,6 +27,8 @@ const LANGUAGES = {
 } as const;
 
 export type LanguageCode = keyof typeof LANGUAGES;
+
+export const logger = LoggerFactory.getInstance().createLogger('i18n');
 
 export const SUPPORTED_LANGUAGE_CODES: LanguageCode[] = Object.keys(LANGUAGES) as LanguageCode[];
 
@@ -54,7 +57,7 @@ export const initI18n = async () => {
     },
     compatibilityJSON: 'v4' as const,
     parseMissingKeyHandler: (key: string) => {
-      console.warn(`Missing translation: ${key}`);
+      logger.warn(`Missing translation: ${key}`);
       return key;
     },
   };

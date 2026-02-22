@@ -1,5 +1,8 @@
 import React, { createContext, useState, useContext, useMemo, ReactNode, useEffect } from 'react';
 import { keyValueRepository } from '../repositories/KeyValueRepository';
+import { LoggerFactory } from '../services/logger/LoggerFactory';
+
+const logger = LoggerFactory.getInstance().createLogger('OnboardingProvider');
 
 const ONBOARDING_STATUS_KEY = 'onboarding_status';
 
@@ -22,7 +25,7 @@ export const OnboardingProvider = ({ children }: Readonly<{ children: ReactNode 
           setIsOnboardedState(true);
         }
       } catch (error) {
-        console.error('Failed to load onboarding status', error);
+        logger.error({ message: 'Failed to load onboarding status' }, error instanceof Error ? error : new Error(String(error)));
       } finally {
         setIsLoading(false);
       }
@@ -36,7 +39,7 @@ export const OnboardingProvider = ({ children }: Readonly<{ children: ReactNode 
       await keyValueRepository.setItem(ONBOARDING_STATUS_KEY, status ? 'completed' : 'pending');
       setIsOnboardedState(status);
     } catch (error) {
-      console.error('Failed to save onboarding status', error);
+      logger.error({ message: 'Failed to save onboarding status' }, error instanceof Error ? error : new Error(String(error)));
     }
   };
 

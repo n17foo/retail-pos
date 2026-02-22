@@ -31,7 +31,7 @@ export class ShopifyOrderService extends BaseOrderService {
       this.config.accessToken = this.config.accessToken || process.env.SHOPIFY_ACCESS_TOKEN || '';
 
       if (!this.config.apiKey || !this.config.accessToken || !this.config.storeUrl) {
-        console.warn('Missing Shopify API configuration');
+        this.logger.warn({ message: 'Missing Shopify API configuration' });
         return false;
       }
 
@@ -50,15 +50,18 @@ export class ShopifyOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Shopify API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Shopify API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Shopify API', error);
+        this.logger.error({ message: 'Error connecting to Shopify API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize Shopify order service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Shopify order service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -111,7 +114,7 @@ export class ShopifyOrderService extends BaseOrderService {
       // Map created Shopify order to our format
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error('Error creating Shopify order:', error);
+      this.logger.error({ message: 'Error creating Shopify order:' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -144,7 +147,10 @@ export class ShopifyOrderService extends BaseOrderService {
       // Map Shopify order to our format
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from Shopify`, error);
+      this.logger.error(
+        { message: `Error fetching order ${orderId} from Shopify` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -191,7 +197,10 @@ export class ShopifyOrderService extends BaseOrderService {
       // Map updated Shopify order to our format
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on Shopify`, error);
+      this.logger.error(
+        { message: `Error updating order ${orderId} on Shopify` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }

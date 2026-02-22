@@ -45,7 +45,7 @@ export class MagentoInventoryService extends BaseInventoryService {
       }
 
       if (!this.config.storeUrl) {
-        console.warn('Missing Magento store URL configuration');
+        this.logger.warn({ message: 'Missing Magento store URL configuration' });
         return false;
       }
 
@@ -53,7 +53,7 @@ export class MagentoInventoryService extends BaseInventoryService {
       if (!this.config.accessToken && this.config.username && this.config.password) {
         const token = await this.getAuthToken();
         if (!token) {
-          console.error('Failed to authenticate with Magento');
+          this.logger.error({ message: 'Failed to authenticate with Magento' });
           return false;
         }
       }
@@ -70,15 +70,18 @@ export class MagentoInventoryService extends BaseInventoryService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Magento API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Magento API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Magento API', error);
+        this.logger.error({ message: 'Error connecting to Magento API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize Magento inventory service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Magento inventory service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -146,13 +149,16 @@ export class MagentoInventoryService extends BaseInventoryService {
             }
           }
         } catch (error) {
-          console.error(`Error fetching inventory for product ${productId}:`, error);
+          this.logger.error(
+            { message: `Error fetching inventory for product ${productId}:` },
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       }
 
       return { items };
     } catch (error) {
-      console.error('Error fetching inventory from Magento:', error);
+      this.logger.error({ message: 'Error fetching inventory from Magento:' }, error instanceof Error ? error : new Error(String(error)));
       return { items };
     }
   }
@@ -258,7 +264,7 @@ export class MagentoInventoryService extends BaseInventoryService {
 
       return response.ok;
     } catch (error) {
-      console.error('Error updating MSI inventory:', error);
+      this.logger.error({ message: 'Error updating MSI inventory:' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -313,7 +319,7 @@ export class MagentoInventoryService extends BaseInventoryService {
 
       return token;
     } catch (error) {
-      console.error('Error getting Magento auth token', error);
+      this.logger.error({ message: 'Error getting Magento auth token' }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }

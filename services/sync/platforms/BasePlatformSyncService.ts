@@ -18,7 +18,7 @@ export abstract class BasePlatformSyncService extends BaseSyncService implements
     const missingKeys = requirements.required.filter(key => !config[key]);
 
     if (missingKeys.length > 0) {
-      console.error(`Missing required configuration for ${this.constructor.name}: ${missingKeys.join(', ')}`);
+      this.logger.error({ message: `Missing required configuration for ${this.constructor.name}: ${missingKeys.join(', ')}` });
       return false;
     }
 
@@ -51,7 +51,7 @@ export abstract class BasePlatformSyncService extends BaseSyncService implements
    */
   async registerSyncWebhooks(_webhookUrl: string): Promise<boolean> {
     // Default implementation - should be overridden by subclasses
-    console.warn(`${this.constructor.name}.registerSyncWebhooks is not implemented`);
+    this.logger.warn({ message: `${this.constructor.name}.registerSyncWebhooks is not implemented` });
     return false;
   }
 
@@ -61,7 +61,7 @@ export abstract class BasePlatformSyncService extends BaseSyncService implements
    */
   async unregisterSyncWebhooks(): Promise<boolean> {
     // Default implementation - should be overridden by subclasses
-    console.warn(`${this.constructor.name}.unregisterSyncWebhooks is not implemented`);
+    this.logger.warn({ message: `${this.constructor.name}.unregisterSyncWebhooks is not implemented` });
     return false;
   }
 
@@ -71,7 +71,7 @@ export abstract class BasePlatformSyncService extends BaseSyncService implements
    */
   async testConnection(): Promise<boolean> {
     // Default implementation - should be overridden by subclasses
-    console.warn(`${this.constructor.name}.testConnection is not implemented`);
+    this.logger.warn({ message: `${this.constructor.name}.testConnection is not implemented` });
     return false;
   }
 

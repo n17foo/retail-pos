@@ -17,6 +17,9 @@ import { getServiceContainer, ServiceContainer } from '../services/basket/Basket
 import { ECommercePlatform } from '../utils/platforms';
 import { useAuthContext } from './AuthProvider';
 import { queueManager } from '../services/queue/QueueManager';
+import { LoggerFactory } from '../services/logger/LoggerFactory';
+
+const logger = LoggerFactory.getInstance().createLogger('BasketProvider');
 
 // Re-export basket item type for components
 export interface CartItem {
@@ -222,7 +225,7 @@ export const BasketProvider = ({ children }: Readonly<{ children: ReactNode }>) 
         setUnsyncedOrdersCount(unsyncedOrders.length);
       }
     } catch (err) {
-      console.error('Failed to refresh unsynced count:', err);
+      logger.error({ message: 'Failed to refresh unsynced count' }, err instanceof Error ? err : new Error(String(err)));
     }
   }, []);
 

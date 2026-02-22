@@ -1,4 +1,5 @@
 import { keyValueRepository } from '../../repositories/KeyValueRepository';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 export interface ReceiptConfig {
   // Header configuration
@@ -146,6 +147,7 @@ const PRINTER_PRESETS: Record<string, Partial<ReceiptConfig['printerModel']>> = 
 
 export class ReceiptConfigService {
   private static instance: ReceiptConfigService;
+  private logger = LoggerFactory.getInstance().createLogger('ReceiptConfigService');
   private config: ReceiptConfig = DEFAULT_RECEIPT_CONFIG;
   private initialized = false;
 
@@ -168,7 +170,7 @@ export class ReceiptConfigService {
       }
       this.initialized = true;
     } catch (error) {
-      console.error('Failed to load receipt config:', error);
+      this.logger.error({ message: 'Failed to load receipt config:' }, error instanceof Error ? error : new Error(String(error)));
       this.config = DEFAULT_RECEIPT_CONFIG;
       this.initialized = true;
     }

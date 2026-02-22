@@ -27,14 +27,17 @@ export class WixInventoryService extends BaseInventoryService {
       this.config.apiVersion = this.config.apiVersion || process.env.WIX_API_VERSION || WIX_API_VERSION;
 
       if (!this.config.apiKey || !this.config.siteId) {
-        console.warn('Missing Wix API configuration');
+        this.logger.warn({ message: 'Missing Wix API configuration' });
         return false;
       }
 
       this.initialized = true;
       return true;
     } catch (error) {
-      console.error('Failed to initialize Wix inventory service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Wix inventory service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -79,13 +82,16 @@ export class WixInventoryService extends BaseInventoryService {
             }
           }
         } catch (error) {
-          console.error(`Error fetching inventory for product ${productId}:`, error);
+          this.logger.error(
+            { message: `Error fetching inventory for product ${productId}:` },
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       }
 
       return { items };
     } catch (error) {
-      console.error('Error fetching inventory from Wix:', error);
+      this.logger.error({ message: 'Error fetching inventory from Wix:' }, error instanceof Error ? error : new Error(String(error)));
       return { items };
     }
   }

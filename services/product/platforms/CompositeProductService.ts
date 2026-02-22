@@ -1,10 +1,12 @@
 import { Product, ProductQueryOptions, ProductResult, SyncResult, ProductServiceInterface } from '../ProductServiceInterface';
 import { PlatformProductServiceInterface } from './PlatformProductServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Composite service that aggregates results from multiple platform-specific product services
  */
 export class CompositeProductService implements ProductServiceInterface {
+  private logger = LoggerFactory.getInstance().createLogger('CompositeProductService');
   private services: PlatformProductServiceInterface[] = [];
 
   /**
@@ -37,7 +39,7 @@ export class CompositeProductService implements ProductServiceInterface {
         try {
           return await service.initialize();
         } catch (error) {
-          console.error('Failed to initialize service:', error);
+          this.logger.error({ message: 'Failed to initialize service:' }, error instanceof Error ? error : new Error(String(error)));
           return false;
         }
       })
@@ -65,7 +67,7 @@ export class CompositeProductService implements ProductServiceInterface {
         try {
           return await service.getProducts(options);
         } catch (error) {
-          console.error('Error getting products from service:', error);
+          this.logger.error({ message: 'Error getting products from service:' }, error instanceof Error ? error : new Error(String(error)));
           return { products: [], pagination: { currentPage: 1, totalPages: 0, totalItems: 0 } };
         }
       })
@@ -113,7 +115,10 @@ export class CompositeProductService implements ProductServiceInterface {
           return product;
         }
       } catch (error) {
-        console.error(`Error getting product ${productId} from service:`, error);
+        this.logger.error(
+          { message: `Error getting product ${productId} from service:` },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -168,7 +173,10 @@ export class CompositeProductService implements ProductServiceInterface {
           return await service.updateProduct(productId, productData);
         }
       } catch (error) {
-        console.error(`Error updating product ${productId} in service:`, error);
+        this.logger.error(
+          { message: `Error updating product ${productId} in service:` },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -197,7 +205,10 @@ export class CompositeProductService implements ProductServiceInterface {
           return await service.deleteProduct(productId);
         }
       } catch (error) {
-        console.error(`Error deleting product ${productId} from service:`, error);
+        this.logger.error(
+          { message: `Error deleting product ${productId} from service:` },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -223,7 +234,7 @@ export class CompositeProductService implements ProductServiceInterface {
         try {
           return await service.syncProducts(products);
         } catch (error) {
-          console.error('Error syncing products with service:', error);
+          this.logger.error({ message: 'Error syncing products with service:' }, error instanceof Error ? error : new Error(String(error)));
           return {
             successful: 0,
             failed: products.length,
@@ -267,7 +278,7 @@ export class CompositeProductService implements ProductServiceInterface {
           try {
             await service.initialize();
           } catch (error) {
-            console.error('Failed to initialize service:', error);
+            this.logger.error({ message: 'Failed to initialize service:' }, error instanceof Error ? error : new Error(String(error)));
           }
         }
       })

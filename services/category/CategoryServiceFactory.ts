@@ -11,6 +11,7 @@ import { SquarespaceCategoryService } from './platforms/SquarespaceCategoryServi
 import { MagentoCategoryService } from './platforms/MagentoCategoryService';
 import { SyliusCategoryService } from './platforms/SyliusCategoryService';
 import { WixCategoryService } from './platforms/WixCategoryService';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Factory for creating category service instances
@@ -18,6 +19,7 @@ import { WixCategoryService } from './platforms/WixCategoryService';
  */
 export class CategoryServiceFactory {
   private static instance: CategoryServiceFactory;
+  private logger = LoggerFactory.getInstance().createLogger('CategoryServiceFactory');
   private offlineDefaultService: CategoryServiceInterface;
 
   // Cache for platform-specific services
@@ -106,7 +108,7 @@ export class CategoryServiceFactory {
         break;
 
       default:
-        console.warn(`Unknown platform: ${platform}, using offline category service`);
+        this.logger.warn({ message: `Unknown platform: ${platform}, using offline category service` });
         return this.offlineDefaultService;
     }
 
@@ -189,7 +191,7 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize Shopify category service:', err);
+      this.logger.error({ message: 'Failed to initialize Shopify category service:' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -210,7 +212,10 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize WooCommerce category service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize WooCommerce category service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -231,7 +236,10 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize BigCommerce category service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize BigCommerce category service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -245,7 +253,7 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.getCategories().catch(err => {
-      console.error('Failed to initialize Magento category service:', err);
+      this.logger.error({ message: 'Failed to initialize Magento category service:' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -259,7 +267,7 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.getCategories().catch(err => {
-      console.error('Failed to initialize Sylius category service:', err);
+      this.logger.error({ message: 'Failed to initialize Sylius category service:' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -273,7 +281,7 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.getCategories().catch(err => {
-      console.error('Failed to initialize Wix category service:', err);
+      this.logger.error({ message: 'Failed to initialize Wix category service:' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -287,7 +295,10 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.getCategories().catch(err => {
-      console.error('Failed to initialize PrestaShop category service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize PrestaShop category service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -301,7 +312,10 @@ export class CategoryServiceFactory {
 
     // Initialize asynchronously
     service.getCategories().catch(err => {
-      console.error('Failed to initialize Squarespace category service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize Squarespace category service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -313,7 +327,7 @@ export class CategoryServiceFactory {
   private createOfflineService(): CategoryServiceInterface {
     const service = offlineCategoryService;
     service.initialize().catch(err => {
-      console.error('Failed to initialize Offline category service:', err);
+      this.logger.error({ message: 'Failed to initialize Offline category service:' }, err instanceof Error ? err : new Error(String(err)));
     });
     return service;
   }

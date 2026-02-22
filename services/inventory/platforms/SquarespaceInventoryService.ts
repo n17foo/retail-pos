@@ -27,14 +27,17 @@ export class SquarespaceInventoryService extends BaseInventoryService {
       this.config.apiVersion = this.config.apiVersion || process.env.SQUARESPACE_API_VERSION || SQUARESPACE_API_VERSION;
 
       if (!this.config.apiKey) {
-        console.warn('Missing Squarespace API configuration');
+        this.logger.warn({ message: 'Missing Squarespace API configuration' });
         return false;
       }
 
       this.initialized = true;
       return true;
     } catch (error) {
-      console.error('Failed to initialize Squarespace inventory service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Squarespace inventory service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -83,7 +86,10 @@ export class SquarespaceInventoryService extends BaseInventoryService {
 
       return { items };
     } catch (error) {
-      console.error('Error fetching inventory from Squarespace:', error);
+      this.logger.error(
+        { message: 'Error fetching inventory from Squarespace:' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return { items };
     }
   }

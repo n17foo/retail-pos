@@ -35,7 +35,7 @@ export class ShopifySyncService extends BasePlatformSyncService {
    */
   async initialize(config: PlatformSyncConfig): Promise<boolean> {
     if (!config.storeUrl || !config.accessToken) {
-      console.error('Shopify storeUrl and accessToken are required');
+      this.logger.error({ message: 'Shopify storeUrl and accessToken are required' });
       return false;
     }
     this.storeUrl = config.storeUrl;
@@ -71,14 +71,14 @@ export class ShopifySyncService extends BasePlatformSyncService {
       const response = await fetch(url, { headers });
 
       if (!response.ok) {
-        console.error('Shopify connection test failed:', response.statusText);
+        this.logger.error({ message: `Shopify connection test failed: ${response.statusText}` });
         return false;
       }
 
       const data = await response.json();
       return !!data.shop;
     } catch (error) {
-      console.error('Error testing Shopify connection:', error);
+      this.logger.error({ message: 'Error testing Shopify connection' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -139,14 +139,17 @@ export class ShopifySyncService extends BasePlatformSyncService {
             });
 
             if (!response.ok) {
-              console.error(`Failed to register Shopify webhook for ${topic}:`, response.statusText);
+              this.logger.error({ message: `Failed to register Shopify webhook for ${topic}: ${response.statusText}` });
               return null;
             }
 
             const data = await response.json();
             return data.webhook?.id;
           } catch (error) {
-            console.error(`Error registering Shopify webhook for ${topic}:`, error);
+            this.logger.error(
+              { message: `Error registering Shopify webhook for ${topic}` },
+              error instanceof Error ? error : new Error(String(error))
+            );
             return null;
           }
         })
@@ -157,7 +160,7 @@ export class ShopifySyncService extends BasePlatformSyncService {
 
       return this.webhookIds.length > 0;
     } catch (error) {
-      console.error('Error registering Shopify webhooks:', error);
+      this.logger.error({ message: 'Error registering Shopify webhooks' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -188,7 +191,10 @@ export class ShopifySyncService extends BasePlatformSyncService {
 
             return response.ok;
           } catch (error) {
-            console.error(`Error unregistering Shopify webhook ${webhookId}:`, error);
+            this.logger.error(
+              { message: `Error unregistering Shopify webhook ${webhookId}` },
+              error instanceof Error ? error : new Error(String(error))
+            );
             return false;
           }
         })
@@ -200,7 +206,7 @@ export class ShopifySyncService extends BasePlatformSyncService {
       // Return true if all webhooks were successfully deleted
       return results.every(Boolean);
     } catch (error) {
-      console.error('Error unregistering Shopify webhooks:', error);
+      this.logger.error({ message: 'Error unregistering Shopify webhooks' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -286,7 +292,10 @@ export class ShopifySyncService extends BasePlatformSyncService {
 
       this.completeSyncOperation(syncId, result);
     } catch (error) {
-      console.error(`Error in Shopify sync operation ${syncId}:`, error);
+      this.logger.error(
+        { message: `Error in Shopify sync operation ${syncId}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw error;
     }
   }

@@ -1,5 +1,6 @@
 import { Category } from '../CategoryServiceInterface';
 import { PlatformCategoryConfig, PlatformCategoryServiceInterface, PlatformConfigRequirements } from './PlatformCategoryServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Abstract base class for platform-specific category services
@@ -8,6 +9,7 @@ import { PlatformCategoryConfig, PlatformCategoryServiceInterface, PlatformConfi
 export abstract class BaseCategoryService implements PlatformCategoryServiceInterface {
   protected config: PlatformCategoryConfig = {};
   protected initialized = false;
+  protected logger = LoggerFactory.getInstance().createLogger(this.constructor.name);
 
   /**
    * Get the configuration requirements for this platform

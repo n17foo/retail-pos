@@ -33,7 +33,7 @@ export class WooCommerceSearchService extends BaseSearchService {
       this.config.apiVersion = this.config.apiVersion || process.env.WOOCOMMERCE_API_VERSION || WOOCOMMERCE_API_VERSION;
 
       if (!this.config.consumerKey || !this.config.consumerSecret || !this.config.storeUrl) {
-        console.warn('Missing WooCommerce API configuration');
+        this.logger.warn({ message: 'Missing WooCommerce API configuration' });
         return false;
       }
 
@@ -50,15 +50,18 @@ export class WooCommerceSearchService extends BaseSearchService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to WooCommerce API', await response.text());
+          this.logger.error({ message: 'Failed to connect to WooCommerce API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to WooCommerce API:', error);
+        this.logger.error({ message: 'Error connecting to WooCommerce API:' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Error initializing WooCommerce search service:', error);
+      this.logger.error(
+        { message: 'Error initializing WooCommerce search service:' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -80,7 +83,7 @@ export class WooCommerceSearchService extends BaseSearchService {
   async searchPlatformProducts(query: string, options: SearchOptions): Promise<SearchProduct[]> {
     try {
       if (!this.isInitialized()) {
-        console.warn('WooCommerce search service not initialized. Cannot perform search.');
+        this.logger.warn({ message: 'WooCommerce search service not initialized. Cannot perform search.' });
         return [];
       }
 
@@ -96,7 +99,7 @@ export class WooCommerceSearchService extends BaseSearchService {
 
       return [];
     } catch (error) {
-      console.error('Error searching WooCommerce products:', error);
+      this.logger.error({ message: 'Error searching WooCommerce products:' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -170,7 +173,10 @@ export class WooCommerceSearchService extends BaseSearchService {
         },
       };
     } catch (error) {
-      console.error('Error fetching products from WooCommerce:', error);
+      this.logger.error(
+        { message: 'Error fetching products from WooCommerce:' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return {
         products: [],
         pagination: {
@@ -205,7 +211,10 @@ export class WooCommerceSearchService extends BaseSearchService {
       const data = await response.json();
       return (data || []).map((category: any) => category.name);
     } catch (error) {
-      console.error('Error fetching categories from WooCommerce:', error);
+      this.logger.error(
+        { message: 'Error fetching categories from WooCommerce:' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return [];
     }
   }
@@ -233,7 +242,7 @@ export class WooCommerceSearchService extends BaseSearchService {
       const category = (data || []).find((cat: any) => cat.name === categoryName);
       return category ? category.id.toString() : null;
     } catch (error) {
-      console.error('Error finding category ID by name:', error);
+      this.logger.error({ message: 'Error finding category ID by name:' }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }

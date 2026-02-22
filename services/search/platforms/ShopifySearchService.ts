@@ -32,7 +32,7 @@ export class ShopifySearchService extends BaseSearchService {
       this.config.accessToken = this.config.accessToken || process.env.SHOPIFY_ACCESS_TOKEN || '';
 
       if (!this.config.apiKey || !this.config.accessToken || !this.config.storeUrl) {
-        console.warn('Missing Shopify API configuration');
+        this.logger.warn({ message: 'Missing Shopify API configuration' });
         return false;
       }
 
@@ -52,15 +52,18 @@ export class ShopifySearchService extends BaseSearchService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Shopify API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Shopify API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Shopify API:', error);
+        this.logger.error({ message: 'Error connecting to Shopify API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Error initializing Shopify search service:', error);
+      this.logger.error(
+        { message: 'Error initializing Shopify search service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -82,7 +85,7 @@ export class ShopifySearchService extends BaseSearchService {
   async searchPlatformProducts(query: string, options: SearchOptions): Promise<SearchProduct[]> {
     try {
       if (!this.isInitialized()) {
-        console.warn('Shopify search service not initialized. Cannot perform search.');
+        this.logger.warn({ message: 'Shopify search service not initialized. Cannot perform search.' });
         return [];
       }
 
@@ -98,7 +101,7 @@ export class ShopifySearchService extends BaseSearchService {
 
       return [];
     } catch (error) {
-      console.error('Error searching Shopify products:', error);
+      this.logger.error({ message: 'Error searching Shopify products' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -163,7 +166,7 @@ export class ShopifySearchService extends BaseSearchService {
         },
       };
     } catch (error) {
-      console.error('Error fetching products from Shopify:', error);
+      this.logger.error({ message: 'Error fetching products from Shopify' }, error instanceof Error ? error : new Error(String(error)));
       return {
         products: [],
         pagination: {
@@ -198,7 +201,7 @@ export class ShopifySearchService extends BaseSearchService {
       const data = await response.json();
       return (data.custom_collections || []).map((collection: any) => collection.title);
     } catch (error) {
-      console.error('Error fetching categories from Shopify:', error);
+      this.logger.error({ message: 'Error fetching categories from Shopify' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }

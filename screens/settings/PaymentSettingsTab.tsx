@@ -4,6 +4,7 @@ import { PaymentProvider } from '../../services/payment/PaymentServiceFactory';
 import { usePaymentSettings, PaymentSettings } from '../../hooks/usePaymentSettings';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
 import { useTranslate } from '../../hooks/useTranslate';
+import { useLogger } from '../../hooks/useLogger';
 
 type ProviderSettingKey<T extends keyof PaymentSettings> = keyof PaymentSettings[T];
 
@@ -11,6 +12,8 @@ const PaymentSettingsTab = () => {
   const { t } = useTranslate();
   const { paymentSettings, handlePaymentSettingsChange, saveSettings, testConnection, error, saveStatus, isLoading, loadSettings } =
     usePaymentSettings();
+
+  const logger = useLogger('PaymentSettingsTab');
 
   const hasUnsavedChanges = saveStatus === 'unsaved';
   const isMounted = useRef(true);
@@ -21,7 +24,7 @@ const PaymentSettingsTab = () => {
       try {
         await loadSettings();
       } catch (err) {
-        console.error('Failed to load payment settings:', err);
+        logger.error('Failed to load payment settings:', err);
       }
     };
 
@@ -29,7 +32,7 @@ const PaymentSettingsTab = () => {
     return () => {
       isMounted.current = false;
     };
-  }, [loadSettings]);
+  }, [loadSettings, logger]);
 
   // Handle provider change
   const handleProviderChange = useCallback(
@@ -62,9 +65,9 @@ const PaymentSettingsTab = () => {
     try {
       await saveSettings(paymentSettings);
     } catch (err) {
-      console.error('Failed to save payment settings:', err);
+      logger.error('Failed to save payment settings:', err);
     }
-  }, [saveSettings, paymentSettings]);
+  }, [saveSettings, paymentSettings, logger]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
@@ -81,10 +84,10 @@ const PaymentSettingsTab = () => {
         Alert.alert(t('common.error'), t('settings.payment.connectionError'));
       }
     } catch (err) {
-      console.error('Connection test failed:', err);
+      logger.error('Connection test failed:', err);
       Alert.alert(t('common.error'), t('settings.payment.connectionTestFailed'));
     }
-  }, [testConnection, paymentSettings.provider, t]);
+  }, [testConnection, paymentSettings.provider, t, logger]);
 
   // Render provider selection radio buttons
   const renderProviderSelection = () => (

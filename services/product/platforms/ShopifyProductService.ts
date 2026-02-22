@@ -71,7 +71,10 @@ export class ShopifyProductService extends BaseProductService {
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize Shopify product service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Shopify product service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -233,7 +236,7 @@ export class ShopifyProductService extends BaseProductService {
       // Map created Shopify product to our format
       return this.mapToProduct(data.product);
     } catch (error) {
-      console.error('Error creating product on Shopify', error);
+      this.logger.error({ message: 'Error creating product on Shopify' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }

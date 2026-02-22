@@ -1,6 +1,7 @@
 import { SearchOptions, SearchProduct } from '../SearchServiceInterface';
 import { ProductQueryOptions, Product, ProductResult } from '../../product/ProductServiceInterface';
 import { PlatformSearchServiceInterface, PlatformConfigRequirements, PlatformSearchConfig } from './PlatformSearchServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Base abstract class for platform-specific search service implementations
@@ -11,6 +12,7 @@ export abstract class BaseSearchService implements PlatformSearchServiceInterfac
   protected config: PlatformSearchConfig;
   protected readonly MAX_HISTORY_ITEMS = 10;
   protected searchHistory: string[] = [];
+  protected logger = LoggerFactory.getInstance().createLogger(this.constructor.name);
 
   /**
    * Creates a new platform search service

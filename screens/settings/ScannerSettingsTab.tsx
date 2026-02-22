@@ -4,6 +4,7 @@ import { useScannerSettings, ScannerSettings } from '../../hooks/useScannerSetti
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
 import { Button } from '../../components/Button';
 import { useTranslate } from '../../hooks/useTranslate';
+import { useLogger } from '../../hooks/useLogger';
 
 const SCANNER_TYPE_KEYS = [
   { value: 'camera', labelKey: 'settings.scanner.camera' },
@@ -15,6 +16,7 @@ const SCANNER_TYPE_KEYS = [
 const ScannerSettingsTab: React.FC = () => {
   const { t } = useTranslate();
   const { scannerSettings, saveSettings, testConnection, isLoading, error, saveStatus, loadSettings } = useScannerSettings();
+  const logger = useLogger('ScannerSettingsTab');
 
   // Local state for form values
   const [formValues, setFormValues] = useState<ScannerSettings>(scannerSettings);
@@ -48,10 +50,10 @@ const ScannerSettingsTab: React.FC = () => {
       await saveSettings(formValues);
       setHasUnsavedChanges(false);
     } catch (err) {
-      console.error('Failed to save scanner settings:', err);
+      logger.error('Failed to save scanner settings:', err);
       Alert.alert(t('common.error'), t('settings.scanner.saveError'));
     }
-  }, [formValues, saveSettings, t]);
+  }, [formValues, saveSettings, t, logger]);
 
   // Handle test connection
   const handleTestConnection = useCallback(async () => {
@@ -63,10 +65,10 @@ const ScannerSettingsTab: React.FC = () => {
         Alert.alert(t('common.error'), t('settings.scanner.connectionError'));
       }
     } catch (err) {
-      console.error('Scanner connection test failed:', err);
+      logger.error('Scanner connection test failed:', err);
       Alert.alert(t('common.error'), t('settings.scanner.connectionTestError'));
     }
-  }, [testConnection, formValues, t]);
+  }, [testConnection, formValues, t, logger]);
 
   // Reset form to saved values
   const handleCancel = useCallback(() => {

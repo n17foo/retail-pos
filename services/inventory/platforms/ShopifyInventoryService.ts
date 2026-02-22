@@ -62,7 +62,7 @@ export class ShopifyInventoryService extends BaseInventoryService {
 
       return { items };
     } catch (error) {
-      console.error('Error fetching Shopify inventory:', error);
+      this.logger.error({ message: 'Error fetching Shopify inventory' }, error instanceof Error ? error : new Error(String(error)));
       return { items: [] };
     }
   }
@@ -163,7 +163,7 @@ export class ShopifyInventoryService extends BaseInventoryService {
 
       return result;
     } catch (error) {
-      console.error('Error updating Shopify inventory:', error);
+      this.logger.error({ message: 'Error updating Shopify inventory' }, error instanceof Error ? error : new Error(String(error)));
       return {
         successful: result.successful,
         failed: updates.length - result.successful,
@@ -208,7 +208,10 @@ export class ShopifyInventoryService extends BaseInventoryService {
       const data = await response.json();
       return data.variant?.inventory_item_id?.toString() || null;
     } catch (error) {
-      console.error(`Error getting inventory item ID for variant ${variantId}:`, error);
+      this.logger.error(
+        { message: `Error getting inventory item ID for variant ${variantId}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -235,7 +238,7 @@ export class ShopifyInventoryService extends BaseInventoryService {
       const location = data.locations?.find((loc: any) => loc.active);
       return location?.id?.toString() || null;
     } catch (error) {
-      console.error('Error getting location ID:', error);
+      this.logger.error({ message: 'Error getting location ID' }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }

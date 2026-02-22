@@ -81,7 +81,7 @@ export class WooCommerceInventoryService extends BaseInventoryService {
 
       return { items };
     } catch (error) {
-      console.error('Error fetching WooCommerce inventory:', error);
+      this.logger.error({ message: 'Error fetching WooCommerce inventory:' }, error instanceof Error ? error : new Error(String(error)));
       return { items: [] };
     }
   }
@@ -153,7 +153,7 @@ export class WooCommerceInventoryService extends BaseInventoryService {
 
       return result;
     } catch (error) {
-      console.error('Error updating WooCommerce inventory:', error);
+      this.logger.error({ message: 'Error updating WooCommerce inventory:' }, error instanceof Error ? error : new Error(String(error)));
       return {
         successful: result.successful,
         failed: updates.length - result.successful,

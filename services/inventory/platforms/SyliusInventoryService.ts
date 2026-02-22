@@ -34,7 +34,7 @@ export class SyliusInventoryService extends BaseInventoryService {
       }
 
       if (!this.config.apiUrl) {
-        console.warn('Missing Sylius API URL configuration');
+        this.logger.warn({ message: 'Missing Sylius API URL configuration' });
         return false;
       }
 
@@ -42,7 +42,7 @@ export class SyliusInventoryService extends BaseInventoryService {
       if (!this.config.accessToken && this.config.apiKey && this.config.apiSecret) {
         const token = await this.getOAuthToken();
         if (!token) {
-          console.error('Failed to authenticate with Sylius');
+          this.logger.error({ message: 'Failed to authenticate with Sylius' });
           return false;
         }
       }
@@ -50,7 +50,10 @@ export class SyliusInventoryService extends BaseInventoryService {
       this.initialized = true;
       return true;
     } catch (error) {
-      console.error('Failed to initialize Sylius inventory service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Sylius inventory service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -95,13 +98,16 @@ export class SyliusInventoryService extends BaseInventoryService {
             }
           }
         } catch (error) {
-          console.error(`Error fetching inventory for product ${productId}:`, error);
+          this.logger.error(
+            { message: `Error fetching inventory for product ${productId}:` },
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       }
 
       return { items };
     } catch (error) {
-      console.error('Error fetching inventory from Sylius:', error);
+      this.logger.error({ message: 'Error fetching inventory from Sylius:' }, error instanceof Error ? error : new Error(String(error)));
       return { items };
     }
   }
@@ -195,7 +201,7 @@ export class SyliusInventoryService extends BaseInventoryService {
 
       return this.accessToken;
     } catch (error) {
-      console.error('Error getting Sylius OAuth token', error);
+      this.logger.error({ message: 'Error getting Sylius OAuth token' }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }

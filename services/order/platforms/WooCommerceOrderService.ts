@@ -29,7 +29,7 @@ export class WooCommerceOrderService extends BaseOrderService {
       this.config.storeUrl = this.config.storeUrl || process.env.WOOCOMMERCE_URL || '';
 
       if (!this.config.consumerKey || !this.config.consumerSecret || !this.config.storeUrl) {
-        console.warn('Missing WooCommerce API configuration');
+        this.logger.warn({ message: 'Missing WooCommerce API configuration' });
         return false;
       }
 
@@ -47,15 +47,18 @@ export class WooCommerceOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to WooCommerce API', await response.text());
+          this.logger.error({ message: 'Failed to connect to WooCommerce API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to WooCommerce API', error);
+        this.logger.error({ message: 'Error connecting to WooCommerce API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize WooCommerce order service', error);
+      this.logger.error(
+        { message: 'Failed to initialize WooCommerce order service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -102,7 +105,7 @@ export class WooCommerceOrderService extends BaseOrderService {
       // Map created WooCommerce order to our format
       return this.mapToOrder(data);
     } catch (error) {
-      console.error('Error creating order on WooCommerce', error);
+      this.logger.error({ message: 'Error creating order on WooCommerce' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -132,7 +135,10 @@ export class WooCommerceOrderService extends BaseOrderService {
       // Map WooCommerce order to our format
       return this.mapToOrder(data);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from WooCommerce`, error);
+      this.logger.error(
+        { message: `Error fetching order ${orderId} from WooCommerce` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -174,7 +180,10 @@ export class WooCommerceOrderService extends BaseOrderService {
       // Map updated WooCommerce order to our format
       return this.mapToOrder(data);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on WooCommerce`, error);
+      this.logger.error(
+        { message: `Error updating order ${orderId} on WooCommerce` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }

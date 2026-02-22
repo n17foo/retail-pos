@@ -9,6 +9,7 @@ import { useEcommerceSettings } from '../hooks/useEcommerceSettings';
 import InventoryItemCard, { InventoryItem } from './inventory/InventoryItemCard';
 import InventoryFilterTabs from './inventory/InventoryFilterTabs';
 import InventorySummaryFooter from './inventory/InventorySummaryFooter';
+import { useLogger } from '../hooks/useLogger';
 
 interface InventoryScreenProps {
   onGoBack?: () => void;
@@ -28,6 +29,7 @@ const InventoryScreen: React.FC<InventoryScreenProps> = ({ onGoBack }) => {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [editQuantity, setEditQuantity] = useState('');
   const [inlineError, setInlineError] = useState<string | null>(null);
+  const logger = useLogger('InventoryScreen');
 
   // Load inventory data
   const loadInventory = useCallback(async () => {
@@ -53,9 +55,9 @@ const InventoryScreen: React.FC<InventoryScreenProps> = ({ onGoBack }) => {
         setInventoryItems(items);
       }
     } catch (err) {
-      console.error('Error loading inventory:', err);
+      logger.error('Error loading inventory:', err);
     }
-  }, [ecommerceInitialized, products, getInventory]);
+  }, [ecommerceInitialized, products, getInventory, logger]);
 
   // Load products and inventory on mount
   useEffect(() => {

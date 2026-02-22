@@ -24,11 +24,11 @@ const MORE_MENU_ACCESS: Record<UserRole, MoreMenuItem[]> = {
 };
 
 export const canAccessTab = (role: UserRole | undefined, tab: TabName): boolean => {
-  if (!role) return true; // Fallback: allow access when role is unknown (dev mode)
-  return TAB_ACCESS[role].includes(tab);
+  const effectiveRole: UserRole = role ?? 'cashier'; // Default to least-privilege role
+  return TAB_ACCESS[effectiveRole].includes(tab);
 };
 
 export const canAccessMoreMenuItem = (role: UserRole | undefined, item: MoreMenuItem): boolean => {
-  if (!role) return true; // Fallback: allow access when role is unknown (dev mode)
-  return MORE_MENU_ACCESS[role].includes(item);
+  const effectiveRole: UserRole = role ?? 'cashier'; // Default to least-privilege role
+  return MORE_MENU_ACCESS[effectiveRole].includes(item);
 };

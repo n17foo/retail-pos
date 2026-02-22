@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.n17foo.retail-pos",
       "infoPlist": {
         "NSCameraUsageDescription": "RetailPOS uses the camera to scan product barcodes.",
+        "NSFaceIDUsageDescription": "RetailPOS uses Face ID to authenticate staff members.",
         "NSBluetoothAlwaysUsageDescription": "RetailPOS uses Bluetooth to connect to barcode scanners and receipt printers.",
         "NSBluetoothPeripheralUsageDescription": "RetailPOS uses Bluetooth to connect to barcode scanners and receipt printers.",
         "UIRequiresFullScreen": false,
@@ -54,7 +55,6 @@
         "expo-camera",
         {
           "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to scan barcodes.",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone.",
           "recordAudioAndroid": false
         }
       ],

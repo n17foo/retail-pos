@@ -1,11 +1,13 @@
 import { SearchServiceInterface, SearchOptions, SearchResult } from '../SearchServiceInterface';
 import { PlatformSearchServiceInterface } from './PlatformSearchServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Composite search service that implements the search service interface
  * by delegating to platform-specific implementations
  */
 export class CompositeSearchService implements SearchServiceInterface {
+  private logger = LoggerFactory.getInstance().createLogger('CompositeSearchService');
   private initialized: boolean = false;
   private searchHistory: string[] = [];
   private readonly MAX_HISTORY_ITEMS = 10;
@@ -21,7 +23,7 @@ export class CompositeSearchService implements SearchServiceInterface {
    */
   async initialize(): Promise<boolean> {
     if (this.platformServices.length === 0) {
-      console.warn('No platform search services provided');
+      this.logger.warn({ message: 'No platform search services provided' });
       return false;
     }
 
@@ -138,7 +140,10 @@ export class CompositeSearchService implements SearchServiceInterface {
       // If we're already initialized, initialize the new service too
       if (this.initialized) {
         service.initialize().catch(error => {
-          console.error('Failed to initialize added platform service:', error);
+          this.logger.error(
+            { message: 'Failed to initialize added platform service' },
+            error instanceof Error ? error : new Error(String(error))
+          );
         });
       }
     }

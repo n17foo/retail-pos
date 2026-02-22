@@ -41,8 +41,7 @@ RetailPOS/
 │   ├── payment/            # Payment processing (disconnect is async-compatible)
 │   ├── printer/            # Receipt printing + openDrawer() ESC/POS
 │   ├── product/            # Product management
-│   ├── refund/             # Refund service (8 platforms + factory)
-│   ├── returns/            # ReturnService (process returns, optional refund orchestration)
+│   ├── returns/            # ReturnService (process returns + refunds, 10 platforms)
 │   ├── scanner/            # Barcode + QR scanning (4 types: camera, BT, USB, QR hardware)
 │   ├── search/             # Search functionality
 │   ├── storage/            # SQLite storage
@@ -847,8 +846,10 @@ describe('Button', () => {
 8. **Use theme constants** - Never hardcode colors, spacing, or typography
 9. **Avoid index files** - Do not create index.ts or index.tsx files solely for re-exporting multiple files in a folder. Import files directly to save time and avoid unnecessary indirection.
 10. **No hardcoded config** - Use `posConfig.values` for tax rates, store info, currency, etc. Never hardcode business configuration values.
-11. **Logger over console** - Use `LoggerInterface` (via constructor injection) for all service logging. Never use `console.log/error` in services.
+11. **Logger over console** - Use `LoggerInterface` (via constructor injection or `LoggerFactory`) for all service logging. Never use `console.log/error/warn` in services or contexts.
 12. **Drawer is UI-driven** - The `CheckoutService` sets `openDrawer` on `CheckoutResult`. The UI layer reads the flag and calls the drawer service. Services never open hardware directly.
+13. **Role access defaults to least privilege** - `canAccessTab` and `canAccessMoreMenuItem` default to `'cashier'` access when role is `undefined`. Never default to full access.
+14. **Known security gap — PIN storage** - User PINs are stored as plaintext strings in SQLite (`users.pin`). Before production, hash PINs with bcrypt or Argon2 in `UserRepository.create/update` and compare hashes in `PinAuthProvider.authenticate`.
 
 ---
 
@@ -864,4 +865,4 @@ describe('Button', () => {
 
 ---
 
-_Last updated: February 20, 2026_
+_Last updated: February 22, 2026_

@@ -1,10 +1,12 @@
 import { SyncEntityType, SyncOperationResult, SyncOptions, SyncServiceInterface, SyncStatus } from './SyncServiceInterface';
 import { v4 as uuidv4 } from 'uuid';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Base implementation of the sync service that handles common functionality
  */
 export abstract class BaseSyncService implements SyncServiceInterface {
+  protected logger = LoggerFactory.getInstance().createLogger(this.constructor.name);
   // In-memory store for active sync operations
   private activeSyncs: Map<string, SyncStatus> = new Map();
   // In-memory store for completed sync history
@@ -36,7 +38,7 @@ export abstract class BaseSyncService implements SyncServiceInterface {
 
     // Execute sync operation in the background
     this.executeSyncOperation(syncId, options).catch(error => {
-      console.error(`Error in sync operation ${syncId}:`, error);
+      this.logger.error({ message: `Error in sync operation ${syncId}` }, error instanceof Error ? error : new Error(String(error)));
       const failedStatus = this.activeSyncs.get(syncId);
       if (failedStatus) {
         failedStatus.status = 'failed';

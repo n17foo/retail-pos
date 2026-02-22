@@ -29,14 +29,17 @@ export class PrestaShopInventoryService extends BaseInventoryService {
       }
 
       if (!this.config.storeUrl || !this.config.apiKey) {
-        console.warn('Missing PrestaShop API configuration');
+        this.logger.warn({ message: 'Missing PrestaShop API configuration' });
         return false;
       }
 
       this.initialized = true;
       return true;
     } catch (error) {
-      console.error('Failed to initialize PrestaShop inventory service', error);
+      this.logger.error(
+        { message: 'Failed to initialize PrestaShop inventory service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -79,13 +82,19 @@ export class PrestaShopInventoryService extends BaseInventoryService {
             }
           }
         } catch (error) {
-          console.error(`Error fetching inventory for product ${productId}:`, error);
+          this.logger.error(
+            { message: `Error fetching inventory for product ${productId}:` },
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       }
 
       return { items };
     } catch (error) {
-      console.error('Error fetching inventory from PrestaShop:', error);
+      this.logger.error(
+        { message: 'Error fetching inventory from PrestaShop:' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return { items };
     }
   }

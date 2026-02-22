@@ -6,6 +6,7 @@ import { usePayment } from '../hooks/usePayment';
 import { PaymentResponse } from '../services/payment/PaymentServiceInterface';
 import { PaymentProvider } from '../services/payment/PaymentServiceFactory';
 import { useCurrency } from '../hooks/useCurrency';
+import { useLogger } from '../hooks/useLogger';
 
 interface StripeNfcPaymentTerminalProps {
   amount: number;
@@ -43,6 +44,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('ready');
   const [cardType, setCardType] = useState<string | null>(null);
+  const logger = useLogger('StripeNfcPaymentTerminal');
 
   // Get payment services from hook
   const { processPayment, disconnect, isTerminalConnected, getConnectedDeviceId, getCurrentProvider } = usePayment();
@@ -127,7 +129,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
         }
       }
     } catch (err) {
-      console.error('Payment error:', err);
+      logger.error('Payment error:', err);
       setPaymentStatus('error');
       setError(err instanceof Error ? err.message : 'Unknown payment error occurred');
     } finally {

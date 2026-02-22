@@ -44,7 +44,7 @@ export class WooCommerceCategoryService extends BaseCategoryService {
       // Convert WooCommerce categories to our format
       return this.buildCategoryTree(categories);
     } catch (error) {
-      console.error('Error fetching WooCommerce categories:', error);
+      this.logger.error({ message: 'Error fetching WooCommerce categories:' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -75,7 +75,10 @@ export class WooCommerceCategoryService extends BaseCategoryService {
       const category = await response.json();
       return this.mapWooCommerceCategory(category);
     } catch (error) {
-      console.error(`Error fetching WooCommerce category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error fetching WooCommerce category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return undefined;
     }
   }
@@ -116,7 +119,7 @@ export class WooCommerceCategoryService extends BaseCategoryService {
       const newCategory = await response.json();
       return this.mapWooCommerceCategory(newCategory);
     } catch (error) {
-      console.error('Error creating WooCommerce category:', error);
+      this.logger.error({ message: 'Error creating WooCommerce category:' }, error instanceof Error ? error : new Error(String(error)));
       throw new Error(`Failed to create category: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -167,7 +170,10 @@ export class WooCommerceCategoryService extends BaseCategoryService {
       const updatedCategory = await response.json();
       return this.mapWooCommerceCategory(updatedCategory);
     } catch (error) {
-      console.error(`Error updating WooCommerce category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error updating WooCommerce category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw new Error(`Failed to update category: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -190,7 +196,10 @@ export class WooCommerceCategoryService extends BaseCategoryService {
 
       return response.ok;
     } catch (error) {
-      console.error(`Error deleting WooCommerce category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error deleting WooCommerce category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }

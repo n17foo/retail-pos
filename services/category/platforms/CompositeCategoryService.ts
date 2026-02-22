@@ -1,11 +1,13 @@
 import { Category, CategoryServiceInterface } from '../CategoryServiceInterface';
 import { PlatformCategoryServiceInterface } from './PlatformCategoryServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Composite service that aggregates multiple platform-specific category services
  * Allows querying and managing categories across multiple e-commerce platforms
  */
 export class CompositeCategoryService implements CategoryServiceInterface {
+  private logger = LoggerFactory.getInstance().createLogger('CompositeCategoryService');
   /**
    * The platform-specific services this composite will delegate to
    */
@@ -19,7 +21,7 @@ export class CompositeCategoryService implements CategoryServiceInterface {
     this.services = services;
 
     if (services.length === 0) {
-      console.warn('CompositeCategoryService created with no services');
+      this.logger.warn({ message: 'CompositeCategoryService created with no services' });
     }
   }
 
@@ -33,7 +35,7 @@ export class CompositeCategoryService implements CategoryServiceInterface {
       try {
         return service.getCategories();
       } catch (error) {
-        console.error('Error getting categories from service:', error);
+        this.logger.error({ message: 'Error getting categories from service:' }, error instanceof Error ? error : new Error(String(error)));
         return Promise.resolve([]);
       }
     });
@@ -98,7 +100,10 @@ export class CompositeCategoryService implements CategoryServiceInterface {
             };
           }
         } catch (error) {
-          console.error(`Error getting category ${originalId} from platform ${platformIndex}:`, error);
+          this.logger.error(
+            { message: `Error getting category ${originalId} from platform ${platformIndex}:` },
+            error instanceof Error ? error : new Error(String(error))
+          );
         }
       }
       return undefined;
@@ -116,7 +121,10 @@ export class CompositeCategoryService implements CategoryServiceInterface {
           };
         }
       } catch (error) {
-        console.error(`Error getting category ${categoryId} from service ${i}:`, error);
+        this.logger.error(
+          { message: `Error getting category ${categoryId} from service ${i}:` },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -141,7 +149,7 @@ export class CompositeCategoryService implements CategoryServiceInterface {
             _platform: i,
           };
         } catch (error) {
-          console.error('Error creating category:', error);
+          this.logger.error({ message: 'Error creating category:' }, error instanceof Error ? error : new Error(String(error)));
         }
       }
     }

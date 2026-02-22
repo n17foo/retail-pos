@@ -31,7 +31,7 @@ export class WixSearchService extends BaseSearchService {
       this.config.apiVersion = this.config.apiVersion || process.env.WIX_API_VERSION || 'v1';
 
       if (!this.config.apiKey || !this.config.siteId) {
-        console.warn('Missing Wix API configuration');
+        this.logger.warn({ message: 'Missing Wix API configuration' });
         return false;
       }
 
@@ -46,15 +46,15 @@ export class WixSearchService extends BaseSearchService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Wix API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Wix API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Wix API:', error);
+        this.logger.error({ message: 'Error connecting to Wix API:' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Error initializing Wix search service:', error);
+      this.logger.error({ message: 'Error initializing Wix search service:' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -76,7 +76,7 @@ export class WixSearchService extends BaseSearchService {
   async searchPlatformProducts(query: string, options: SearchOptions): Promise<SearchProduct[]> {
     try {
       if (!this.isInitialized()) {
-        console.warn('Wix search service not initialized. Cannot perform search.');
+        this.logger.warn({ message: 'Wix search service not initialized. Cannot perform search.' });
         return [];
       }
 
@@ -92,7 +92,7 @@ export class WixSearchService extends BaseSearchService {
 
       return [];
     } catch (error) {
-      console.error('Error searching Wix products:', error);
+      this.logger.error({ message: 'Error searching Wix products:' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -172,7 +172,7 @@ export class WixSearchService extends BaseSearchService {
         },
       };
     } catch (error) {
-      console.error('Error fetching products from Wix:', error);
+      this.logger.error({ message: 'Error fetching products from Wix:' }, error instanceof Error ? error : new Error(String(error)));
       return {
         products: [],
         pagination: {
@@ -207,7 +207,7 @@ export class WixSearchService extends BaseSearchService {
       const data = await response.json();
       return (data.collections || []).map((collection: any) => collection.name);
     } catch (error) {
-      console.error('Error fetching categories from Wix:', error);
+      this.logger.error({ message: 'Error fetching categories from Wix:' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -235,7 +235,10 @@ export class WixSearchService extends BaseSearchService {
       const collection = (data.collections || []).find((col: any) => col.name === categoryName);
       return collection ? collection._id : null;
     } catch (error) {
-      console.error('Error finding category ID by name in Wix:', error);
+      this.logger.error(
+        { message: 'Error finding category ID by name in Wix:' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }

@@ -27,7 +27,7 @@ export class BigCommerceOrderService extends BaseOrderService {
       this.config.clientId = this.config.clientId || process.env.BIGCOMMERCE_CLIENT_ID || '';
 
       if (!this.config.storeHash || !this.config.accessToken) {
-        console.warn('Missing BigCommerce API configuration');
+        this.logger.warn({ message: 'Missing BigCommerce API configuration' });
         return false;
       }
 
@@ -42,15 +42,18 @@ export class BigCommerceOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to BigCommerce API', await response.text());
+          this.logger.error({ message: 'Failed to connect to BigCommerce API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to BigCommerce API', error);
+        this.logger.error({ message: 'Error connecting to BigCommerce API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize BigCommerce order service', error);
+      this.logger.error(
+        { message: 'Failed to initialize BigCommerce order service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -97,7 +100,7 @@ export class BigCommerceOrderService extends BaseOrderService {
       // Map created BigCommerce order to our format
       return this.mapToOrder(data);
     } catch (error) {
-      console.error('Error creating order on BigCommerce', error);
+      this.logger.error({ message: 'Error creating order on BigCommerce' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -144,7 +147,10 @@ export class BigCommerceOrderService extends BaseOrderService {
       // Map BigCommerce order to our format
       return this.mapToOrder(fullOrder);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from BigCommerce`, error);
+      this.logger.error(
+        { message: `Error fetching order ${orderId} from BigCommerce` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -185,7 +191,10 @@ export class BigCommerceOrderService extends BaseOrderService {
       // Get the updated order to return
       return await this.getOrder(orderId);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on BigCommerce`, error);
+      this.logger.error(
+        { message: `Error updating order ${orderId} on BigCommerce` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }

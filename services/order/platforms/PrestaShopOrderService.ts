@@ -23,7 +23,7 @@ export class PrestaShopOrderService extends BaseOrderService {
       }
 
       if (!this.config.storeUrl || !this.config.apiKey) {
-        console.warn('Missing PrestaShop API configuration');
+        this.logger.warn({ message: 'Missing PrestaShop API configuration' });
         return false;
       }
 
@@ -36,15 +36,18 @@ export class PrestaShopOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to PrestaShop API', await response.text());
+          this.logger.error({ message: 'Failed to connect to PrestaShop API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to PrestaShop API', error);
+        this.logger.error({ message: 'Error connecting to PrestaShop API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize PrestaShop order service', error);
+      this.logger.error(
+        { message: 'Failed to initialize PrestaShop order service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -87,7 +90,7 @@ export class PrestaShopOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error('Error creating order on PrestaShop', error);
+      this.logger.error({ message: 'Error creating order on PrestaShop' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -114,7 +117,10 @@ export class PrestaShopOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from PrestaShop`, error);
+      this.logger.error(
+        { message: `Error fetching order ${orderId} from PrestaShop` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -147,7 +153,10 @@ export class PrestaShopOrderService extends BaseOrderService {
 
       return await this.getOrder(orderId);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on PrestaShop`, error);
+      this.logger.error(
+        { message: `Error updating order ${orderId} on PrestaShop` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }

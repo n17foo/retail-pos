@@ -11,6 +11,7 @@ import { CompositeProductService } from './platforms/CompositeProductService';
 import { OfflineProductService } from './platforms/OfflineProductService';
 import { PlatformProductConfig, PlatformProductServiceInterface } from './platforms/PlatformProductServiceInterface';
 import { ECommercePlatform } from '../../utils/platforms';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Factory for creating product service instances
@@ -18,6 +19,7 @@ import { ECommercePlatform } from '../../utils/platforms';
  */
 export class ProductServiceFactory {
   private static instance: ProductServiceFactory;
+  private logger = LoggerFactory.getInstance().createLogger('ProductServiceFactory');
   private offlineDefaultService: ProductServiceInterface;
   private shopifyService: ShopifyProductService | null = null;
   private wooCommerceService: WooCommerceProductService | null = null;
@@ -58,7 +60,10 @@ export class ProductServiceFactory {
         if (!this.shopifyService) {
           this.shopifyService = new ShopifyProductService(config);
           this.shopifyService.initialize().catch(err => {
-            console.error('Failed to initialize Shopify product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Shopify product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.shopifyService;
@@ -67,7 +72,10 @@ export class ProductServiceFactory {
         if (!this.wooCommerceService) {
           this.wooCommerceService = new WooCommerceProductService(config);
           this.wooCommerceService.initialize().catch(err => {
-            console.error('Failed to initialize WooCommerce product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize WooCommerce product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.wooCommerceService;
@@ -76,7 +84,10 @@ export class ProductServiceFactory {
         if (!this.bigCommerceService) {
           this.bigCommerceService = new BigCommerceProductService(config);
           this.bigCommerceService.initialize().catch(err => {
-            console.error('Failed to initialize BigCommerce product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize BigCommerce product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.bigCommerceService;
@@ -85,7 +96,10 @@ export class ProductServiceFactory {
         if (!this.magentoService) {
           this.magentoService = new MagentoProductService(config);
           this.magentoService.initialize().catch(err => {
-            console.error('Failed to initialize Magento product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Magento product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.magentoService;
@@ -94,7 +108,10 @@ export class ProductServiceFactory {
         if (!this.syliusService) {
           this.syliusService = new SyliusProductService(config);
           this.syliusService.initialize().catch(err => {
-            console.error('Failed to initialize Sylius product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Sylius product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.syliusService;
@@ -103,7 +120,10 @@ export class ProductServiceFactory {
         if (!this.wixService) {
           this.wixService = new WixProductService(config);
           this.wixService.initialize().catch(err => {
-            console.error('Failed to initialize Wix product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Wix product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.wixService;
@@ -112,7 +132,10 @@ export class ProductServiceFactory {
         if (!this.prestaShopService) {
           this.prestaShopService = new PrestaShopProductService(config);
           this.prestaShopService.initialize().catch(err => {
-            console.error('Failed to initialize PrestaShop product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize PrestaShop product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.prestaShopService;
@@ -121,7 +144,10 @@ export class ProductServiceFactory {
         if (!this.squarespaceService) {
           this.squarespaceService = new SquarespaceProductService(config);
           this.squarespaceService.initialize().catch(err => {
-            console.error('Failed to initialize Squarespace product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Squarespace product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.squarespaceService;
@@ -130,13 +156,16 @@ export class ProductServiceFactory {
         if (!this.offlineService) {
           this.offlineService = new OfflineProductService(config);
           this.offlineService.initialize().catch(err => {
-            console.error('Failed to initialize Offline product service:', err);
+            this.logger.error(
+              { message: 'Failed to initialize Offline product service:' },
+              err instanceof Error ? err : new Error(String(err))
+            );
           });
         }
         return this.offlineService;
 
       default:
-        console.warn(`Platform ${platform} not supported, using offline product service`);
+        this.logger.warn({ message: `Platform ${platform} not supported, using offline product service` });
         return this.offlineDefaultService;
     }
   }
@@ -200,68 +229,95 @@ export class ProductServiceFactory {
       case ECommercePlatform.SHOPIFY:
         this.shopifyService = new ShopifyProductService(config);
         this.shopifyService.initialize().catch(err => {
-          console.error('Failed to initialize Shopify product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Shopify product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.WOOCOMMERCE:
         this.wooCommerceService = new WooCommerceProductService(config);
         this.wooCommerceService.initialize().catch(err => {
-          console.error('Failed to initialize WooCommerce product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize WooCommerce product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.BIGCOMMERCE:
         this.bigCommerceService = new BigCommerceProductService(config);
         this.bigCommerceService.initialize().catch(err => {
-          console.error('Failed to initialize BigCommerce product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize BigCommerce product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.MAGENTO:
         this.magentoService = new MagentoProductService(config);
         this.magentoService.initialize().catch(err => {
-          console.error('Failed to initialize Magento product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Magento product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.SYLIUS:
         this.syliusService = new SyliusProductService(config);
         this.syliusService.initialize().catch(err => {
-          console.error('Failed to initialize Sylius product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Sylius product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.WIX:
         this.wixService = new WixProductService(config);
         this.wixService.initialize().catch(err => {
-          console.error('Failed to initialize Wix product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Wix product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.PRESTASHOP:
         this.prestaShopService = new PrestaShopProductService(config);
         this.prestaShopService.initialize().catch(err => {
-          console.error('Failed to initialize PrestaShop product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize PrestaShop product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.SQUARESPACE:
         this.squarespaceService = new SquarespaceProductService(config);
         this.squarespaceService.initialize().catch(err => {
-          console.error('Failed to initialize Squarespace product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Squarespace product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       case ECommercePlatform.OFFLINE:
         this.offlineService = new OfflineProductService(config);
         this.offlineService.initialize().catch(err => {
-          console.error('Failed to initialize Offline product service with config:', err);
+          this.logger.error(
+            { message: 'Failed to initialize Offline product service with config:' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         break;
 
       default:
-        console.warn(`Platform ${platform} not supported for configuration`);
+        this.logger.warn({ message: `Platform ${platform} not supported for configuration` });
     }
 
     // Reset composite service so it picks up new configurations

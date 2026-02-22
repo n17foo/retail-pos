@@ -30,7 +30,7 @@ export class SyliusSearchService extends BaseSearchService {
       this.config.apiSecret = this.config.apiSecret || process.env.SYLIUS_API_SECRET || '';
 
       if (!this.config.apiUrl || !this.config.apiKey || !this.config.apiSecret) {
-        console.warn('Missing Sylius API configuration');
+        this.logger.warn({ message: 'Missing Sylius API configuration' });
         return false;
       }
 
@@ -45,15 +45,15 @@ export class SyliusSearchService extends BaseSearchService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Sylius API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Sylius API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Sylius API:', error);
+        this.logger.error({ message: 'Error connecting to Sylius API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Error initializing Sylius search service:', error);
+      this.logger.error({ message: 'Error initializing Sylius search service' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -75,7 +75,7 @@ export class SyliusSearchService extends BaseSearchService {
   async searchPlatformProducts(query: string, options: SearchOptions): Promise<SearchProduct[]> {
     try {
       if (!this.isInitialized()) {
-        console.warn('Sylius search service not initialized. Cannot perform search.');
+        this.logger.warn({ message: 'Sylius search service not initialized. Cannot perform search.' });
         return [];
       }
 
@@ -91,7 +91,7 @@ export class SyliusSearchService extends BaseSearchService {
 
       return [];
     } catch (error) {
-      console.error('Error searching Sylius products:', error);
+      this.logger.error({ message: 'Error searching Sylius products' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -164,7 +164,7 @@ export class SyliusSearchService extends BaseSearchService {
         },
       };
     } catch (error) {
-      console.error('Error fetching products from Sylius:', error);
+      this.logger.error({ message: 'Error fetching products from Sylius' }, error instanceof Error ? error : new Error(String(error)));
       return {
         products: [],
         pagination: {
@@ -201,7 +201,7 @@ export class SyliusSearchService extends BaseSearchService {
         .filter((taxon: any) => taxon.level > 0) // Filter out root taxons
         .map((taxon: any) => taxon.name);
     } catch (error) {
-      console.error('Error fetching categories from Sylius:', error);
+      this.logger.error({ message: 'Error fetching categories from Sylius' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }

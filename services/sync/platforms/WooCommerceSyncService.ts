@@ -37,7 +37,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
    */
   async initialize(config: PlatformSyncConfig): Promise<boolean> {
     if (!config.storeUrl || !config.apiKey || !config.apiSecret) {
-      console.error('WooCommerce storeUrl, apiKey, and apiSecret are required');
+      this.logger.error({ message: 'WooCommerce storeUrl, apiKey, and apiSecret are required' });
       return false;
     }
     this.storeUrl = config.storeUrl;
@@ -78,14 +78,14 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
       });
 
       if (!response.ok) {
-        console.error('WooCommerce connection test failed:', response.statusText);
+        this.logger.error({ message: `WooCommerce connection test failed: ${response.statusText}` });
         return false;
       }
 
       // If we get a valid response, the connection is working
       return true;
     } catch (error) {
-      console.error('Error testing WooCommerce connection:', error);
+      this.logger.error({ message: 'Error testing WooCommerce connection' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -139,14 +139,17 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
             });
 
             if (!response.ok) {
-              console.error(`Failed to register WooCommerce webhook for ${topic}:`, response.statusText);
+              this.logger.error({ message: `Failed to register WooCommerce webhook for ${topic}: ${response.statusText}` });
               return null;
             }
 
             const data = await response.json();
             return data.id;
           } catch (error) {
-            console.error(`Error registering WooCommerce webhook for ${topic}:`, error);
+            this.logger.error(
+              { message: `Error registering WooCommerce webhook for ${topic}` },
+              error instanceof Error ? error : new Error(String(error))
+            );
             return null;
           }
         })
@@ -157,7 +160,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
 
       return this.webhookIds.length > 0;
     } catch (error) {
-      console.error('Error registering WooCommerce webhooks:', error);
+      this.logger.error({ message: 'Error registering WooCommerce webhooks' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -193,7 +196,10 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
 
             return response.ok;
           } catch (error) {
-            console.error(`Error unregistering WooCommerce webhook ${webhookId}:`, error);
+            this.logger.error(
+              { message: `Error unregistering WooCommerce webhook ${webhookId}` },
+              error instanceof Error ? error : new Error(String(error))
+            );
             return false;
           }
         })
@@ -205,7 +211,7 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
       // Return true if all webhooks were successfully deleted
       return results.every(Boolean);
     } catch (error) {
-      console.error('Error unregistering WooCommerce webhooks:', error);
+      this.logger.error({ message: 'Error unregistering WooCommerce webhooks' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -291,7 +297,10 @@ export class WooCommerceSyncService extends BasePlatformSyncService {
 
       this.completeSyncOperation(syncId, result);
     } catch (error) {
-      console.error(`Error in WooCommerce sync operation ${syncId}:`, error);
+      this.logger.error(
+        { message: `Error in WooCommerce sync operation ${syncId}` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw error;
     }
   }

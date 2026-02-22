@@ -1,10 +1,12 @@
 import { Order, OrderServiceInterface } from '../OrderServiceInterface';
 import { PlatformOrderServiceInterface } from './PlatformOrderServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Composite service that aggregates results from multiple platform-specific order services
  */
 export class CompositeOrderService implements OrderServiceInterface {
+  private logger = LoggerFactory.getInstance().createLogger('CompositeOrderService');
   private services: PlatformOrderServiceInterface[] = [];
 
   /**
@@ -37,7 +39,7 @@ export class CompositeOrderService implements OrderServiceInterface {
         try {
           return await service.initialize();
         } catch (error) {
-          console.error('Failed to initialize order service:', error);
+          this.logger.error({ message: 'Failed to initialize order service:' }, error instanceof Error ? error : new Error(String(error)));
           return false;
         }
       })
@@ -86,7 +88,10 @@ export class CompositeOrderService implements OrderServiceInterface {
           return order;
         }
       } catch (error) {
-        console.error(`Error getting order ${orderId} from service:`, error);
+        this.logger.error(
+          { message: `Error getting order ${orderId} from service:` },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -116,7 +121,10 @@ export class CompositeOrderService implements OrderServiceInterface {
           return await service.updateOrder(orderId, updates);
         }
       } catch (error) {
-        console.error(`Error updating order ${orderId} in service:`, error);
+        this.logger.error(
+          { message: `Error updating order ${orderId} in service:` },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -141,7 +149,7 @@ export class CompositeOrderService implements OrderServiceInterface {
           try {
             await service.initialize();
           } catch (error) {
-            console.error('Failed to initialize service:', error);
+            this.logger.error({ message: 'Failed to initialize service:' }, error instanceof Error ? error : new Error(String(error)));
           }
         }
       })

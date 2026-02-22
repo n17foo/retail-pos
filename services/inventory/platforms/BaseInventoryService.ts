@@ -4,6 +4,7 @@ import {
   PlatformConfigRequirements,
   PlatformInventoryConfig,
 } from './PlatformInventoryServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Abstract base class for platform-specific inventory services
@@ -12,6 +13,7 @@ import {
 export abstract class BaseInventoryService implements PlatformInventoryServiceInterface {
   protected initialized = false;
   protected config: PlatformInventoryConfig = {};
+  protected logger = LoggerFactory.getInstance().createLogger(this.constructor.name);
 
   /**
    * Get configuration requirements for this platform
@@ -29,7 +31,7 @@ export abstract class BaseInventoryService implements PlatformInventoryServiceIn
     const missingFields = requirements.required.filter(field => !config[field]);
 
     if (missingFields.length > 0) {
-      console.error(`Missing required configuration: ${missingFields.join(', ')}`);
+      this.logger.error({ message: `Missing required configuration: ${missingFields.join(', ')}` });
       return false;
     }
 

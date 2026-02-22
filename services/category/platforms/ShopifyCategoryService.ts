@@ -67,7 +67,7 @@ export class ShopifyCategoryService extends BaseCategoryService {
       // Combine both collection types
       return [...customCategories, ...smartCategories];
     } catch (error) {
-      console.error('Error fetching Shopify categories:', error);
+      this.logger.error({ message: 'Error fetching Shopify categories:' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -117,7 +117,10 @@ export class ShopifyCategoryService extends BaseCategoryService {
       // Not found as either type
       return undefined;
     } catch (error) {
-      console.error(`Error fetching Shopify category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error fetching Shopify category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return undefined;
     }
   }
@@ -161,7 +164,7 @@ export class ShopifyCategoryService extends BaseCategoryService {
       const data = await response.json();
       return this.mapCollectionToCategory(data.custom_collection);
     } catch (error) {
-      console.error('Error creating Shopify category:', error);
+      this.logger.error({ message: 'Error creating Shopify category:' }, error instanceof Error ? error : new Error(String(error)));
       throw new Error(`Failed to create category: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -220,7 +223,10 @@ export class ShopifyCategoryService extends BaseCategoryService {
       const data = await response.json();
       return this.mapCollectionToCategory(data.custom_collection);
     } catch (error) {
-      console.error(`Error updating Shopify category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error updating Shopify category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw new Error(`Failed to update category: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -264,7 +270,10 @@ export class ShopifyCategoryService extends BaseCategoryService {
 
       return response.ok;
     } catch (error) {
-      console.error(`Error deleting Shopify category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error deleting Shopify category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }

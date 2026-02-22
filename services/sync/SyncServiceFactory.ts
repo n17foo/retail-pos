@@ -8,6 +8,7 @@ import { OfflineSyncService } from './platforms/OfflineSyncService';
 import { PrestaShopSyncService } from './platforms/PrestaShopSyncService';
 import { SquarespaceSyncService } from './platforms/SquarespaceSyncService';
 import { PlatformSyncConfig } from './platforms/PlatformSyncServiceInterface';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Factory for creating sync service instances
@@ -15,6 +16,7 @@ import { PlatformSyncConfig } from './platforms/PlatformSyncServiceInterface';
  */
 export class SyncServiceFactory {
   private static instance: SyncServiceFactory;
+  private logger = LoggerFactory.getInstance().createLogger('SyncServiceFactory');
 
   // Cache for platform-specific services
   private serviceInstances: Record<string, SyncServiceInterface | null> = {};
@@ -135,7 +137,7 @@ export class SyncServiceFactory {
         break;
 
       default:
-        console.warn(`Unknown platform: ${platform}, using offline sync service`);
+        this.logger.warn({ message: `Unknown platform: ${platform}, using offline sync service` });
         service = this.offlineDefaultService;
     }
 
@@ -159,7 +161,7 @@ export class SyncServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize Shopify sync service:', err);
+      this.logger.error({ message: 'Failed to initialize Shopify sync service' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -183,7 +185,7 @@ export class SyncServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize WooCommerce sync service:', err);
+      this.logger.error({ message: 'Failed to initialize WooCommerce sync service' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -206,7 +208,7 @@ export class SyncServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize BigCommerce sync service:', err);
+      this.logger.error({ message: 'Failed to initialize BigCommerce sync service' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -220,7 +222,7 @@ export class SyncServiceFactory {
 
     // Offline service doesn't need configuration - it works locally
     service.initialize().catch(err => {
-      console.error('Failed to initialize Offline sync service:', err);
+      this.logger.error({ message: 'Failed to initialize Offline sync service' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -233,7 +235,7 @@ export class SyncServiceFactory {
     const service = new PrestaShopSyncService();
 
     service.initialize().catch(err => {
-      console.error('Failed to initialize PrestaShop sync service:', err);
+      this.logger.error({ message: 'Failed to initialize PrestaShop sync service' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -246,7 +248,7 @@ export class SyncServiceFactory {
     const service = new SquarespaceSyncService();
 
     service.initialize().catch(err => {
-      console.error('Failed to initialize Squarespace sync service:', err);
+      this.logger.error({ message: 'Failed to initialize Squarespace sync service' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -263,7 +265,10 @@ export class SyncServiceFactory {
       case ECommercePlatform.SHOPIFY: {
         const shopifyService = new ShopifySyncService();
         shopifyService.initialize(config).catch(err => {
-          console.error(`Failed to initialize Shopify sync service with config:`, err);
+          this.logger.error(
+            { message: 'Failed to initialize Shopify sync service with config' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         this.serviceInstances[platform] = shopifyService;
         break;
@@ -272,7 +277,10 @@ export class SyncServiceFactory {
       case ECommercePlatform.WOOCOMMERCE: {
         const wooService = new WooCommerceSyncService();
         wooService.initialize(config).catch(err => {
-          console.error(`Failed to initialize WooCommerce sync service with config:`, err);
+          this.logger.error(
+            { message: 'Failed to initialize WooCommerce sync service with config' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         this.serviceInstances[platform] = wooService;
         break;
@@ -281,7 +289,10 @@ export class SyncServiceFactory {
       case ECommercePlatform.BIGCOMMERCE: {
         const bigService = new BigCommerceSyncService();
         bigService.initialize(config).catch(err => {
-          console.error(`Failed to initialize BigCommerce sync service with config:`, err);
+          this.logger.error(
+            { message: 'Failed to initialize BigCommerce sync service with config' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         this.serviceInstances[platform] = bigService;
         break;
@@ -296,7 +307,10 @@ export class SyncServiceFactory {
       case ECommercePlatform.PRESTASHOP: {
         const prestaService = new PrestaShopSyncService();
         prestaService.initialize().catch(err => {
-          console.error(`Failed to initialize PrestaShop sync service with config:`, err);
+          this.logger.error(
+            { message: 'Failed to initialize PrestaShop sync service with config' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         this.serviceInstances[platform] = prestaService;
         break;
@@ -305,7 +319,10 @@ export class SyncServiceFactory {
       case ECommercePlatform.SQUARESPACE: {
         const squarespaceService = new SquarespaceSyncService();
         squarespaceService.initialize().catch(err => {
-          console.error(`Failed to initialize Squarespace sync service with config:`, err);
+          this.logger.error(
+            { message: 'Failed to initialize Squarespace sync service with config' },
+            err instanceof Error ? err : new Error(String(err))
+          );
         });
         this.serviceInstances[platform] = squarespaceService;
         break;
@@ -320,7 +337,7 @@ export class SyncServiceFactory {
       }
 
       default:
-        console.warn(`Unknown platform: ${platform}, not supported for sync configuration`);
+        this.logger.warn({ message: `Unknown platform: ${platform}, not supported for sync configuration` });
         return;
     }
 

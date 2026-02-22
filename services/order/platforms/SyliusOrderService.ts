@@ -32,7 +32,7 @@ export class SyliusOrderService extends BaseOrderService {
       }
 
       if (!this.config.apiUrl) {
-        console.warn('Missing Sylius API URL configuration');
+        this.logger.warn({ message: 'Missing Sylius API URL configuration' });
         return false;
       }
 
@@ -40,7 +40,7 @@ export class SyliusOrderService extends BaseOrderService {
       if (!this.config.accessToken && this.config.apiKey && this.config.apiSecret) {
         const token = await this.getOAuthToken();
         if (!token) {
-          console.error('Failed to authenticate with Sylius');
+          this.logger.error({ message: 'Failed to authenticate with Sylius' });
           return false;
         }
       }
@@ -56,15 +56,18 @@ export class SyliusOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Sylius API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Sylius API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Sylius API', error);
+        this.logger.error({ message: 'Error connecting to Sylius API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize Sylius order service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Sylius order service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -116,7 +119,7 @@ export class SyliusOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data);
     } catch (error) {
-      console.error('Error creating order on Sylius', error);
+      this.logger.error({ message: 'Error creating order on Sylius' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -195,7 +198,10 @@ export class SyliusOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from Sylius`, error);
+      this.logger.error(
+        { message: `Error fetching order ${orderId} from Sylius` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -229,7 +235,10 @@ export class SyliusOrderService extends BaseOrderService {
 
       return await this.getOrder(orderId);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on Sylius`, error);
+      this.logger.error(
+        { message: `Error updating order ${orderId} on Sylius` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -266,7 +275,7 @@ export class SyliusOrderService extends BaseOrderService {
 
       return this.accessToken;
     } catch (error) {
-      console.error('Error getting Sylius OAuth token', error);
+      this.logger.error({ message: 'Error getting Sylius OAuth token' }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }

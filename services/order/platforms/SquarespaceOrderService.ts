@@ -22,7 +22,7 @@ export class SquarespaceOrderService extends BaseOrderService {
       this.config.apiVersion = this.config.apiVersion || process.env.SQUARESPACE_API_VERSION || SQUARESPACE_API_VERSION;
 
       if (!this.config.apiKey) {
-        console.warn('Missing Squarespace API configuration');
+        this.logger.warn({ message: 'Missing Squarespace API configuration' });
         return false;
       }
 
@@ -35,15 +35,18 @@ export class SquarespaceOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Squarespace API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Squarespace API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Squarespace API', error);
+        this.logger.error({ message: 'Error connecting to Squarespace API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize Squarespace order service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Squarespace order service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -82,7 +85,10 @@ export class SquarespaceOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from Squarespace`, error);
+      this.logger.error(
+        { message: `Error fetching order ${orderId} from Squarespace` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -120,7 +126,10 @@ export class SquarespaceOrderService extends BaseOrderService {
 
       return await this.getOrder(orderId);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on Squarespace`, error);
+      this.logger.error(
+        { message: `Error updating order ${orderId} on Squarespace` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -150,7 +159,7 @@ export class SquarespaceOrderService extends BaseOrderService {
         nextCursor: data.pagination?.nextPageCursor,
       };
     } catch (error) {
-      console.error('Error fetching orders from Squarespace', error);
+      this.logger.error({ message: 'Error fetching orders from Squarespace' }, error instanceof Error ? error : new Error(String(error)));
       return { orders: [] };
     }
   }

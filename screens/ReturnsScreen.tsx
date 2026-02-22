@@ -8,6 +8,7 @@ import { RefundRecord } from '../services/returns/ReturnService';
 import { Button } from '../components/Button';
 import Input from '../components/Input';
 import { useCurrency } from '../hooks/useCurrency';
+import { useLogger } from '../hooks/useLogger';
 
 interface ReturnsScreenProps {
   onGoBack?: () => void;
@@ -23,6 +24,7 @@ const ReturnsScreen: React.FC<ReturnsScreenProps> = ({ onGoBack }) => {
   const [reason, setReason] = useState('');
   const [refundHistory, setRefundHistory] = useState<RefundRecord[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const logger = useLogger('ReturnsScreen');
 
   // Fetch refund history when order/transaction ID changes
   useEffect(() => {
@@ -37,14 +39,14 @@ const ReturnsScreen: React.FC<ReturnsScreenProps> = ({ onGoBack }) => {
           setRefundHistory(history);
         }
       } catch (err) {
-        console.error('Failed to fetch refund history:', err);
+        logger.error('Failed to fetch refund history:', err);
       } finally {
         setHistoryLoading(false);
       }
     }
 
     fetchRefundHistory();
-  }, [orderId, transactionId, refundType, getRefundHistory]);
+  }, [orderId, transactionId, refundType, getRefundHistory, logger]);
 
   const [formError, setFormError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);

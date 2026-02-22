@@ -31,7 +31,7 @@ export class BigCommerceSearchService extends BaseSearchService {
       this.config.apiVersion = this.config.apiVersion || process.env.BIGCOMMERCE_API_VERSION || BIGCOMMERCE_API_VERSION;
 
       if (!this.config.clientId || !this.config.apiToken || !this.config.storeHash) {
-        console.warn('Missing BigCommerce API configuration');
+        this.logger.warn({ message: 'Missing BigCommerce API configuration' });
         return false;
       }
 
@@ -46,15 +46,18 @@ export class BigCommerceSearchService extends BaseSearchService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to BigCommerce API', await response.text());
+          this.logger.error({ message: 'Failed to connect to BigCommerce API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to BigCommerce API:', error);
+        this.logger.error({ message: 'Error connecting to BigCommerce API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Error initializing BigCommerce search service:', error);
+      this.logger.error(
+        { message: 'Error initializing BigCommerce search service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -76,7 +79,7 @@ export class BigCommerceSearchService extends BaseSearchService {
   async searchPlatformProducts(query: string, options: SearchOptions): Promise<SearchProduct[]> {
     try {
       if (!this.isInitialized()) {
-        console.warn('BigCommerce search service not initialized. Cannot perform search.');
+        this.logger.warn({ message: 'BigCommerce search service not initialized. Cannot perform search.' });
         return [];
       }
 
@@ -92,7 +95,7 @@ export class BigCommerceSearchService extends BaseSearchService {
 
       return [];
     } catch (error) {
-      console.error('Error searching BigCommerce products:', error);
+      this.logger.error({ message: 'Error searching BigCommerce products' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -163,7 +166,7 @@ export class BigCommerceSearchService extends BaseSearchService {
         },
       };
     } catch (error) {
-      console.error('Error fetching products from BigCommerce:', error);
+      this.logger.error({ message: 'Error fetching products from BigCommerce' }, error instanceof Error ? error : new Error(String(error)));
       return {
         products: [],
         pagination: {
@@ -198,7 +201,10 @@ export class BigCommerceSearchService extends BaseSearchService {
       const data = await response.json();
       return (data.data || []).map((category: any) => category.name);
     } catch (error) {
-      console.error('Error fetching categories from BigCommerce:', error);
+      this.logger.error(
+        { message: 'Error fetching categories from BigCommerce' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return [];
     }
   }

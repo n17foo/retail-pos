@@ -35,7 +35,7 @@ export class MagentoSearchService extends BaseSearchService {
       this.config.adminPath = this.config.adminPath || process.env.MAGENTO_ADMIN_PATH || 'admin';
 
       if (!this.config.storeUrl || !this.config.username || !this.config.password) {
-        console.warn('Missing Magento API configuration');
+        this.logger.warn({ message: 'Missing Magento API configuration' });
         return false;
       }
 
@@ -43,7 +43,7 @@ export class MagentoSearchService extends BaseSearchService {
       try {
         const token = await this.getAuthToken();
         if (!token) {
-          console.error('Failed to authenticate with Magento API');
+          this.logger.error({ message: 'Failed to authenticate with Magento API' });
           return false;
         }
 
@@ -60,15 +60,18 @@ export class MagentoSearchService extends BaseSearchService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Magento API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Magento API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Magento API:', error);
+        this.logger.error({ message: 'Error connecting to Magento API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Error initializing Magento search service:', error);
+      this.logger.error(
+        { message: 'Error initializing Magento search service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -90,7 +93,7 @@ export class MagentoSearchService extends BaseSearchService {
   async searchPlatformProducts(query: string, options: SearchOptions): Promise<SearchProduct[]> {
     try {
       if (!this.isInitialized()) {
-        console.warn('Magento search service not initialized. Cannot perform search.');
+        this.logger.warn({ message: 'Magento search service not initialized. Cannot perform search.' });
         return [];
       }
 
@@ -106,7 +109,7 @@ export class MagentoSearchService extends BaseSearchService {
 
       return [];
     } catch (error) {
-      console.error('Error searching Magento products:', error);
+      this.logger.error({ message: 'Error searching Magento products' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -197,7 +200,7 @@ export class MagentoSearchService extends BaseSearchService {
         },
       };
     } catch (error) {
-      console.error('Error fetching products from Magento:', error);
+      this.logger.error({ message: 'Error fetching products from Magento' }, error instanceof Error ? error : new Error(String(error)));
       return {
         products: [],
         pagination: {
@@ -254,7 +257,7 @@ export class MagentoSearchService extends BaseSearchService {
       extractCategories(data);
       return categories;
     } catch (error) {
-      console.error('Error fetching categories from Magento:', error);
+      this.logger.error({ message: 'Error fetching categories from Magento' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -296,7 +299,10 @@ export class MagentoSearchService extends BaseSearchService {
 
       return null;
     } catch (error) {
-      console.error('Error finding category ID by name in Magento:', error);
+      this.logger.error(
+        { message: 'Error finding category ID by name in Magento' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -362,7 +368,7 @@ export class MagentoSearchService extends BaseSearchService {
       });
 
       if (!response.ok) {
-        console.error('Failed to get Magento authentication token', await response.text());
+        this.logger.error({ message: 'Failed to get Magento authentication token' });
         return null;
       }
 
@@ -376,7 +382,10 @@ export class MagentoSearchService extends BaseSearchService {
 
       return this.accessToken;
     } catch (error) {
-      console.error('Error getting Magento authentication token:', error);
+      this.logger.error(
+        { message: 'Error getting Magento authentication token' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }

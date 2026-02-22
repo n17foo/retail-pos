@@ -22,7 +22,7 @@ export class WixOrderService extends BaseOrderService {
       this.config.apiVersion = this.config.apiVersion || process.env.WIX_API_VERSION || WIX_API_VERSION;
 
       if (!this.config.apiKey || !this.config.siteId) {
-        console.warn('Missing Wix API configuration');
+        this.logger.warn({ message: 'Missing Wix API configuration' });
         return false;
       }
 
@@ -40,15 +40,15 @@ export class WixOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Wix API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Wix API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Wix API', error);
+        this.logger.error({ message: 'Error connecting to Wix API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize Wix order service', error);
+      this.logger.error({ message: 'Failed to initialize Wix order service' }, error instanceof Error ? error : new Error(String(error)));
       return false;
     }
   }
@@ -91,7 +91,7 @@ export class WixOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error('Error creating order on Wix', error);
+      this.logger.error({ message: 'Error creating order on Wix' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -116,7 +116,7 @@ export class WixOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data.order);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from Wix`, error);
+      this.logger.error({ message: `Error fetching order ${orderId} from Wix` }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }
@@ -147,7 +147,7 @@ export class WixOrderService extends BaseOrderService {
 
       return await this.getOrder(orderId);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on Wix`, error);
+      this.logger.error({ message: `Error updating order ${orderId} on Wix` }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }

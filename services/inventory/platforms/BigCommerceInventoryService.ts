@@ -38,7 +38,7 @@ export class BigCommerceInventoryService extends BaseInventoryService {
         });
 
         if (!response.ok) {
-          console.error(`Failed to fetch BigCommerce product ${productId}: ${response.statusText}`);
+          this.logger.error({ message: `Failed to fetch BigCommerce product ${productId}: ${response.statusText}` });
           continue;
         }
 
@@ -72,7 +72,7 @@ export class BigCommerceInventoryService extends BaseInventoryService {
 
       return { items };
     } catch (error) {
-      console.error('Error fetching BigCommerce inventory:', error);
+      this.logger.error({ message: 'Error fetching BigCommerce inventory:' }, error instanceof Error ? error : new Error(String(error)));
       return { items: [] };
     }
   }
@@ -167,7 +167,7 @@ export class BigCommerceInventoryService extends BaseInventoryService {
 
       return result;
     } catch (error) {
-      console.error('Error updating BigCommerce inventory:', error);
+      this.logger.error({ message: 'Error updating BigCommerce inventory:' }, error instanceof Error ? error : new Error(String(error)));
       return {
         successful: result.successful,
         failed: updates.length - result.successful,

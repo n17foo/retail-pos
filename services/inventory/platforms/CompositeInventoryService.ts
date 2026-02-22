@@ -1,5 +1,6 @@
 import { InventoryResult, InventoryUpdate, InventoryUpdateResult, InventoryServiceInterface } from '../InventoryServiceInterface';
 import { PlatformInventoryServiceInterface } from './PlatformInventoryServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Composite service that aggregates multiple platform-specific inventory services
@@ -8,6 +9,7 @@ import { PlatformInventoryServiceInterface } from './PlatformInventoryServiceInt
 export class CompositeInventoryService implements InventoryServiceInterface {
   private initialized = false;
   private services: PlatformInventoryServiceInterface[] = [];
+  private logger = LoggerFactory.getInstance().createLogger('CompositeInventoryService');
 
   /**
    * Create a new composite inventory service
@@ -62,7 +64,10 @@ export class CompositeInventoryService implements InventoryServiceInterface {
           results.push(result);
         }
       } catch (error) {
-        console.error('Error getting inventory from platform service:', error);
+        this.logger.error(
+          { message: 'Error getting inventory from platform service:' },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 
@@ -97,7 +102,10 @@ export class CompositeInventoryService implements InventoryServiceInterface {
           results.push(result);
         }
       } catch (error) {
-        console.error('Error updating inventory in platform service:', error);
+        this.logger.error(
+          { message: 'Error updating inventory in platform service:' },
+          error instanceof Error ? error : new Error(String(error))
+        );
       }
     }
 

@@ -33,7 +33,7 @@ export class MagentoOrderService extends BaseOrderService {
       this.config.storeUrl = this.normalizeStoreUrl(this.config.storeUrl);
 
       if (!this.config.storeUrl) {
-        console.warn('Missing Magento store URL configuration');
+        this.logger.warn({ message: 'Missing Magento store URL configuration' });
         return false;
       }
 
@@ -41,7 +41,7 @@ export class MagentoOrderService extends BaseOrderService {
       if (!this.config.accessToken && this.config.username && this.config.password) {
         const token = await this.getAuthToken();
         if (!token) {
-          console.error('Failed to authenticate with Magento');
+          this.logger.error({ message: 'Failed to authenticate with Magento' });
           return false;
         }
       }
@@ -57,15 +57,18 @@ export class MagentoOrderService extends BaseOrderService {
           this.initialized = true;
           return true;
         } else {
-          console.error('Failed to connect to Magento API', await response.text());
+          this.logger.error({ message: 'Failed to connect to Magento API' });
           return false;
         }
       } catch (error) {
-        console.error('Error connecting to Magento API', error);
+        this.logger.error({ message: 'Error connecting to Magento API' }, error instanceof Error ? error : new Error(String(error)));
         return false;
       }
     } catch (error) {
-      console.error('Failed to initialize Magento order service', error);
+      this.logger.error(
+        { message: 'Failed to initialize Magento order service' },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }
@@ -124,7 +127,7 @@ export class MagentoOrderService extends BaseOrderService {
       // Fetch the created order
       return (await this.getOrder(String(orderId))) as Order;
     } catch (error) {
-      console.error('Error creating order on Magento', error);
+      this.logger.error({ message: 'Error creating order on Magento' }, error instanceof Error ? error : new Error(String(error)));
       throw error;
     }
   }
@@ -202,7 +205,10 @@ export class MagentoOrderService extends BaseOrderService {
       const data = await response.json();
       return this.mapToOrder(data);
     } catch (error) {
-      console.error(`Error fetching order ${orderId} from Magento`, error);
+      this.logger.error(
+        { message: `Error fetching order ${orderId} from Magento` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -242,7 +248,10 @@ export class MagentoOrderService extends BaseOrderService {
 
       return await this.getOrder(orderId);
     } catch (error) {
-      console.error(`Error updating order ${orderId} on Magento`, error);
+      this.logger.error(
+        { message: `Error updating order ${orderId} on Magento` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return null;
     }
   }
@@ -278,7 +287,7 @@ export class MagentoOrderService extends BaseOrderService {
 
       return token;
     } catch (error) {
-      console.error('Error getting Magento auth token', error);
+      this.logger.error({ message: 'Error getting Magento auth token' }, error instanceof Error ? error : new Error(String(error)));
       return null;
     }
   }

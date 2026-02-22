@@ -47,7 +47,7 @@ export class BigCommerceCategoryService extends BaseCategoryService {
       // Map BigCommerce categories to our format and build category tree
       return this.mapCategories(data.data);
     } catch (error) {
-      console.error('Error fetching BigCommerce categories:', error);
+      this.logger.error({ message: 'Error fetching BigCommerce categories:' }, error instanceof Error ? error : new Error(String(error)));
       return [];
     }
   }
@@ -83,7 +83,10 @@ export class BigCommerceCategoryService extends BaseCategoryService {
 
       return this.mapCategory(data.data);
     } catch (error) {
-      console.error(`Error fetching BigCommerce category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error fetching BigCommerce category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return undefined;
     }
   }
@@ -129,7 +132,7 @@ export class BigCommerceCategoryService extends BaseCategoryService {
 
       return this.mapCategory(data.data);
     } catch (error) {
-      console.error('Error creating BigCommerce category:', error);
+      this.logger.error({ message: 'Error creating BigCommerce category:' }, error instanceof Error ? error : new Error(String(error)));
       throw new Error(`Failed to create category: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -185,7 +188,10 @@ export class BigCommerceCategoryService extends BaseCategoryService {
 
       return this.mapCategory(data.data);
     } catch (error) {
-      console.error(`Error updating BigCommerce category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error updating BigCommerce category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       throw new Error(`Failed to update category: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -208,7 +214,10 @@ export class BigCommerceCategoryService extends BaseCategoryService {
 
       return response.ok;
     } catch (error) {
-      console.error(`Error deleting BigCommerce category ${categoryId}:`, error);
+      this.logger.error(
+        { message: `Error deleting BigCommerce category ${categoryId}:` },
+        error instanceof Error ? error : new Error(String(error))
+      );
       return false;
     }
   }

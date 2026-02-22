@@ -11,6 +11,7 @@ import { OfflineInventoryService } from './platforms/OfflineInventoryService';
 import { CompositeInventoryService } from './platforms/CompositeInventoryService';
 import { PlatformInventoryConfig, PlatformInventoryServiceInterface } from './platforms/PlatformInventoryServiceInterface';
 import { ECommercePlatform } from '../../utils/platforms';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Factory for creating inventory service instances
@@ -19,6 +20,7 @@ import { ECommercePlatform } from '../../utils/platforms';
 export class InventoryServiceFactory {
   private static instance: InventoryServiceFactory;
   private offlineDefaultService: InventoryServiceInterface;
+  private logger = LoggerFactory.getInstance().createLogger('InventoryServiceFactory');
 
   // Cache for platform-specific services
   private serviceInstances: Record<string, InventoryServiceInterface | null> = {
@@ -106,7 +108,7 @@ export class InventoryServiceFactory {
         break;
 
       default:
-        console.warn(`Unknown platform: ${platform}, using offline inventory service`);
+        this.logger.warn({ message: `Unknown platform: ${platform}, using offline inventory service` });
         return this.offlineDefaultService;
     }
 
@@ -189,7 +191,10 @@ export class InventoryServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize Shopify inventory service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize Shopify inventory service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -210,7 +215,10 @@ export class InventoryServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize WooCommerce inventory service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize WooCommerce inventory service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -231,7 +239,10 @@ export class InventoryServiceFactory {
 
     // Initialize asynchronously
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize BigCommerce inventory service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize BigCommerce inventory service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -251,7 +262,10 @@ export class InventoryServiceFactory {
     };
 
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize Magento inventory service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize Magento inventory service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -271,7 +285,7 @@ export class InventoryServiceFactory {
     };
 
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize Sylius inventory service:', err);
+      this.logger.error({ message: 'Failed to initialize Sylius inventory service:' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -290,7 +304,7 @@ export class InventoryServiceFactory {
     };
 
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize Wix inventory service:', err);
+      this.logger.error({ message: 'Failed to initialize Wix inventory service:' }, err instanceof Error ? err : new Error(String(err)));
     });
 
     return service;
@@ -308,7 +322,10 @@ export class InventoryServiceFactory {
     };
 
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize PrestaShop inventory service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize PrestaShop inventory service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -326,7 +343,10 @@ export class InventoryServiceFactory {
     };
 
     service.initialize(config).catch(err => {
-      console.error('Failed to initialize Squarespace inventory service:', err);
+      this.logger.error(
+        { message: 'Failed to initialize Squarespace inventory service:' },
+        err instanceof Error ? err : new Error(String(err))
+      );
     });
 
     return service;
@@ -384,13 +404,16 @@ export class InventoryServiceFactory {
         return;
 
       default:
-        console.warn(`Platform ${platform} not supported for inventory configuration`);
+        this.logger.warn({ message: `Platform ${platform} not supported for inventory configuration` });
         return;
     }
 
     if (service) {
       service.initialize(config).catch(err => {
-        console.error(`Failed to initialize ${platform} inventory service with config:`, err);
+        this.logger.error(
+          { message: `Failed to initialize ${platform} inventory service with config` },
+          err instanceof Error ? err : new Error(String(err))
+        );
       });
       this.serviceInstances[platform] = service;
     }
