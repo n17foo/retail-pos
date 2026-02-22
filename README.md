@@ -9,7 +9,7 @@ Website: [retailpos.org](https://retailpos.org)
 
 ## 🚀 Features
 
-✅ **All Planned Features Complete** — Clean TypeScript compile, 55/55 tests pass
+✅ **All Planned Features Complete** — Clean TypeScript compile, 198/198 tests pass
 
 - **Multi-Platform Support**: Shopify, WooCommerce, BigCommerce, Magento, Sylius, Wix, PrestaShop, Squarespace, Offline
 - **Customer Management**: Search, attach customers from platform APIs during checkout
@@ -133,9 +133,8 @@ retailpos/
 │   ├── notifications/# Real-time notification system
 │   ├── order/        # Order processing and sync
 │   ├── product/      # Product management and variants
-│   ├── refund/       # Platform refund services
 │   ├── reporting/    # Analytics and reporting
-│   ├── returns/      # Return processing with refunds
+│   ├── returns/      # Return processing + refunds (10 platforms)
 │   ├── search/       # Product search functionality
 │   ├── sync/         # Data synchronization
 │   ├── tax/          # Tax profile management
@@ -208,12 +207,14 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## 📈 Recent Updates
 
-**All Planned Features Complete** (Latest Integration Session):
+**All Planned Features Complete** (Feb 2026):
 
-- ✅ Platform service extensions: Added BigCommerce, Magento, Sylius, Wix, PrestaShop, Squarespace support (24 new service implementations)
+- ✅ Platform service extensions: BigCommerce, Magento, Sylius, Wix, PrestaShop, Squarespace (24 new service implementations)
 - ✅ UI integrations: Customer search modal, notification system, error boundary
-- ✅ Service wiring: Audit logging, notifications, refund + returns merge
+- ✅ Service wiring: Audit logging, notifications, returns + refund orchestration
 - ✅ Accessibility audit: Full screen reader support across all components
+- ✅ Logging refactor: All `console` calls replaced with structured `LoggerFactory` logging
+- ✅ Security hardening: Role access defaults to least privilege; iOS Face ID permission added
 - ✅ Clean compile + 198/198 tests passing
 
 ## 🔒 Security
@@ -235,7 +236,30 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 - **Issues**: [GitHub Issues](https://github.com/n17foo/retailpos/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/n17foo/retailpos/discussions)
 - **Documentation**: [ARCHITECTURE.md](ARCHITECTURE.md)
+- **Website brief**: [WEBSITE_BRIEF.md](WEBSITE_BRIEF.md) — full product brief for website generation
 
 ---
 
-**RetailPOS** - Bridging the gap between physical and digital retail experiences.
+## 🏢 Need Help Integrating RetailPOS?
+
+RetailPOS is built and maintained by **[N17](https://n17.foo)** — a software studio specialising in retail and commerce infrastructure.
+
+If you need help with any of the following, get in touch:
+
+- **Platform integration** — connecting RetailPOS to your Shopify, WooCommerce, BigCommerce, Magento, or other e-commerce platform
+- **Custom hardware setup** — configuring barcode scanners, receipt printers, cash drawers, or card terminals for your specific hardware
+- **Multi-register deployment** — setting up server/client mode across multiple registers in your store
+- **Custom feature development** — extending RetailPOS with features specific to your business (loyalty programmes, custom reporting, bespoke payment flows)
+- **Production hardening** — security review, PIN hashing, encrypted credential storage, PCI compliance guidance
+- **Hosted deployment** — managed hosting and ongoing maintenance so you don't have to run it yourself
+- **Staff training & onboarding** — getting your team up and running quickly
+
+### Get in touch
+
+- 🌐 **Website**: [N17](https://n17.foo)
+- 📧 **Email**: [hello@n17.foo](mailto:hello@n17.foo)
+- 💬 **GitHub Discussions**: [github.com/n17foo/retailpos/discussions](https://github.com/n17foo/retailpos/discussions)
+
+---
+
+**RetailPOS** — Bridging the gap between physical and digital retail experiences.
