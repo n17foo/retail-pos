@@ -48,7 +48,7 @@ const ReceiptSettingsTab: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [localHeader, localFooter, localOptions, updateHeader, updateFooter, updateOptions]);
+  }, [localHeader, localFooter, localOptions, updateHeader, updateFooter, updateOptions, t]);
 
   const handlePrinterModelChange = useCallback(
     async (model: PrinterModelType) => {
@@ -62,7 +62,7 @@ const ReceiptSettingsTab: React.FC = () => {
         Alert.alert(t('common.error'), err instanceof Error ? err.message : t('settings.receipt.saveError'));
       }
     },
-    [setPrinterModel]
+    [setPrinterModel, t]
   );
 
   const updateLocalHeader = (updates: Partial<typeof localHeader>) => {

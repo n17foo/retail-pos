@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, Animated, Easing } from 'react-native';
 import { lightColors, spacing, typography, borderRadius, elevation } from '../utils/theme';
 import { formatMoney } from '../utils/money';
@@ -35,7 +35,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
 }) => {
   const currency = useCurrency();
   // Animation value for the tap animation
-  const tapAnimation = new Animated.Value(1);
+  const tapAnimation = useMemo(() => new Animated.Value(1), []);
 
   // States
   const [_connecting, _setConnecting] = useState(false);
@@ -73,7 +73,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
       tapAnimation.stopAnimation();
       tapAnimation.setValue(1);
     }
-  }, [paymentStatus]);
+  }, [paymentStatus, tapAnimation]);
 
   // Process payment
   const handlePayment = async () => {
@@ -142,7 +142,7 @@ const StripeNfcPaymentTerminal: React.FC<StripeNfcPaymentTerminalProps> = ({
         disconnect();
       }
     };
-  }, []);
+  }, [disconnect, isTerminalConnected]);
 
   // Show payment instructions based on status
   const renderPaymentInstructions = () => {

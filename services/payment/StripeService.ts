@@ -1,4 +1,5 @@
 import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from './PaymentServiceInterface';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 // For React Native, we'll use a bridge pattern since Stripe Terminal SDK
 // requires React hooks which can't be used in a service class
@@ -14,10 +15,11 @@ export class StripeService implements PaymentServiceInterface {
   private deviceId: string | null = null;
   private connectedDevice: unknown = null;
   private stripeTerminalReady: boolean = false;
+  private logger = LoggerFactory.getInstance().createLogger('StripeService');
 
   private constructor() {
     // This is a bridge implementation - actual initialization happens via the React hook
-    console.log('Stripe payment service bridge created');
+    this.logger.info('Stripe payment service bridge created');
   }
 
   public static getInstance(): StripeService {
@@ -35,9 +37,7 @@ export class StripeService implements PaymentServiceInterface {
     this.isConnected = connected;
     this.deviceId = deviceId;
     this.connectedDevice = deviceInfo;
-    console.log(
-      `Stripe terminal connection status updated: ${connected ? 'connected' : 'disconnected'}${deviceId ? ' to ' + deviceId : ''}`
-    );
+    this.logger.info(`Terminal connection status updated: ${connected ? 'connected' : 'disconnected'}${deviceId ? ' to ' + deviceId : ''}`);
   }
 
   /**
@@ -46,7 +46,7 @@ export class StripeService implements PaymentServiceInterface {
    */
   public async connectToTerminal(deviceId: string): Promise<boolean> {
     // This is a stub - actual connection happens in the React component with useStripeTerminal
-    console.log(`Request to connect to Stripe terminal: ${deviceId} - delegating to React component`);
+    this.logger.info(`Request to connect to Stripe terminal: ${deviceId} - delegating to React component`);
     return this.isConnected && this.deviceId === deviceId;
   }
 
@@ -63,7 +63,7 @@ export class StripeService implements PaymentServiceInterface {
       throw new Error('Not connected to payment terminal');
     }
 
-    console.log(`Queueing payment of $${request.amount.toFixed(2)} for Stripe terminal ${this.deviceId}`);
+    this.logger.info(`Queueing payment of $${request.amount.toFixed(2)} for Stripe terminal ${this.deviceId}`);
 
     // Store the request to be picked up by the React component using the hook
     this.pendingPaymentRequest = request;
@@ -118,7 +118,7 @@ export class StripeService implements PaymentServiceInterface {
    * In the bridge pattern, this returns the readers that have been discovered by the React component
    */
   public async getAvailableTerminals(): Promise<Array<{ id: string; name: string }>> {
-    console.log('Getting available Stripe terminals from bridge cache');
+    this.logger.info('Getting available Stripe terminals from bridge cache');
     return this.discoveredReaders;
   }
 
@@ -128,7 +128,7 @@ export class StripeService implements PaymentServiceInterface {
    */
   public setDiscoveredReaders(readers: Array<{ id: string; name: string }>): void {
     this.discoveredReaders = readers;
-    console.log(`Updated discovered Stripe terminals: ${readers.length} terminals found`);
+    this.logger.info(`Updated discovered Stripe terminals: ${readers.length} terminals found`);
   }
 
   /**
@@ -137,7 +137,7 @@ export class StripeService implements PaymentServiceInterface {
    */
   public disconnect(): void {
     if (this.isConnected && this.deviceId) {
-      console.log(`Request to disconnect from Stripe terminal: ${this.deviceId} - delegating to React component`);
+      this.logger.info(`Request to disconnect from Stripe terminal: ${this.deviceId} - delegating to React component`);
 
       // Reset local state - the React component will handle the actual disconnection
       this.isConnected = false;
@@ -168,7 +168,7 @@ export class StripeService implements PaymentServiceInterface {
    * In the bridge pattern, this returns statuses that have been cached by the React component
    */
   public async getTransactionStatus(transactionId: string): Promise<PaymentResponse> {
-    console.log(`Getting transaction status for ${transactionId} from bridge cache`);
+    this.logger.info(`Getting transaction status for ${transactionId} from bridge cache`);
     return this.transactionStatuses.get(transactionId) || { success: false, errorMessage: 'Transaction not found', timestamp: new Date() };
   }
 
@@ -178,7 +178,7 @@ export class StripeService implements PaymentServiceInterface {
    */
   public setTransactionStatus(transactionId: string, status: PaymentResponse): void {
     this.transactionStatuses.set(transactionId, status);
-    console.log(`Updated transaction status for ${transactionId}`);
+    this.logger.info(`Updated transaction status for ${transactionId}`);
   }
 
   // Store pending transaction operations that need to be processed by React component
@@ -192,7 +192,7 @@ export class StripeService implements PaymentServiceInterface {
    * In the bridge pattern, this queues a void request to be processed by the React component
    */
   public async voidTransaction(transactionId: string): Promise<PaymentResponse> {
-    console.log(`Queueing void request for transaction ${transactionId}`);
+    this.logger.info(`Queueing void request for transaction ${transactionId}`);
 
     // Store the request to be picked up by the React component using the hook
     this.pendingVoidTransaction = transactionId;
@@ -244,7 +244,7 @@ export class StripeService implements PaymentServiceInterface {
    * In the bridge pattern, this queues a refund request to be processed by the React component
    */
   public async refundTransaction(transactionId: string, amount: number): Promise<PaymentResponse> {
-    console.log(`Queueing refund request for transaction ${transactionId} for amount ${amount.toFixed(2)}`);
+    this.logger.info(`Queueing refund request for transaction ${transactionId} for amount ${amount.toFixed(2)}`);
 
     // Store the request to be picked up by the React component using the hook
     this.pendingRefundTransaction = { transactionId, amount };

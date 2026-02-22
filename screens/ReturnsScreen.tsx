@@ -276,9 +276,6 @@ const styles = StyleSheet.create({
     color: lightColors.success,
     fontSize: typography.fontSize.sm,
   },
-  scrollContent: {
-    padding: spacing.md,
-  },
   refundTypeSelector: {
     flexDirection: 'row',
     marginBottom: spacing.md,
@@ -293,34 +290,6 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     ...elevation.low,
     marginBottom: spacing.md,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: lightColors.border,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  reasonInput: {
-    height: 80,
-    textAlignVertical: 'top',
-    paddingTop: spacing.sm,
-  },
-  processButton: {
-    backgroundColor: lightColors.primary,
-    height: 48,
-    borderRadius: borderRadius.sm,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  disabledButton: {
-    backgroundColor: lightColors.textDisabled,
-  },
-  processButtonText: {
-    color: lightColors.textOnPrimary,
-    fontSize: typography.fontSize.md,
-    fontWeight: '500',
   },
   historyContainer: {
     flex: 1,

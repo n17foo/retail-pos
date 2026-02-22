@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView, Button, Switch } from 'react-native';
 import { useScannerSettings, ScannerSettings } from '../../hooks/useScannerSettings';
+import { lightColors } from '../../utils/theme';
 
 interface ScannerSetupStepProps {
   onBack: () => void;
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: lightColors.textSecondary,
     marginBottom: 40,
     textAlign: 'center',
   },
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 5,
     padding: 10,
     marginBottom: 20,
@@ -180,27 +181,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#f9f9f9',
+    borderColor: lightColors.border,
+    backgroundColor: lightColors.background,
   },
   typeOptionActive: {
-    backgroundColor: '#0a84ff',
-    borderColor: '#0a84ff',
+    backgroundColor: lightColors.primary,
+    borderColor: lightColors.primary,
   },
   typeOptionDisabled: {
     opacity: 0.5,
   },
   typeOptionText: {
     fontSize: 14,
-    color: '#666',
+    color: lightColors.textSecondary,
   },
   typeOptionTextActive: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontWeight: '500' as const,
   },
   typeHint: {
     fontSize: 12,
-    color: '#888',
+    color: lightColors.textHint,
     marginBottom: 16,
     fontStyle: 'italic' as const,
   },

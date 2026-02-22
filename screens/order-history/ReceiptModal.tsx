@@ -41,7 +41,7 @@ const ReceiptModal: React.FC<ReceiptModalProps> = ({ visible, order, onPrint, on
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },

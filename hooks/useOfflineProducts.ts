@@ -33,7 +33,7 @@ export const useOfflineProducts = (): UseOfflineProductsReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logger]);
 
   const createProduct = useCallback(
     async (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
@@ -91,14 +91,17 @@ export const useOfflineProducts = (): UseOfflineProductsReturn => {
     [loadProducts]
   );
 
-  const getProductById = useCallback(async (id: string): Promise<Product | null> => {
-    try {
-      return await offlineProductService.getProductById(id);
-    } catch (err) {
-      logger.error({ message: 'Error getting product' }, err instanceof Error ? err : new Error(String(err)));
-      return null;
-    }
-  }, []);
+  const getProductById = useCallback(
+    async (id: string): Promise<Product | null> => {
+      try {
+        return await offlineProductService.getProductById(id);
+      } catch (err) {
+        logger.error({ message: 'Error getting product' }, err instanceof Error ? err : new Error(String(err)));
+        return null;
+      }
+    },
+    [logger]
+  );
 
   const clearAllProducts = useCallback(async (): Promise<void> => {
     setIsLoading(true);

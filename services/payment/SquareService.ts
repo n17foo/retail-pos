@@ -1,10 +1,12 @@
 import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from './PaymentServiceInterface';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 // Conditionally import Square SDK to avoid bundling issues
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- third-party SDK with no type definitions
 type SquareSDKModule = Record<string, (...args: any[]) => any>;
 let SQIPCore: SquareSDKModule;
 let SQIPCardEntry: SquareSDKModule;
+const logger = LoggerFactory.getInstance().createLogger('SquareService');
 
 try {
   // Import Square SDK v1.x named exports
@@ -12,7 +14,7 @@ try {
   SQIPCore = squareSdk.SQIPCore;
   SQIPCardEntry = squareSdk.SQIPCardEntry;
 } catch (error) {
-  console.warn('Square SDK not available, running in mock mode:', error);
+  logger.warn('Square SDK not available, running in mock mode:', error);
 }
 
 /**
@@ -29,9 +31,9 @@ export class SquareService implements PaymentServiceInterface {
     try {
       // Initialize Square SDK
       this.initializeSquareSdk();
-      console.log('Square payment service initialized successfully');
+      logger.info('Square payment service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Square payment service:', error);
+      logger.error('Failed to initialize Square payment service:', error);
     }
   }
 
@@ -43,7 +45,7 @@ export class SquareService implements PaymentServiceInterface {
       // Initialize with your Square app ID using SQIPCore
       await SQIPCore.setSquareApplicationId(process.env.SQUARE_APP_ID || 'YOUR_SQUARE_APP_ID');
     } catch (error) {
-      console.error('Error initializing Square SDK:', error);
+      logger.error('Error initializing Square SDK:', error);
       throw error;
     }
   }
@@ -63,7 +65,7 @@ export class SquareService implements PaymentServiceInterface {
    */
   public async connectToTerminal(deviceId: string): Promise<boolean> {
     try {
-      console.log(`Connecting to Square terminal: ${deviceId}`);
+      logger.info(`Connecting to Square terminal: ${deviceId}`);
 
       // For compatibility with our interface, we use the deviceId param
       // In a real Square implementation, you might use this to identify different iOS/Android devices
@@ -75,7 +77,7 @@ export class SquareService implements PaymentServiceInterface {
 
       return true;
     } catch (error) {
-      console.error('Failed to connect to Square terminal:', error);
+      logger.error('Failed to connect to Square terminal:', error);
       this.isConnected = false;
       this.deviceId = null;
       this.connectedDevice = null;
@@ -92,7 +94,7 @@ export class SquareService implements PaymentServiceInterface {
     }
 
     try {
-      console.log(`Processing payment of $${request.amount.toFixed(2)} with Square`);
+      logger.info(`Processing payment of $${request.amount.toFixed(2)} with Square`);
 
       // Start card entry using SQIPCardEntry
       await new Promise<Record<string, unknown>>((resolve, reject) => {
@@ -130,7 +132,7 @@ export class SquareService implements PaymentServiceInterface {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Square payment processing error:', error);
+      logger.error('Square payment processing error:', error);
       return {
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown payment processing error',
@@ -154,7 +156,7 @@ export class SquareService implements PaymentServiceInterface {
    */
   public disconnect(): void {
     if (this.isConnected) {
-      console.log(`Disconnecting from Square terminal: ${this.deviceId}`);
+      logger.info(`Disconnecting from Square terminal: ${this.deviceId}`);
       this.isConnected = false;
       this.deviceId = null;
       this.connectedDevice = null;

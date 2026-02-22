@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Dimensions, PanResponder } from 'react-native';
 import { lightColors, spacing, typography, elevation } from '../utils/theme';
 
@@ -29,7 +29,7 @@ export const SwipeablePanel: React.FC<SwipeablePanelProps> = ({
   const overlayOpacity = useRef(new Animated.Value(0)).current;
 
   // Show panel animation
-  const showPanel = () => {
+  const showPanel = useCallback(() => {
     Animated.parallel([
       Animated.timing(leftPos, {
         toValue: position === 'left' ? 0 : width - PANEL_WIDTH,
@@ -42,10 +42,10 @@ export const SwipeablePanel: React.FC<SwipeablePanelProps> = ({
         useNativeDriver: false, // Using JS driver for consistency
       }),
     ]).start();
-  };
+  }, [position, leftPos, overlayOpacity]);
 
   // Hide panel animation
-  const hidePanel = () => {
+  const hidePanel = useCallback(() => {
     Animated.parallel([
       Animated.timing(leftPos, {
         toValue: position === 'left' ? -PANEL_WIDTH : width,
@@ -60,7 +60,7 @@ export const SwipeablePanel: React.FC<SwipeablePanelProps> = ({
     ]).start(() => {
       if (onClose) onClose();
     });
-  };
+  }, [position, leftPos, overlayOpacity, onClose]);
 
   // Swipe gesture handler
   const panResponder = useRef(
@@ -103,7 +103,7 @@ export const SwipeablePanel: React.FC<SwipeablePanelProps> = ({
     } else {
       hidePanel();
     }
-  }, [isOpen]);
+  }, [isOpen, showPanel, hidePanel]);
 
   // Always render to ensure animations work properly
   // The overlay opacity will keep the component hidden when closed

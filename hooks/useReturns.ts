@@ -37,7 +37,7 @@ export function useReturns(platform?: ECommercePlatform) {
     }
 
     init();
-  }, []);
+  }, [logger]);
 
   /**
    * Process a refund for an e-commerce order
@@ -82,7 +82,7 @@ export function useReturns(platform?: ECommercePlatform) {
         setIsLoading(false);
       }
     },
-    [isInitialized, platform]
+    [isInitialized, platform, logger]
   );
 
   /**
@@ -128,7 +128,7 @@ export function useReturns(platform?: ECommercePlatform) {
         setIsLoading(false);
       }
     },
-    [isInitialized]
+    [isInitialized, logger]
   );
 
   /**
@@ -160,7 +160,7 @@ export function useReturns(platform?: ECommercePlatform) {
         setIsLoading(false);
       }
     },
-    [isInitialized, platform]
+    [isInitialized, platform, logger]
   );
 
   return {

@@ -169,7 +169,7 @@ export const useEcommerceSettings = () => {
     } catch (error) {
       logger.error({ message: 'Failed to load e-commerce settings' }, error instanceof Error ? error : new Error(String(error)));
     }
-  }, []);
+  }, [logger]);
 
   // Load settings on mount
   useEffect(() => {
@@ -333,7 +333,7 @@ export const useEcommerceSettings = () => {
     } finally {
       isUpdating.current = false;
     }
-  }, [ecommerceSettings, handleEcommerceSettingsChange, saveSettings]);
+  }, [ecommerceSettings, handleEcommerceSettingsChange, saveSettings, logger]);
 
   // Cancel changes and revert to original settings
   const cancelChanges = useCallback(() => {

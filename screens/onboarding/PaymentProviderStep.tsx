@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView, Button
 import { usePaymentSettings, PaymentSettings } from '../../hooks/usePaymentSettings';
 import { PaymentProvider } from '../../services/payment/PaymentServiceFactory';
 import { useTranslate } from '../../hooks/useTranslate';
+import { lightColors } from '../../utils/theme';
 
 interface PaymentProviderStepProps {
   onBack: () => void;
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: lightColors.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -261,18 +262,18 @@ const styles = StyleSheet.create({
   radioButton: {
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 5,
     marginRight: 10,
     marginBottom: 10,
   },
   radioButtonSelected: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
+    backgroundColor: lightColors.primary,
+    borderColor: lightColors.primary,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,

@@ -4,6 +4,7 @@ import ProductManagementTab from './ProductManagementTab';
 import CategoryManagementTab from './CategoryManagementTab';
 import UsersSettingsTab from './UsersSettingsTab';
 import { useTranslate } from '../../hooks/useTranslate';
+import { elevation, lightColors, semanticColors } from '../../utils/theme';
 
 type OfflineSection = 'overview' | 'products' | 'categories' | 'users';
 
@@ -64,17 +65,17 @@ const OfflineManagementTab: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: lightColors.background,
   },
   backButton: {
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: lightColors.border,
   },
   backButtonText: {
     fontSize: 16,
-    color: '#007AFF',
+    color: lightColors.primary,
   },
   overviewContainer: {
     flex: 1,
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
   },
   overviewDescription: {
     fontSize: 14,
-    color: '#666',
+    color: lightColors.textSecondary,
     textAlign: 'center',
     marginBottom: 30,
     lineHeight: 20,
@@ -97,14 +98,10 @@ const styles = StyleSheet.create({
     gap: 15,
   },
   menuCard: {
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     borderRadius: 12,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...elevation.medium,
   },
   menuIcon: {
     fontSize: 32,
@@ -117,10 +114,10 @@ const styles = StyleSheet.create({
   },
   menuDescription: {
     fontSize: 14,
-    color: '#666',
+    color: lightColors.textSecondary,
   },
   infoBox: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: semanticColors.hover,
     borderRadius: 12,
     padding: 20,
     marginTop: 30,
@@ -130,11 +127,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 10,
-    color: '#1565c0',
+    color: lightColors.primary,
   },
   infoText: {
     fontSize: 14,
-    color: '#1976d2',
+    color: lightColors.primary,
     lineHeight: 22,
   },
 });

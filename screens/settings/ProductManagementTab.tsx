@@ -4,6 +4,7 @@ import { useOfflineProducts, Product } from '../../hooks/useOfflineProducts';
 import { useOfflineCategories } from '../../hooks/useOfflineCategories';
 import { formatMoney } from '../../utils/money';
 import { useCurrency } from '../../hooks/useCurrency';
+import { elevation, lightColors } from '../../utils/theme';
 
 interface ProductFormData {
   title: string;
@@ -329,38 +330,38 @@ const ProductManagementTab: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: lightColors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: lightColors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: lightColors.primary,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 8,
   },
   addButtonText: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontWeight: '600',
   },
   searchContainer: {
     padding: 15,
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: lightColors.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
@@ -369,16 +370,12 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   productCard: {
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
     flexDirection: 'row',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...elevation.low,
   },
   productImageContainer: {
     width: 80,
@@ -394,13 +391,13 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 8,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: lightColors.inputBackground,
     justifyContent: 'center',
     alignItems: 'center',
   },
   placeholderText: {
     fontSize: 10,
-    color: '#999',
+    color: lightColors.textHint,
   },
   productInfo: {
     flex: 1,
@@ -413,22 +410,22 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#007AFF',
+    color: lightColors.primary,
     marginBottom: 4,
   },
   productSku: {
     fontSize: 12,
-    color: '#666',
+    color: lightColors.textSecondary,
   },
   productStock: {
     fontSize: 12,
-    color: '#666',
+    color: lightColors.textSecondary,
   },
   productCategory: {
     fontSize: 11,
-    color: '#999',
+    color: lightColors.textHint,
     marginTop: 4,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: lightColors.inputBackground,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 4,
@@ -442,21 +439,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: lightColors.inputBackground,
   },
   editButtonText: {
     fontSize: 14,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   deleteButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
-    backgroundColor: '#ffebee',
+    backgroundColor: lightColors.error + '15',
   },
   deleteButtonText: {
     fontSize: 14,
-    color: '#dc3545',
+    color: lightColors.error,
   },
   statsContainer: {
     padding: 15,
@@ -464,16 +461,16 @@ const styles = StyleSheet.create({
   },
   statsText: {
     fontSize: 14,
-    color: '#666',
+    color: lightColors.textSecondary,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     borderRadius: 15,
     padding: 20,
     width: '90%',
@@ -489,11 +486,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
@@ -514,18 +511,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
   },
   categoryOptionSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: lightColors.primary,
+    borderColor: lightColors.primary,
   },
   categoryOptionText: {
     fontSize: 12,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   categoryOptionTextSelected: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontWeight: '600',
   },
   modalButtons: {
@@ -539,30 +536,30 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   cancelButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: lightColors.inputBackground,
   },
   cancelButtonText: {
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: lightColors.primary,
   },
   saveButtonText: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontWeight: '600',
   },
   errorText: {
-    color: '#dc3545',
+    color: lightColors.error,
     padding: 15,
     textAlign: 'center',
   },
   loadingText: {
-    color: '#666',
+    color: lightColors.textSecondary,
     padding: 15,
     textAlign: 'center',
   },
   emptyText: {
-    color: '#666',
+    color: lightColors.textSecondary,
     textAlign: 'center',
     padding: 30,
   },

@@ -33,7 +33,7 @@ export const useOfflineCategories = (): UseOfflineCategoriesReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logger]);
 
   const createCategory = useCallback(
     async (categoryData: Omit<Category, 'id'>): Promise<Category> => {

@@ -14,6 +14,7 @@ import ShiftModal from './order-history/ShiftModal';
 import ReportModal from './order-history/ReportModal';
 import ReceiptModal from './order-history/ReceiptModal';
 import { useCurrency } from '../hooks/useCurrency';
+import { useLogger } from '../hooks/useLogger';
 
 interface OrderHistoryScreenProps extends MoreStackScreenProps<'OrderHistory'> {}
 
@@ -40,6 +41,7 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
   const { getLocalOrders, syncOrderToPlatform, getSyncQueueStatus, unsyncedOrdersCount } = useBasketContext();
   const { user } = useAuthContext();
   const { currentShift, openShift, closeShift, generateReport, getReportLines, getReceiptLines } = useDailyReport();
+  const logger = useLogger('OrderHistoryScreen');
 
   const currency = useCurrency();
   const userRole = user?.role || 'cashier';
@@ -88,12 +90,12 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
       filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       setOrders(filtered);
     } catch (error) {
-      console.error('Failed to load orders:', error);
+      logger.error('Failed to load orders:', error);
       Alert.alert('Error', 'Failed to load orders');
     } finally {
       setLoading(false);
     }
-  }, [dayOffset, isCashier, user?.id, getLocalOrders]);
+  }, [dayOffset, isCashier, user?.id, getLocalOrders, logger]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -119,13 +121,13 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
           Alert.alert('Sync Failed', result.error || 'Unknown error occurred');
         }
       } catch (error) {
-        console.error('Failed to resync order:', error);
+        logger.error('Failed to resync order:', error);
         Alert.alert('Error', 'Failed to resync order');
       } finally {
         setSyncingOrderId(null);
       }
     },
-    [syncOrderToPlatform, loadOrders]
+    [syncOrderToPlatform, loadOrders, logger]
   );
 
   const handleDeleteOrder = useCallback(
@@ -141,14 +143,14 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
               await loadOrders();
               Alert.alert('Deleted', 'Order removed successfully');
             } catch (error) {
-              console.error('Failed to delete order:', error);
+              logger.error('Failed to delete order:', error);
               Alert.alert('Error', 'Failed to delete order');
             }
           },
         },
       ]);
     },
-    [loadOrders]
+    [loadOrders, logger]
   );
 
   const handlePrintReceipt = useCallback((order: LocalOrder) => {
@@ -159,10 +161,10 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
   const handlePrintReceiptConfirm = useCallback(() => {
     if (!selectedOrder) return;
     const lines = getReceiptLines(selectedOrder);
-    console.log('=== RECEIPT ===');
-    lines.forEach(line => console.log(line));
+    logger.info('=== RECEIPT ===');
+    lines.forEach(line => logger.info(line));
     Alert.alert('Print', 'Receipt sent to printer. Check console for preview.');
-  }, [selectedOrder, getReceiptLines]);
+  }, [selectedOrder, getReceiptLines, logger]);
 
   // ============ Shift Actions ============
 
@@ -204,7 +206,7 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
     } finally {
       setIsProcessingShift(false);
     }
-  }, [cashAmount, shiftModalMode, openShift, closeShift, generateReport, orders, user]);
+  }, [cashAmount, shiftModalMode, openShift, closeShift, generateReport, orders, user, currency.code]);
 
   const handleGenerateReport = useCallback(async () => {
     try {
@@ -219,10 +221,10 @@ const OrderHistoryScreen: React.FC<OrderHistoryScreenProps> = () => {
   const handlePrintReport = useCallback(() => {
     if (!currentReport) return;
     const lines = getReportLines(currentReport);
-    console.log('=== DAILY REPORT ===');
-    lines.forEach(line => console.log(line));
+    logger.info('=== DAILY REPORT ===');
+    lines.forEach(line => logger.info(line));
     Alert.alert('Print', 'Report sent to printer. Check console for preview.');
-  }, [currentReport, getReportLines]);
+  }, [currentReport, getReportLines, logger]);
 
   // ============ Date Navigation ============
 

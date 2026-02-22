@@ -1,4 +1,4 @@
-import { Dispatch, ReactNode, SetStateAction, createContext, useContext, useMemo, useState } from 'react';
+import React, { Dispatch, ReactNode, SetStateAction, createContext, useContext, useMemo, useState } from 'react';
 
 export interface CategoryContextType {
   isLeftPanelOpen: boolean;

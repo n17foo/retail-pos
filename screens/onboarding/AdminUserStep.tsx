@@ -4,6 +4,7 @@ import PinKeypad from '../../components/PinKeypad';
 import PinDisplay from '../../components/PinDisplay';
 import { useUsers } from '../../hooks/useUsers';
 import { useTranslate } from '../../hooks/useTranslate';
+import { lightColors } from '../../utils/theme';
 
 interface AdminUserStepProps {
   onBack: () => void;
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
-    color: '#666',
+    color: lightColors.textSecondary,
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -220,16 +221,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
   },
   pinContainer: {
     alignItems: 'center',
@@ -243,18 +244,18 @@ const styles = StyleSheet.create({
   },
   pinDescription: {
     fontSize: 14,
-    color: '#666',
+    color: lightColors.textSecondary,
     textAlign: 'center',
     marginBottom: 20,
   },
   errorText: {
-    color: '#dc3545',
+    color: lightColors.error,
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 15,
   },
   loadingText: {
-    color: '#007AFF',
+    color: lightColors.primary,
     fontSize: 14,
     marginTop: 15,
   },

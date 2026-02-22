@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
     paddingTop: 60,

@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, ScrollView, Button } from 'react-native';
 import { usePrinterSettings, PrinterSettings } from '../../hooks/usePrinterSettings';
 import { PrinterConnectionType } from '../../services/printer/UnifiedPrinterService';
+import { lightColors } from '../../utils/theme';
 
 interface PrinterSetupStepProps {
   onBack: () => void;
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: lightColors.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -186,17 +187,17 @@ const styles = StyleSheet.create({
   radioButton: {
     padding: 10,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 5,
     marginHorizontal: 5,
   },
   radioButtonSelected: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
+    backgroundColor: lightColors.primary,
+    borderColor: lightColors.primary,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,

@@ -133,7 +133,7 @@ const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ visible, onClos
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'flex-end',
   },
   container: {

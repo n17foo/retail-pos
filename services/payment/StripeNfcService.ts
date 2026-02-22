@@ -17,12 +17,12 @@ export class StripeNfcService implements PaymentServiceInterface {
   private logger = LoggerFactory.getInstance().createLogger('StripeNfcService');
 
   private constructor() {
-    console.log('Stripe NFC Tap to Pay service initialized');
+    this.logger.info('Stripe NFC Tap to Pay service initialized');
     // Only initialize on supported platforms (iOS 15.4+ or Android 11+)
     if (this.isPlatformSupported()) {
       this.initializeStripeSDK();
     } else {
-      console.warn('Stripe NFC is not supported on this device');
+      this.logger.warn('Stripe NFC is not supported on this device');
     }
   }
 
@@ -57,15 +57,15 @@ export class StripeNfcService implements PaymentServiceInterface {
       const bridgeManager = StripeTerminalBridgeManager.getInstance();
 
       if (!bridgeManager.bridge) {
-        console.warn('Stripe Terminal Bridge is not yet initialized in React context');
-        console.warn('Make sure StripeTerminalBridgeProvider is added to your App component');
+        this.logger.warn('Stripe Terminal Bridge is not yet initialized in React context');
+        this.logger.warn('Make sure StripeTerminalBridgeProvider is added to your App component');
         throw new Error('Stripe Terminal Bridge not available');
       }
 
       // Use the bridge to initialize the SDK
       // The actual SDK initialization happens in the React component via the Provider
       if (bridgeManager.isTerminalInitialized()) {
-        console.log('Stripe Terminal SDK already initialized');
+        this.logger.info('Stripe Terminal SDK already initialized');
         this.isInitialized = true;
         return true;
       }
@@ -75,7 +75,7 @@ export class StripeNfcService implements PaymentServiceInterface {
       this.isInitialized = initSuccess;
       return initSuccess;
     } catch (error) {
-      console.error('Failed to initialize Stripe Terminal SDK:', error);
+      this.logger.error('Failed to initialize Stripe Terminal SDK:', error);
       this.isInitialized = false;
       return false;
     }
@@ -87,7 +87,7 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   public async testTerminalConnection(): Promise<{ success: boolean; message?: string }> {
     try {
-      console.log('Testing Stripe NFC terminal connection...');
+      this.logger.info('Testing Stripe NFC terminal connection...');
 
       // First check if Stripe NFC is enabled in settings
       const enableNfc = (await keyValueRepository.getItem('stripe_nfc_enableNfc')) === 'true';
@@ -139,7 +139,7 @@ export class StripeNfcService implements PaymentServiceInterface {
         };
       }
     } catch (error: unknown) {
-      console.error('Test connection error:', error);
+      this.logger.error('Test connection error:', error as Error);
       return {
         success: false,
         message: error instanceof Error ? error.message : 'An unknown error occurred while testing the terminal connection',
@@ -154,7 +154,7 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   async connectToTerminal(deviceId: string): Promise<boolean> {
     try {
-      console.log(`Connecting to Stripe NFC reader: ${deviceId}`);
+      this.logger.info(`Connecting to Stripe NFC reader: ${deviceId}`);
 
       // Ensure the SDK is initialized
       if (!this.isInitialized) {
@@ -171,14 +171,14 @@ export class StripeNfcService implements PaymentServiceInterface {
       if (success) {
         this.deviceId = deviceId;
         this.isConnected = true;
-        console.log(`Connected to NFC reader: ${deviceId}`);
+        this.logger.info(`Connected to NFC reader: ${deviceId}`);
       } else {
         throw new Error('Failed to connect to reader');
       }
 
       return success;
     } catch (error) {
-      console.error('Error connecting to Stripe NFC reader:', error);
+      this.logger.error('Error connecting to Stripe NFC reader:', error);
       this.isConnected = false;
       this.deviceId = null;
       return false;
@@ -192,7 +192,7 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   async processPayment(request: PaymentRequest): Promise<PaymentResponse> {
     try {
-      console.log('Processing payment via Stripe NFC:', request);
+      this.logger.info('Processing payment via Stripe NFC:', request);
 
       // Check if Stripe NFC is enabled
       const enableNfc = (await keyValueRepository.getItem('stripe_nfc_enableNfc')) === 'true';
@@ -209,14 +209,14 @@ export class StripeNfcService implements PaymentServiceInterface {
       if (!this.isConnected) {
         // If we have a known device ID, try to reconnect to it
         if (this.deviceId) {
-          console.log(`Attempting to reconnect to previous NFC reader: ${this.deviceId}`);
+          this.logger.info(`Attempting to reconnect to previous NFC reader: ${this.deviceId}`);
           const reconnectSuccess = await this.connectToTerminal(this.deviceId);
           if (!reconnectSuccess) {
             throw new Error('Failed to reconnect to NFC reader');
           }
         } else {
           // Try to discover and connect to the first available reader
-          console.log('No reader connected, attempting to discover and connect');
+          this.logger.info('No reader connected, attempting to discover and connect');
 
           // Ensure the SDK is initialized
           if (!this.isInitialized) {
@@ -267,7 +267,7 @@ export class StripeNfcService implements PaymentServiceInterface {
         },
       };
 
-      console.log('Sending payment request to terminal:', paymentRequest);
+      this.logger.info('Sending payment request to terminal:', paymentRequest);
 
       // Use the bridge manager to process the payment
       const bridgeManager = StripeTerminalBridgeManager.getInstance();
@@ -309,7 +309,7 @@ export class StripeNfcService implements PaymentServiceInterface {
         amount: request.amount,
       } as PaymentResponse; // Explicitly cast to ensure TypeScript recognizes the type
     } catch (error: unknown) {
-      console.error('Error processing Stripe NFC payment:', error);
+      this.logger.error('Error processing Stripe NFC payment:', error as Error);
       const errMsg = error instanceof Error ? error.message : '';
 
       // Check if this is a terminal connection error
@@ -338,18 +338,18 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   disconnect(): void {
     if (this.isConnected) {
-      console.log('Disconnecting from Stripe NFC reader...');
+      this.logger.info('Disconnecting from Stripe NFC reader...');
 
       // Use the bridge manager to disconnect the reader
       try {
         const bridgeManager = StripeTerminalBridgeManager.getInstance();
         bridgeManager.disconnectReader();
       } catch (error) {
-        console.error('Error disconnecting from reader:', error);
+        this.logger.error('Error disconnecting from reader:', error as Error);
       } finally {
         this.isConnected = false;
         this.deviceId = null;
-        console.log('Disconnected from NFC reader');
+        this.logger.info('Disconnected from NFC reader');
       }
     }
   }
@@ -368,7 +368,7 @@ export class StripeNfcService implements PaymentServiceInterface {
       const bridgeManager = StripeTerminalBridgeManager.getInstance();
       return bridgeManager.isReaderConnected();
     } catch (error) {
-      this.logger.error('Error checking NFC reader connection:', error);
+      this.logger.error('Error checking NFC reader connection:', error as Error);
       // If there's an error accessing the bridge, fall back to our local state
       return this.isConnected;
     }
@@ -389,11 +389,11 @@ export class StripeNfcService implements PaymentServiceInterface {
     try {
       // Check platform support first
       if (!this.isPlatformSupported()) {
-        console.warn('This device does not support NFC payments');
+        this.logger.warn('This device does not support NFC payments');
         return [];
       }
 
-      console.log('Discovering NFC terminals...');
+      this.logger.info('Discovering NFC terminals...');
 
       // Ensure the SDK is initialized
       if (!this.isInitialized) {
@@ -416,7 +416,7 @@ export class StripeNfcService implements PaymentServiceInterface {
         name: reader.deviceType || `NFC Reader ${reader.serialNumber || 'Unknown'}`,
       }));
     } catch (error) {
-      console.error('Error discovering NFC readers:', error);
+      this.logger.error('Error discovering NFC readers:', error as Error);
       return [];
     }
   }
@@ -449,7 +449,7 @@ export class StripeNfcService implements PaymentServiceInterface {
           return (await response.json()) as Record<string, unknown>;
         }
       } catch (bridgeError) {
-        console.warn('Bridge transaction status check failed, falling back to Stripe API', bridgeError);
+        this.logger.warn('Bridge transaction status check failed, falling back to Stripe API', bridgeError);
       }
     }
 
@@ -475,7 +475,7 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   async getTransactionStatus(transactionId: string): Promise<PaymentResponse> {
     try {
-      console.log(`Checking status of transaction: ${transactionId}`);
+      this.logger.info(`Checking status of transaction: ${transactionId}`);
       const raw = await this.getRawTransactionStatus(transactionId);
       return {
         success: raw.status === 'succeeded',
@@ -483,7 +483,7 @@ export class StripeNfcService implements PaymentServiceInterface {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Error checking transaction status:', error);
+      this.logger.error('Error checking transaction status:', error);
       throw error;
     }
   }
@@ -494,7 +494,7 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   async voidTransaction(transactionId: string): Promise<PaymentResponse> {
     try {
-      console.log(`Voiding transaction: ${transactionId}`);
+      this.logger.info(`Voiding transaction: ${transactionId}`);
 
       // Ensure the SDK is initialized
       if (!this.isInitialized) {
@@ -560,7 +560,7 @@ export class StripeNfcService implements PaymentServiceInterface {
             };
           }
         } catch (backendError) {
-          console.warn('Backend void transaction failed, trying direct API', backendError);
+          this.logger.warn('Backend void transaction failed, trying direct API', backendError);
         }
       }
 
@@ -586,7 +586,7 @@ export class StripeNfcService implements PaymentServiceInterface {
         timestamp: new Date(),
       };
     } catch (error: unknown) {
-      console.error('Error voiding transaction:', error);
+      this.logger.error('Error voiding transaction:', error as Error);
       return {
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Failed to void transaction',
@@ -602,7 +602,7 @@ export class StripeNfcService implements PaymentServiceInterface {
    */
   async refundTransaction(transactionId: string, amount: number): Promise<PaymentResponse> {
     try {
-      console.log(`Refunding ${amount} for transaction: ${transactionId}`);
+      this.logger.info(`Refunding ${amount} for transaction: ${transactionId}`);
 
       // Ensure the SDK is initialized
       if (!this.isInitialized) {
@@ -632,7 +632,7 @@ export class StripeNfcService implements PaymentServiceInterface {
             };
           }
         } catch (bridgeError) {
-          console.warn('Bridge refund failed, trying API', bridgeError);
+          this.logger.warn('Bridge refund failed, trying API', bridgeError);
         }
       }
 
@@ -669,7 +669,7 @@ export class StripeNfcService implements PaymentServiceInterface {
             };
           }
         } catch (backendError) {
-          console.warn('Backend refund failed, trying direct API', backendError);
+          this.logger.warn('Backend refund failed, trying direct API', backendError);
         }
       }
 
@@ -700,7 +700,7 @@ export class StripeNfcService implements PaymentServiceInterface {
         amount: amount,
       };
     } catch (error: unknown) {
-      console.error('Error refunding transaction:', error);
+      this.logger.error('Error refunding transaction:', error as Error);
       return {
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Failed to process refund',

@@ -71,18 +71,18 @@ module.exports = [
     },
     rules: {
       // React
-      'react/prop-types': 'off',
-      'react/react-in-jsx-scope': 'off',
-      'react/display-name': 'off',
+      'react/prop-types': 'error',
+      'react/react-in-jsx-scope': 'error',
+      'react/display-name': 'error',
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/exhaustive-deps': 'error',
 
       // React Native
-      'react-native/no-unused-styles': 'warn',
-      'react-native/split-platform-components': 'warn',
-      'react-native/no-inline-styles': 'warn',
-      'react-native/no-color-literals': 'warn',
-      'react-native/no-raw-text': 'off',
+      'react-native/no-unused-styles': 'error',
+      'react-native/split-platform-components': 'error',
+      'react-native/no-inline-styles': 'error',
+      'react-native/no-color-literals': 'error',
+      'react-native/no-raw-text': 'error',
 
       // TypeScript
       '@typescript-eslint/explicit-function-return-type': 'off',
@@ -104,7 +104,7 @@ module.exports = [
       'no-undef': 'off',
 
       // General
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': ['error', { allow: ['warn', 'error'] }],
     },
   },
   prettierConfig,

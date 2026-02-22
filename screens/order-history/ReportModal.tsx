@@ -127,7 +127,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ visible, report, onClo
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },

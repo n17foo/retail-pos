@@ -59,7 +59,7 @@ const LocalApiSettingsTab: React.FC = () => {
       localApiServer.stop();
       Alert.alert(t('common.saved'), t('settings.localApi.savedStandalone'));
     }
-  }, [mode, port, sharedSecret, registerName, serverAddress]);
+  }, [mode, port, sharedSecret, registerName, serverAddress, t]);
 
   const handleTestConnection = useCallback(async () => {
     setConnectionStatus('testing');
@@ -68,7 +68,7 @@ const LocalApiSettingsTab: React.FC = () => {
     if (!result.ok) {
       Alert.alert(t('settings.localApi.connectionFailed'), result.error || t('settings.localApi.connectionFailedMessage'));
     }
-  }, []);
+  }, [t]);
 
   const handleScan = useCallback(async () => {
     setScanning(true);
@@ -85,7 +85,7 @@ const LocalApiSettingsTab: React.FC = () => {
     if (servers.length === 0) {
       Alert.alert(t('settings.localApi.noServersFound'), t('settings.localApi.noServersFoundMessage'));
     }
-  }, []);
+  }, [t]);
 
   const handleSelectServer = useCallback(async (server: DiscoveredServer) => {
     setServerAddress(server.address);

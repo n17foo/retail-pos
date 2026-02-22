@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: typography.fontSize.md,
     fontWeight: '600',
-    color: '#fff',
+    color: lightColors.textOnPrimary,
   },
 });
 

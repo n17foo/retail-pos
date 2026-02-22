@@ -22,7 +22,7 @@ export const useSettings = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logger]);
 
   useEffect(() => {
     fetchSettings();

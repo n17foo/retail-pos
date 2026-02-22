@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import OrderScreen from '../screens/OrderScreen';
@@ -14,10 +14,18 @@ const SearchScreen = lazy(() => import('../screens/SearchScreen'));
 const InventoryScreen = lazy(() => import('../screens/InventoryScreen'));
 
 const LazyFallback = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <View style={styles.fallback}>
     <ActivityIndicator size="large" color={lightColors.primary} />
   </View>
 );
+
+const styles = StyleSheet.create({
+  fallback: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 

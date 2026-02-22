@@ -69,7 +69,7 @@ const PaymentSettingsTab = () => {
   // Handle cancel
   const handleCancel = useCallback(() => {
     handlePaymentSettingsChange(paymentSettings);
-  }, [handlePaymentSettingsChange]);
+  }, [handlePaymentSettingsChange, paymentSettings]);
 
   // Test connection
   const testPaymentConnection = useCallback(async () => {
@@ -84,7 +84,7 @@ const PaymentSettingsTab = () => {
       console.error('Connection test failed:', err);
       Alert.alert(t('common.error'), t('settings.payment.connectionTestFailed'));
     }
-  }, [testConnection, paymentSettings.provider]);
+  }, [testConnection, paymentSettings.provider, t]);
 
   // Render provider selection radio buttons
   const renderProviderSelection = () => (
@@ -178,7 +178,7 @@ const PaymentSettingsTab = () => {
         <Text style={styles.settingLabel}>{t('settings.payment.stripeNfcSettings')}</Text>
 
         {/* API Credentials Section */}
-        <View style={[styles.settingGroup, { marginBottom: 20 }]}>
+        <View style={[styles.settingGroup, styles.sectionMargin]}>
           <Text style={styles.settingLabel}>{t('settings.payment.apiCredentials')}</Text>
           <View style={styles.inputGroup}>
             <Text>{t('settings.payment.apiKey')}</Text>
@@ -222,7 +222,7 @@ const PaymentSettingsTab = () => {
         </View>
 
         {/* Backend Configuration Section */}
-        <View style={[styles.settingGroup, { marginBottom: 20 }]}>
+        <View style={[styles.settingGroup, styles.sectionMargin]}>
           <Text style={styles.settingLabel}>{t('settings.payment.backendConfig')}</Text>
           <View style={styles.inputGroup}>
             <Text>{t('settings.payment.backendUrl')}</Text>
@@ -256,7 +256,7 @@ const PaymentSettingsTab = () => {
         </View>
 
         {/* Reader Configuration Section */}
-        <View style={[styles.settingGroup, { marginBottom: 20 }]}>
+        <View style={[styles.settingGroup, styles.sectionMargin]}>
           <Text style={styles.settingLabel}>{t('settings.payment.readerConfig')}</Text>
           <View style={styles.optionRow}>
             <Text style={styles.label}>{t('settings.payment.enableNfcReader')}</Text>
@@ -309,7 +309,7 @@ const PaymentSettingsTab = () => {
 
         {/* Test Connection Button */}
         <TouchableOpacity
-          style={[styles.verticalButton, styles.testButton, isLoading && styles.buttonDisabled, { marginTop: 20 }]}
+          style={[styles.verticalButton, styles.testButton, isLoading && styles.buttonDisabled, styles.sectionMarginTop]}
           onPress={async () => {
             try {
               // Save settings first
@@ -654,6 +654,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
     padding: spacing.lg,
+  },
+  sectionMargin: {
+    marginBottom: 20,
+  },
+  sectionMarginTop: {
+    marginTop: 20,
   },
 });
 

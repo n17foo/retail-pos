@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Alert, FlatList } from 'react-native';
-import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
+import { lightColors, spacing, borderRadius, typography, elevation, semanticColors } from '../../utils/theme';
 import { CURRENCIES, getCurrencySymbol } from '../../utils/currency';
 
 interface OfflineSetupStepProps {
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   infoBox: {
-    backgroundColor: '#e7f3ff',
+    backgroundColor: semanticColors.infoBackground,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     marginBottom: spacing.lg,
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: typography.fontSize.md,
     fontWeight: '600',
-    color: '#0056b3',
+    color: semanticColors.infoText,
     marginBottom: spacing.xs,
   },
   infoText: {

@@ -40,7 +40,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
     if (activeMethod === 'biometric') {
       handleBiometricAuth();
     }
-  }, [activeMethod]);
+  });
 
   const startShake = useCallback(() => {
     Animated.sequence([
@@ -61,8 +61,18 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         startShake();
       }
     },
-    [onLogin, startShake]
+    [onLogin, startShake, t]
   );
+
+  // ── Biometric handler ───────────────────────────────────────────────
+
+  const handleBiometricAuth = useCallback(() => {
+    setIsLoading(true);
+    setError(null);
+    authService.authenticate('biometric').then(result => {
+      handleAuthResult('biometric', result);
+    });
+  }, [handleAuthResult]);
 
   // ── PIN handlers ────────────────────────────────────────────────────
 
@@ -86,7 +96,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         });
       }
     },
-    [pin, handleAuthResult]
+    [pin, handleAuthResult, handleBiometricAuth]
   );
 
   const handlePinDelete = useCallback(() => {
@@ -95,16 +105,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       setError(null);
     }
   }, [pin]);
-
-  // ── Biometric handler ───────────────────────────────────────────────
-
-  const handleBiometricAuth = useCallback(() => {
-    setIsLoading(true);
-    setError(null);
-    authService.authenticate('biometric').then(result => {
-      handleAuthResult('biometric', result);
-    });
-  }, [handleAuthResult]);
 
   // ── Password handler ────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
       handleAuthResult(password, result);
       if (!result.success) setPassword('');
     });
-  }, [password, handleAuthResult]);
+  }, [password, handleAuthResult, t]);
 
   // ── Mag-stripe / RFID handler ───────────────────────────────────────
 

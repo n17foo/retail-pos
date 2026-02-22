@@ -38,8 +38,27 @@ export const lightColors = {
   statusOffline: '#F44336',
   statusWarning: '#FFC107',
 
+  // Interactive states
+  hover: '#E3F2FD',
+  active: '#BBDEFB',
+  focus: '#90CAF9',
+  disabled: '#BDBDBD',
+
+  // Status backgrounds
+  warningBackground: '#fff3cd',
+  warningText: '#856404',
+  successBackground: '#d4edda',
+  successText: '#155724',
+
   // Overlay colors
   overlay: 'rgba(0,0,0,0.5)',
+  overlayDark: 'rgba(0,0,0,0.7)',
+  overlayLight: 'rgba(0,0,0,0.45)',
+  outOfStockOverlay: 'rgba(255, 0, 0, 0.5)',
+  transparent: 'transparent',
+  whiteOverlayLight: 'rgba(255, 255, 255, 0.2)',
+  whiteOverlayMedium: 'rgba(255, 255, 255, 0.3)',
+  whiteOverlayDark: 'rgba(255, 255, 255, 0.5)',
 };
 
 export const darkColors = {
@@ -138,10 +157,14 @@ export const semanticColors = {
   info: lightColors.info,
 
   // Interactive states
-  hover: '#E3F2FD',
-  active: '#BBDEFB',
-  focus: '#90CAF9',
-  disabled: lightColors.textDisabled,
+  hover: lightColors.hover,
+
+  // Info colors
+  infoBackground: '#e7f3ff',
+  infoText: '#0056b3',
+
+  // Receipt colors
+  receiptPaper: '#FFFFF0',
 
   // Platform branding
   shopify: '#96BF48',

@@ -51,7 +51,7 @@ const ScannerSettingsTab: React.FC = () => {
       console.error('Failed to save scanner settings:', err);
       Alert.alert(t('common.error'), t('settings.scanner.saveError'));
     }
-  }, [formValues, saveSettings]);
+  }, [formValues, saveSettings, t]);
 
   // Handle test connection
   const handleTestConnection = useCallback(async () => {
@@ -66,7 +66,7 @@ const ScannerSettingsTab: React.FC = () => {
       console.error('Scanner connection test failed:', err);
       Alert.alert(t('common.error'), t('settings.scanner.connectionTestError'));
     }
-  }, [testConnection, formValues]);
+  }, [testConnection, formValues, t]);
 
   // Reset form to saved values
   const handleCancel = useCallback(() => {
@@ -225,11 +225,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     color: lightColors.textSecondary,
   },
-  buttonText: {
-    color: lightColors.textOnPrimary,
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.medium as '500',
-  },
   errorText: {
     color: lightColors.error,
     fontSize: typography.fontSize.sm,
@@ -268,9 +263,6 @@ const styles = StyleSheet.create({
     color: lightColors.textOnPrimary,
     fontWeight: typography.fontWeight.medium as '500',
   },
-  toggleTextInactive: {
-    color: lightColors.textSecondary,
-  },
   disabled: {
     opacity: 0.6,
   },
@@ -283,20 +275,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center' as const,
     marginBottom: spacing.sm,
     ...elevation.low,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  testButton: {
-    backgroundColor: lightColors.primary,
-  },
-  saveButton: {
-    backgroundColor: lightColors.success,
-    flex: 1,
-  },
-  cancelButton: {
-    backgroundColor: lightColors.error,
-    flex: 1,
   },
 
   // Status & Feedback

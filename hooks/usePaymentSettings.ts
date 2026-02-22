@@ -93,7 +93,7 @@ export const usePaymentSettings = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logger]);
 
   // Save settings to storage
   const saveSettings = useCallback(
@@ -117,7 +117,7 @@ export const usePaymentSettings = () => {
         setIsLoading(false);
       }
     },
-    [setPaymentProvider]
+    [setPaymentProvider, logger]
   );
 
   // Handle settings change
@@ -135,69 +135,85 @@ export const usePaymentSettings = () => {
   }, []);
 
   // Test connection to payment provider
-  const testConnection = useCallback(async (provider: PaymentProvider) => {
-    try {
-      setIsLoading(true);
-      logger.info({ message: `Testing connection to ${provider}` });
+  const testConnection = useCallback(
+    async (provider: PaymentProvider) => {
+      try {
+        setIsLoading(true);
+        logger.info({ message: `Testing connection to ${provider}` });
 
-      // Implement different testing logic per provider
-      switch (provider) {
-        case PaymentProvider.STRIPE_NFC: {
-          // For Stripe NFC, use the dedicated StripeNfcService to test the terminal connection
+        // Implement different testing logic per provider
+        switch (provider) {
+          case PaymentProvider.STRIPE_NFC: {
+            // For Stripe NFC, use the dedicated StripeNfcService to test the terminal connection
 
-          // First, save all the current settings to storage so the service can access them
-          await keyValueRepository.setItem('stripe_nfc_apiKey', paymentSettings.stripe_nfc.apiKey);
-          await keyValueRepository.setItem('stripe_nfc_publishableKey', paymentSettings.stripe_nfc.publishableKey || '');
-          await keyValueRepository.setItem('stripe_nfc_merchantId', paymentSettings.stripe_nfc.merchantId);
-          await keyValueRepository.setItem('stripe_nfc_backendUrl', paymentSettings.stripe_nfc.backendUrl);
-          await keyValueRepository.setItem('stripe_nfc_useDirectApi', String(paymentSettings.stripe_nfc.useDirectApi || false));
-          await keyValueRepository.setItem('stripe_nfc_useSimulatedReader', String(paymentSettings.stripe_nfc.useSimulatedReader || false));
-          await keyValueRepository.setItem('stripe_nfc_connectionTimeout', paymentSettings.stripe_nfc.connectionTimeout || '30');
-          await keyValueRepository.setItem('stripe_nfc_enableNfc', String(paymentSettings.stripe_nfc.enableNfc || false));
+            // First, save all the current settings to storage so the service can access them
+            await keyValueRepository.setItem('stripe_nfc_apiKey', paymentSettings.stripe_nfc.apiKey);
+            await keyValueRepository.setItem('stripe_nfc_publishableKey', paymentSettings.stripe_nfc.publishableKey || '');
+            await keyValueRepository.setItem('stripe_nfc_merchantId', paymentSettings.stripe_nfc.merchantId);
+            await keyValueRepository.setItem('stripe_nfc_backendUrl', paymentSettings.stripe_nfc.backendUrl);
+            await keyValueRepository.setItem('stripe_nfc_useDirectApi', String(paymentSettings.stripe_nfc.useDirectApi || false));
+            await keyValueRepository.setItem(
+              'stripe_nfc_useSimulatedReader',
+              String(paymentSettings.stripe_nfc.useSimulatedReader || false)
+            );
+            await keyValueRepository.setItem('stripe_nfc_connectionTimeout', paymentSettings.stripe_nfc.connectionTimeout || '30');
+            await keyValueRepository.setItem('stripe_nfc_enableNfc', String(paymentSettings.stripe_nfc.enableNfc || false));
 
-          // Import and use the StripeNfcService
-          const { StripeNfcService } = await import('../services/payment/StripeNfcService');
-          const stripeService = StripeNfcService.getInstance();
+            // Import and use the StripeNfcService
+            const { StripeNfcService } = await import('../services/payment/StripeNfcService');
+            const stripeService = StripeNfcService.getInstance();
 
-          // Test the connection
-          logger.info({ message: 'Testing Stripe NFC terminal connection' });
-          const testResult = await stripeService.testTerminalConnection();
+            // Test the connection
+            logger.info({ message: 'Testing Stripe NFC terminal connection' });
+            const testResult = await stripeService.testTerminalConnection();
 
-          // Log the test result
-          if (testResult.success) {
-            logger.info({
-              message: 'Stripe NFC terminal connection test successful',
-              details: testResult.message,
-            });
-          } else {
-            logger.warn({
-              message: 'Stripe NFC terminal connection test failed',
-              error: testResult.message,
-            });
-            throw new Error(testResult.message || 'Connection test failed');
+            // Log the test result
+            if (testResult.success) {
+              logger.info({
+                message: 'Stripe NFC terminal connection test successful',
+                details: testResult.message,
+              });
+            } else {
+              logger.warn({
+                message: 'Stripe NFC terminal connection test failed',
+                error: testResult.message,
+              });
+              throw new Error(testResult.message || 'Connection test failed');
+            }
+
+            return testResult.success;
           }
-
-          return testResult.success;
+          case PaymentProvider.WORLDPAY:
+          case PaymentProvider.STRIPE:
+          case PaymentProvider.SQUARE:
+          default:
+            // For other providers, simply return true
+            // In the future, implement specific connection tests for each provider
+            logger.info({ message: `Connection test not implemented for ${provider}, returning success` });
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+            return true;
         }
-        case PaymentProvider.WORLDPAY:
-        case PaymentProvider.STRIPE:
-        case PaymentProvider.SQUARE:
-        default:
-          // For other providers, simply return true
-          // In the future, implement specific connection tests for each provider
-          logger.info({ message: `Connection test not implemented for ${provider}, returning success` });
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-          return true;
+      } catch (err) {
+        const errorMessage = `Failed to connect to ${provider}`;
+        setError(errorMessage);
+        logger.error({ message: errorMessage, provider }, err instanceof Error ? err : new Error(String(err)));
+        return false;
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      const errorMessage = `Failed to connect to ${provider}`;
-      setError(errorMessage);
-      logger.error({ message: errorMessage, provider }, err instanceof Error ? err : new Error(String(err)));
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [
+      paymentSettings.stripe_nfc.apiKey,
+      paymentSettings.stripe_nfc.backendUrl,
+      paymentSettings.stripe_nfc.connectionTimeout,
+      paymentSettings.stripe_nfc.enableNfc,
+      paymentSettings.stripe_nfc.merchantId,
+      paymentSettings.stripe_nfc.publishableKey,
+      paymentSettings.stripe_nfc.useDirectApi,
+      paymentSettings.stripe_nfc.useSimulatedReader,
+      logger,
+    ]
+  );
 
   // Load settings on mount
   useEffect(() => {

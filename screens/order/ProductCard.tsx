@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   },
   outOfStockOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: lightColors.overlayLight,
     alignItems: 'center',
     justifyContent: 'center',
   },

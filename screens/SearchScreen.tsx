@@ -36,7 +36,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ onGoBack, onSelectProduct }
     return () => {
       clearTimeout(handler);
     };
-  }, [query, filterOptions, isInitialized]);
+  });
 
   const handleSearch = useCallback(async () => {
     if (!query.trim()) return;

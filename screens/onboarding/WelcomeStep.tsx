@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { useTranslate } from '../../hooks/useTranslate';
+import { lightColors } from '../../utils/theme';
 
 interface WelcomeStepProps {
   onNext: () => void;
@@ -34,13 +35,13 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 18,
-    color: '#666',
+    color: lightColors.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
   },
   description: {
     fontSize: 16,
-    color: '#333',
+    color: lightColors.textPrimary,
     marginBottom: 40,
     textAlign: 'center',
   },

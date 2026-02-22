@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Button, Alert, TextInput, ScrollView } from 'react-native';
+import { lightColors } from '../../utils/theme';
 
 interface PlatformConfigurationStepProps {
   platformId: string;
@@ -339,48 +340,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
   },
   errorText: {
-    color: '#dc3545',
+    color: lightColors.error,
     fontSize: 16,
     textAlign: 'center',
-  },
-  infoBox: {
-    backgroundColor: '#e7f3ff',
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 20,
-    borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
-  },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#0056b3',
-    marginBottom: 8,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
-    marginBottom: 5,
-  },
-  helpText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: -10,
-    marginBottom: 15,
-    fontStyle: 'italic',
   },
   title: {
     fontSize: 24,
@@ -390,7 +364,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: lightColors.textSecondary,
     marginBottom: 30,
   },
   buttonContainer: {

@@ -1,4 +1,5 @@
 import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from '../PaymentServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Mock implementation of Stripe Terminal service for development in Expo Go
@@ -9,6 +10,7 @@ export class StripeMockService implements PaymentServiceInterface {
   private isConnected: boolean = false;
   private deviceId: string | null = null;
   private connectedDevice: unknown = null;
+  private logger = LoggerFactory.getInstance().createLogger('StripeMockService');
 
   // Mock readers for testing
   private mockReaders = [
@@ -17,7 +19,7 @@ export class StripeMockService implements PaymentServiceInterface {
   ];
 
   private constructor() {
-    console.log('Stripe MOCK service initialized for development');
+    this.logger.info('Stripe MOCK service initialized for development');
   }
 
   public static getInstance(): StripeMockService {
@@ -31,7 +33,7 @@ export class StripeMockService implements PaymentServiceInterface {
    * Connect to a mock terminal reader
    */
   public async connectToTerminal(deviceId: string): Promise<boolean> {
-    console.log(`[MOCK] Connecting to Stripe terminal: ${deviceId}`);
+    this.logger.info(`[MOCK] Connecting to Stripe terminal: ${deviceId}`);
 
     // Simulate a delay for realism
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -40,7 +42,7 @@ export class StripeMockService implements PaymentServiceInterface {
     this.deviceId = deviceId;
     this.connectedDevice = this.mockReaders.find(r => r.id === deviceId);
 
-    console.log(`[MOCK] Successfully connected to Stripe terminal: ${deviceId}`);
+    this.logger.info(`[MOCK] Successfully connected to Stripe terminal: ${deviceId}`);
     return true;
   }
 
@@ -52,7 +54,7 @@ export class StripeMockService implements PaymentServiceInterface {
       throw new Error('Not connected to payment terminal');
     }
 
-    console.log(`[MOCK] Processing payment of $${request.amount.toFixed(2)} on Stripe terminal ${this.deviceId}`);
+    this.logger.info(`[MOCK] Processing payment of $${request.amount.toFixed(2)} on Stripe terminal ${this.deviceId}`);
 
     // Simulate payment processing delay
     await new Promise(resolve => setTimeout(resolve, 3000));
@@ -81,7 +83,7 @@ export class StripeMockService implements PaymentServiceInterface {
    * Get available mock Stripe readers
    */
   public async getAvailableTerminals(): Promise<Array<{ id: string; name: string }>> {
-    console.log('[MOCK] Discovering Stripe terminals');
+    this.logger.info('[MOCK] Discovering Stripe terminals');
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -94,7 +96,7 @@ export class StripeMockService implements PaymentServiceInterface {
    */
   public disconnect(): void {
     if (this.isConnected && this.deviceId) {
-      console.log(`[MOCK] Disconnecting from Stripe terminal: ${this.deviceId}`);
+      this.logger.info(`[MOCK] Disconnecting from Stripe terminal: ${this.deviceId}`);
 
       this.isConnected = false;
       this.deviceId = null;
@@ -120,7 +122,7 @@ export class StripeMockService implements PaymentServiceInterface {
    * Get transaction status from mock system
    */
   public async getTransactionStatus(transactionId: string): Promise<PaymentResponse> {
-    console.log(`[MOCK] Getting status for transaction: ${transactionId}`);
+    this.logger.info(`[MOCK] Getting status for transaction: ${transactionId}`);
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -137,7 +139,7 @@ export class StripeMockService implements PaymentServiceInterface {
    * Void/cancel a transaction in mock system
    */
   public async voidTransaction(transactionId: string): Promise<PaymentResponse> {
-    console.log(`[MOCK] Voiding transaction: ${transactionId}`);
+    this.logger.info(`[MOCK] Voiding transaction: ${transactionId}`);
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 1200));
@@ -164,7 +166,7 @@ export class StripeMockService implements PaymentServiceInterface {
    * Issue a refund in mock system
    */
   public async refundTransaction(transactionId: string, amount: number): Promise<PaymentResponse> {
-    console.log(`[MOCK] Refunding transaction: ${transactionId} for $${amount.toFixed(2)}`);
+    this.logger.info(`[MOCK] Refunding transaction: ${transactionId} for $${amount.toFixed(2)}`);
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 1500));

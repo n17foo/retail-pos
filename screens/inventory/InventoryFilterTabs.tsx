@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     alignItems: 'center',
     borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderBottomColor: lightColors.transparent,
   },
   activeFilterTab: {
     borderBottomColor: lightColors.primary,

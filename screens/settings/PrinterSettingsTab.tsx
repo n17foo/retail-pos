@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityInd
 import { PrinterConnectionType } from '../../services/printer/UnifiedPrinterService';
 import { usePrinterSettings, PrinterSettings } from '../../hooks/usePrinterSettings';
 import { useTranslate } from '../../hooks/useTranslate';
+import { useLogger } from '../../hooks/useLogger';
 import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
@@ -12,6 +13,8 @@ const deepCopy = <T,>(obj: T): T => JSON.parse(JSON.stringify(obj));
 
 const PrinterSettingsTab: React.FC = () => {
   const { t } = useTranslate();
+
+  const logger = useLogger('PrinterSettingsTab');
 
   // Use the printer settings hook
   const {
@@ -40,23 +43,23 @@ const PrinterSettingsTab: React.FC = () => {
   useEffect(() => {
     const init = async () => {
       if (!initialized.current) {
-        console.log('Initializing PrinterSettingsTab');
+        logger.info('Initializing PrinterSettingsTab');
         await loadSettings();
         initialized.current = true;
       }
     };
 
     init();
-  }, [loadSettings]);
+  }, [loadSettings, initialized, logger]);
 
   // Update original settings when printer settings change
   useEffect(() => {
     if (initialized.current) {
-      console.log('Printer settings updated');
+      logger.info('Printer settings updated');
       originalSettings.current = deepCopy(printerSettings);
       setHasUnsavedChanges(false);
     }
-  }, [printerSettings]);
+  }, [printerSettings, initialized, logger]);
 
   // Update settings and mark as changed
   const updateSettings = useCallback(
@@ -72,7 +75,7 @@ const PrinterSettingsTab: React.FC = () => {
 
   const handleTestConnection = useCallback(async () => {
     try {
-      console.log('Testing printer connection');
+      logger.info('Testing printer connection');
       const success = await testConnection(printerSettings);
       const showTestConnectionSuccess = () => {
         Alert.alert(
@@ -101,7 +104,7 @@ const PrinterSettingsTab: React.FC = () => {
 
       Alert.alert(t('settings.printer.testConnectionErrorTitle', 'Connection Failed') as string, errorMessage as string);
     }
-  }, [testConnection, printerSettings, t]);
+  }, [testConnection, printerSettings, t, logger]);
 
   const renderConnectionSettings = useCallback(() => {
     switch (printerSettings.connectionType) {
@@ -359,11 +362,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     marginBottom: spacing.md,
   },
-  inputLabel: {
-    fontSize: typography.fontSize.sm,
-    color: lightColors.textSecondary,
-    marginBottom: spacing.xs,
-  },
   radioGroup: {
     marginBottom: spacing.lg,
   },
@@ -412,32 +410,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: spacing.xs,
     ...elevation.low,
-  },
-  testButton: {
-    backgroundColor: lightColors.success,
-    marginRight: spacing.xs,
-  },
-  testButtonText: {
-    color: lightColors.textOnPrimary,
-  },
-  saveButton: {
-    backgroundColor: lightColors.primary,
-    flex: 1,
-  },
-  cancelButton: {
-    backgroundColor: lightColors.divider,
-    marginRight: spacing.xs,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: lightColors.textPrimary,
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semiBold as '600',
-  },
-  saveButtonText: {
-    color: lightColors.textOnPrimary,
   },
   toggleButton: {
     paddingVertical: spacing.xs,

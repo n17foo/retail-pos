@@ -108,7 +108,7 @@ const AppContent = () => {
       backgroundSyncService.stop();
       queueManager.dispose();
     };
-  }, []);
+  }, [changeLanguage, logger]);
 
   return (
     <SafeAreaView style={styles.container}>

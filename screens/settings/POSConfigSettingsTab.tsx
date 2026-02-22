@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   saveButtonText: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontSize: typography.fontSize.md,
     fontWeight: '600',
   },

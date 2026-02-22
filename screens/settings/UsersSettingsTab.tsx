@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert,
 import { useUsers, User, UserRole } from '../../hooks/useUsers';
 import PinKeypad from '../../components/PinKeypad';
 import PinDisplay from '../../components/PinDisplay';
+import { elevation, lightColors } from '../../utils/theme';
 
 const PIN_LENGTH = 6;
 
@@ -38,7 +39,7 @@ const UsersSettingsTab: React.FC = () => {
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   const resetForm = () => {
     setFormData({
@@ -381,48 +382,44 @@ const UsersSettingsTab: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: lightColors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: lightColors.border,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: lightColors.primary,
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 8,
   },
   addButtonText: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontWeight: '600',
   },
   userList: {
     padding: 15,
   },
   userCard: {
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...elevation.low,
   },
   userCardInactive: {
     opacity: 0.6,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: lightColors.inputBackground,
   },
   userInfo: {
     marginBottom: 10,
@@ -433,16 +430,16 @@ const styles = StyleSheet.create({
   },
   userRole: {
     fontSize: 14,
-    color: '#666',
+    color: lightColors.textSecondary,
     marginTop: 2,
   },
   userEmail: {
     fontSize: 12,
-    color: '#999',
+    color: lightColors.textHint,
     marginTop: 2,
   },
   inactiveLabel: {
-    color: '#dc3545',
+    color: lightColors.error,
     fontSize: 12,
     fontWeight: '500',
     marginTop: 4,
@@ -456,32 +453,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: lightColors.inputBackground,
   },
   actionButtonText: {
     fontSize: 14,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   deactivateButton: {
-    backgroundColor: '#fff3cd',
+    backgroundColor: lightColors.warningBackground,
   },
   deactivateText: {
-    color: '#856404',
+    color: lightColors.warningText,
   },
   activateButton: {
-    backgroundColor: '#d4edda',
+    backgroundColor: lightColors.successBackground,
   },
   activateText: {
-    color: '#155724',
+    color: lightColors.successText,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: lightColors.surface,
     borderRadius: 15,
     padding: 20,
     width: '90%',
@@ -495,7 +492,7 @@ const styles = StyleSheet.create({
   },
   modalSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: lightColors.textSecondary,
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -503,11 +500,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
@@ -523,19 +520,19 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: lightColors.border,
     alignItems: 'center',
   },
   roleOptionSelected: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: lightColors.primary,
+    borderColor: lightColors.primary,
   },
   roleOptionText: {
     fontSize: 12,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   roleOptionTextSelected: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontWeight: '600',
   },
   pinInputContainer: {
@@ -553,36 +550,36 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   cancelButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: lightColors.inputBackground,
   },
   cancelButtonText: {
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: lightColors.primary,
   },
   saveButtonText: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontWeight: '600',
   },
   backButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: lightColors.inputBackground,
   },
   backButtonText: {
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   errorText: {
-    color: '#dc3545',
+    color: lightColors.error,
     padding: 15,
     textAlign: 'center',
   },
   loadingText: {
-    color: '#666',
+    color: lightColors.textSecondary,
     padding: 15,
     textAlign: 'center',
   },
   emptyText: {
-    color: '#666',
+    color: lightColors.textSecondary,
     textAlign: 'center',
     padding: 30,
   },

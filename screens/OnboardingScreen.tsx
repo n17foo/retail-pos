@@ -21,6 +21,7 @@ import type { POSSetupValues } from './onboarding/POSSetupStep';
 import AuthMethodSetupStep from './onboarding/AuthMethodSetupStep';
 import SummaryStep from './onboarding/SummaryStep';
 import { posConfig } from '../services/config/POSConfigService';
+import { useLogger } from '../hooks/useLogger';
 
 type OnboardingStep =
   | 'welcome'
@@ -48,6 +49,8 @@ const OnboardingScreen: React.FC = () => {
     categories: [],
     currency: 'GBP',
   });
+
+  const logger = useLogger('OnboardingScreen');
 
   const isOffline = selectedPlatform === 'offline';
 
@@ -169,7 +172,7 @@ const OnboardingScreen: React.FC = () => {
 
   const handleOnboardingComplete = () => {
     // In a real app, we would save all the collected settings here.
-    console.log('Onboarding complete!', { platform: selectedPlatform, config: ecommerceConfig });
+    logger.info('Onboarding complete!', { platform: selectedPlatform, config: ecommerceConfig });
     setIsOnboarded(true);
   };
 

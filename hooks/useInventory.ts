@@ -38,7 +38,7 @@ export const useInventory = (platform?: ECommercePlatform) => {
         setIsLoading(false);
       }
     },
-    [registry, platform]
+    [registry, platform, logger]
   );
 
   /**
@@ -67,7 +67,7 @@ export const useInventory = (platform?: ECommercePlatform) => {
         setIsLoading(false);
       }
     },
-    [registry, platform]
+    [registry, platform, logger]
   );
 
   /**

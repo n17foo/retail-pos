@@ -1,5 +1,6 @@
 import { PaymentServiceInterface, PaymentRequest, PaymentResponse } from './PaymentServiceInterface';
 import { PaymentProvider, PaymentServiceFactory } from './PaymentServiceFactory';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 /**
  * Unified payment service that combines service functionality with provider switching
@@ -7,6 +8,7 @@ import { PaymentProvider, PaymentServiceFactory } from './PaymentServiceFactory'
 class PaymentService implements PaymentServiceInterface {
   private serviceFactory: PaymentServiceFactory;
   private activeService: PaymentServiceInterface;
+  private logger = LoggerFactory.getInstance().createLogger('PaymentService');
 
   constructor() {
     // Use the factory to get the appropriate service implementation
@@ -18,7 +20,7 @@ class PaymentService implements PaymentServiceInterface {
   setPaymentProvider(provider: PaymentProvider): void {
     this.serviceFactory.setPaymentProvider(provider);
     this.activeService = this.serviceFactory.getPaymentService();
-    console.log(`[PAYMENT SERVICE] Provider set to: ${provider}`);
+    this.logger.info(`Provider set to: ${provider}`);
   }
 
   // Get current provider

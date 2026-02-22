@@ -5,6 +5,7 @@ import { usePaymentSettings } from '../../hooks/usePaymentSettings';
 import { usePrinterSettings } from '../../hooks/usePrinterSettings';
 import { useScannerSettings } from '../../hooks/useScannerSettings';
 import { useTranslate } from '../../hooks/useTranslate';
+import { lightColors } from '../../utils/theme';
 
 interface SummaryStepProps {
   onBack: () => void;
@@ -90,14 +91,14 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: lightColors.textSecondary,
     marginBottom: 30,
     textAlign: 'center',
   },
   section: {
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: lightColors.border,
     borderRadius: 8,
     padding: 15,
   },
@@ -111,15 +112,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: lightColors.divider,
   },
   label: {
     fontSize: 16,
-    color: '#333',
+    color: lightColors.textPrimary,
   },
   value: {
     fontSize: 16,
-    color: '#666',
+    color: lightColors.textSecondary,
     fontWeight: '500',
   },
   buttonContainer: {

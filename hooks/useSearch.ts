@@ -49,7 +49,7 @@ export const useSearch = () => {
     if (!isInitialized) {
       initializeSearchService();
     }
-  }, [searchService, isInitialized]);
+  }, [searchService, isInitialized, logger]);
 
   /**
    * Search for products

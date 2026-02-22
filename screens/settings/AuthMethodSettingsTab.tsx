@@ -44,7 +44,7 @@ const AuthMethodSettingsTab: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [applicableMethods]);
 
   useEffect(() => {
     loadConfig();
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   primaryBadge: {
     fontSize: typography.fontSize.xs,
     fontWeight: '700',
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     backgroundColor: lightColors.primary,
     paddingHorizontal: spacing.xs + 2,
     paddingVertical: 1,
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   saveButtonText: {
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     fontSize: typography.fontSize.md,
     fontWeight: '600',
   },

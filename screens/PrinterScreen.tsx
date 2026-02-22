@@ -30,7 +30,7 @@ const PrinterScreen: React.FC<PrinterScreenProps> = ({ onGoBack }) => {
     };
 
     loadPrinters();
-  }, []);
+  }, [printerService]);
 
   const handleConnectPrinter = async (printer: PrinterConfig) => {
     try {

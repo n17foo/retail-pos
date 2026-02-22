@@ -1,4 +1,5 @@
 import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from '../PaymentServiceInterface';
+import { LoggerFactory } from '../../logger/LoggerFactory';
 
 /**
  * Mock implementation of Stripe NFC Tap to Pay service for development in Expo Go
@@ -8,12 +9,13 @@ export class StripeNfcMockService implements PaymentServiceInterface {
   private static instance: StripeNfcMockService;
   private isConnected: boolean = false;
   private deviceId: string | null = null;
+  private logger = LoggerFactory.getInstance().createLogger('StripeNfcMockService');
 
   // For NFC tap to pay, the "device" is the phone itself
   private mockDevice = { id: 'MOCK_NFC_DEVICE', name: 'Mock NFC Reader (Built-in)' };
 
   private constructor() {
-    console.log('Stripe NFC MOCK service initialized for development');
+    this.logger.info('Stripe NFC MOCK service initialized for development');
   }
 
   public static getInstance(): StripeNfcMockService {
@@ -27,7 +29,7 @@ export class StripeNfcMockService implements PaymentServiceInterface {
    * Connect to the mock NFC reader
    */
   public async connectToTerminal(deviceId: string): Promise<boolean> {
-    console.log('[MOCK] Initializing Stripe NFC reader');
+    this.logger.info('[MOCK] Initializing Stripe NFC reader');
 
     // Simulate a delay for realism
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -35,7 +37,7 @@ export class StripeNfcMockService implements PaymentServiceInterface {
     this.isConnected = true;
     this.deviceId = deviceId || this.mockDevice.id;
 
-    console.log(`[MOCK] Successfully initialized Stripe NFC reader: ${this.deviceId}`);
+    this.logger.info(`[MOCK] Successfully initialized Stripe NFC reader: ${this.deviceId}`);
     return true;
   }
 
@@ -47,12 +49,12 @@ export class StripeNfcMockService implements PaymentServiceInterface {
       throw new Error('NFC reader not initialized');
     }
 
-    console.log(`[MOCK] Processing NFC tap payment of $${request.amount.toFixed(2)}`);
-    console.log(`[MOCK] Please tap card on the device... (simulating)`);
+    this.logger.info(`[MOCK] Processing NFC tap payment of $${request.amount.toFixed(2)}`);
+    this.logger.info(`[MOCK] Please tap card on the device... (simulating)`);
 
     // Simulate card tap delay
     await new Promise(resolve => setTimeout(resolve, 2000));
-    console.log('[MOCK] Card detected! Processing...');
+    this.logger.info('[MOCK] Card detected! Processing...');
 
     // Simulate processing delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -90,7 +92,7 @@ export class StripeNfcMockService implements PaymentServiceInterface {
    * Get available NFC readers (usually just the device itself)
    */
   public async getAvailableTerminals(): Promise<Array<{ id: string; name: string }>> {
-    console.log('[MOCK] Checking NFC availability');
+    this.logger.info('[MOCK] Checking NFC availability');
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -103,7 +105,7 @@ export class StripeNfcMockService implements PaymentServiceInterface {
    */
   public disconnect(): void {
     if (this.isConnected) {
-      console.log('[MOCK] Resetting Stripe NFC reader state');
+      this.logger.info('[MOCK] Resetting Stripe NFC reader state');
       this.isConnected = false;
       this.deviceId = null;
     }
@@ -127,7 +129,7 @@ export class StripeNfcMockService implements PaymentServiceInterface {
    * Get transaction status from mock system
    */
   public async getTransactionStatus(transactionId: string): Promise<PaymentResponse> {
-    console.log(`[MOCK] Getting status for NFC transaction: ${transactionId}`);
+    this.logger.info(`[MOCK] Getting status for NFC transaction: ${transactionId}`);
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 600));
@@ -147,7 +149,7 @@ export class StripeNfcMockService implements PaymentServiceInterface {
    * Void/cancel a transaction in mock system
    */
   public async voidTransaction(transactionId: string): Promise<PaymentResponse> {
-    console.log(`[MOCK] Voiding NFC transaction: ${transactionId}`);
+    this.logger.info(`[MOCK] Voiding NFC transaction: ${transactionId}`);
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -174,7 +176,7 @@ export class StripeNfcMockService implements PaymentServiceInterface {
    * Issue a refund in mock system
    */
   public async refundTransaction(transactionId: string, amount: number): Promise<PaymentResponse> {
-    console.log(`[MOCK] Refunding NFC transaction: ${transactionId} for $${amount.toFixed(2)}`);
+    this.logger.info(`[MOCK] Refunding NFC transaction: ${transactionId} for $${amount.toFixed(2)}`);
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 1200));

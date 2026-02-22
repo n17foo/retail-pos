@@ -49,7 +49,7 @@ const AuthMethodSetupStep: React.FC<AuthMethodSetupStepProps> = ({ onBack, onCom
       setAvailability(result);
     };
     checkAvailability();
-  }, [authMode]);
+  }, [authMode, applicableMethods]);
 
   const toggleMethod = (method: AuthMethodType) => {
     // PIN (offline default) and platform_auth (online default) cannot be disabled
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   primaryBadge: {
     fontSize: typography.fontSize.xs,
     fontWeight: '700',
-    color: '#fff',
+    color: lightColors.textOnPrimary,
     backgroundColor: lightColors.primary,
     paddingHorizontal: spacing.xs + 2,
     paddingVertical: 1,
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: typography.fontSize.md,
     fontWeight: '600',
-    color: '#fff',
+    color: lightColors.textOnPrimary,
   },
 });
 

@@ -69,7 +69,7 @@ export const useScanner = () => {
       }
       scannerFactory.disconnectAll();
     };
-  }, []);
+  }, [logger, scannerFactory]);
 
   // Save scanner settings to storage
   const saveSettings = async (settings: ScannerSettings) => {

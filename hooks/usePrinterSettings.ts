@@ -98,7 +98,7 @@ export const usePrinterSettings = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logger]);
 
   const saveSettings = useCallback(
     async (settings: PrinterSettings) => {
@@ -132,7 +132,7 @@ export const usePrinterSettings = () => {
         return false;
       }
     },
-    [t]
+    [t, logger]
   );
 
   // Handle printer settings change
@@ -145,66 +145,69 @@ export const usePrinterSettings = () => {
   }, []);
 
   // Test printer connection with timeout and abort controller
-  const testConnection = useCallback(async (settings: PrinterSettings) => {
-    if (testConnectionRef.current) {
-      testConnectionRef.current.abort();
-    }
-
-    const controller = new AbortController();
-    testConnectionRef.current = controller;
-
-    try {
-      setIsTesting(true);
-      setError(null);
-
-      // Validate settings before testing
-      const validation = validatePrinterSettings(settings);
-      if (!validation.isValid) {
-        throw new Error(validation.error || 'Invalid printer settings');
+  const testConnection = useCallback(
+    async (settings: PrinterSettings) => {
+      if (testConnectionRef.current) {
+        testConnectionRef.current.abort();
       }
 
-      // Set a timeout for the connection test
-      const timeout = new Promise<boolean>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 10000));
+      const controller = new AbortController();
+      testConnectionRef.current = controller;
 
-      // Actual connection test implementation would go here
-      // This is a placeholder that simulates a successful connection
-      const testPromise = new Promise<boolean>(resolve => {
-        // Simulate network delay
-        setTimeout(() => {
-          // Simulate 90% success rate for testing
-          const isSuccess = Math.random() > 0.1;
-          resolve(isSuccess);
-        }, 2000);
-      });
+      try {
+        setIsTesting(true);
+        setError(null);
 
-      const result = await Promise.race([testPromise, timeout]);
+        // Validate settings before testing
+        const validation = validatePrinterSettings(settings);
+        if (!validation.isValid) {
+          throw new Error(validation.error || 'Invalid printer settings');
+        }
 
-      if (controller.signal.aborted) {
-        return false;
-      }
+        // Set a timeout for the connection test
+        const timeout = new Promise<boolean>((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 10000));
 
-      if (!result) {
-        throw new Error('Failed to connect to the printer. Please check your settings.');
-      }
+        // Actual connection test implementation would go here
+        // This is a placeholder that simulates a successful connection
+        const testPromise = new Promise<boolean>(resolve => {
+          // Simulate network delay
+          setTimeout(() => {
+            // Simulate 90% success rate for testing
+            const isSuccess = Math.random() > 0.1;
+            resolve(isSuccess);
+          }, 2000);
+        });
 
-      return true;
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        return false;
+        const result = await Promise.race([testPromise, timeout]);
+
+        if (controller.signal.aborted) {
+          return false;
+        }
+
+        if (!result) {
+          throw new Error('Failed to connect to the printer. Please check your settings.');
+        }
+
+        return true;
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          return false;
+        }
+        {
+          const errorMessage = err instanceof Error ? err.message : 'Failed to connect to the printer';
+          setError(errorMessage);
+          logger.error({ message: 'Error testing printer connection' }, err instanceof Error ? err : new Error(String(err)));
+          throw err;
+        }
+      } finally {
+        if (testConnectionRef.current === controller) {
+          setIsTesting(false);
+          testConnectionRef.current = null;
+        }
       }
-      {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to connect to the printer';
-        setError(errorMessage);
-        logger.error({ message: 'Error testing printer connection' }, err instanceof Error ? err : new Error(String(err)));
-        throw err;
-      }
-    } finally {
-      if (testConnectionRef.current === controller) {
-        setIsTesting(false);
-        testConnectionRef.current = null;
-      }
-    }
-  }, []);
+    },
+    [logger]
+  );
 
   // Clean up any pending test connections on unmount
   useEffect(() => {

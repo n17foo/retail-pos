@@ -1,10 +1,11 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native';
 import { useEcommerceSettings } from '../../hooks/useEcommerceSettings';
-import { lightColors, spacing, borderRadius, typography, elevation } from '../../utils/theme';
+import { lightColors, spacing, borderRadius, typography, elevation, semanticColors } from '../../utils/theme';
 import { Button } from '../../components/Button';
 import { useTranslate } from '../../hooks/useTranslate';
 import { ECommercePlatform } from '../../utils/platforms';
+import { useLogger } from '../../hooks/useLogger';
 
 // Platform display names
 const PLATFORM_NAMES: Record<string, string> = {
@@ -30,6 +31,8 @@ const EcommerceSettingsTab: React.FC = () => {
     cancelChanges,
     testConnection: testEcommerceConnection,
   } = useEcommerceSettings();
+
+  const logger = useLogger('EcommerceSettingsTab');
 
   // Handle platform change
   const handlePlatformChange = useCallback(
@@ -76,10 +79,10 @@ const EcommerceSettingsTab: React.FC = () => {
   // Handle enabled toggle
   const handleEnabledChange = useCallback(
     (enabled: boolean) => {
-      console.log('Toggling enabled to:', enabled);
+      logger.info('Toggling enabled to:', enabled);
       updateSettings({ enabled });
     },
-    [updateSettings]
+    [updateSettings, logger]
   );
 
   // Handle save
@@ -88,7 +91,7 @@ const EcommerceSettingsTab: React.FC = () => {
     if (success) {
       Alert.alert(t('common.success'), t('settings.ecommerce.saveSuccess'));
     }
-  }, [saveChanges]);
+  }, [saveChanges, t]);
 
   // Handle cancel
   const handleCancel = useCallback(() => {
@@ -97,9 +100,9 @@ const EcommerceSettingsTab: React.FC = () => {
 
   // Connection test handler
   const handleConnectionTest = useCallback(async () => {
-    console.log('Testing ecommerce connection');
+    logger.info('Testing ecommerce connection');
     await testEcommerceConnection();
-  }, [testEcommerceConnection]);
+  }, [testEcommerceConnection, logger]);
 
   return (
     <View style={styles.settingsSection}>
@@ -111,7 +114,7 @@ const EcommerceSettingsTab: React.FC = () => {
           style={[styles.toggleButton, ecommerceSettings.enabled ? styles.toggleActive : styles.toggleInactive]}
           onPress={() => {
             const newEnabledState = !ecommerceSettings.enabled;
-            console.log('Toggle pressed, new state:', newEnabledState);
+            logger.info('Toggle pressed, new state:', newEnabledState);
             handleEnabledChange(newEnabledState);
           }}
         >
@@ -559,15 +562,6 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     color: lightColors.textPrimary,
   },
-  buttonText: {
-    color: lightColors.textOnPrimary,
-    fontWeight: typography.fontWeight.semiBold as '600',
-    fontSize: typography.fontSize.sm,
-  },
-  saveButtonDisabled: {
-    backgroundColor: lightColors.divider,
-    opacity: 0.7,
-  },
   actionButtons: {
     flexDirection: 'row' as const,
     justifyContent: 'flex-end' as const,
@@ -586,19 +580,8 @@ const styles = StyleSheet.create({
     minWidth: 120,
     ...elevation.low,
   },
-  testButton: {
-    backgroundColor: lightColors.info,
-  },
-  saveButton: {
-    backgroundColor: lightColors.success,
-  },
-  cancelButton: {
-    backgroundColor: lightColors.error,
-    flex: 1,
-    marginRight: spacing.xs,
-  },
   infoBox: {
-    backgroundColor: '#e7f3ff',
+    backgroundColor: semanticColors.infoBackground,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -608,7 +591,7 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: typography.fontSize.md,
     fontWeight: typography.fontWeight.semiBold as '600',
-    color: '#0056b3',
+    color: semanticColors.infoText,
     marginBottom: spacing.xs,
   },
   infoText: {

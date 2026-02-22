@@ -1,3 +1,4 @@
+import { LoggerFactory } from '../logger/LoggerFactory';
 import { AbstractPrinterService } from './BasePrinterService';
 import { PrinterStatus, ReceiptData } from './PrinterTypes';
 
@@ -66,6 +67,7 @@ export type PrinterConfig = USBPrinterConfig | BluetoothPrinterConfig | NetworkP
 export class UnifiedPrinterService extends AbstractPrinterService {
   private printerInstance: PrinterSDKModule = null;
   private printerType: PrinterConnectionType | null = null;
+  private logger = LoggerFactory.getInstance().createLogger('UnifiedPrinterService');
 
   /**
    * Connect to a printer
@@ -78,21 +80,21 @@ export class UnifiedPrinterService extends AbstractPrinterService {
         throw new Error('Invalid printer configuration');
       }
 
-      console.log(`Connecting to ${config.printerType} printer: ${config.printerName}`);
+      this.logger.info(`Connecting to ${config.printerType} printer: ${config.printerName}`);
 
       this.printerType = config.printerType;
 
       // Dynamically import the required printer modules
       try {
         if (!USBPrinter || !BLEPrinter || !NetPrinter) {
-          console.log('Dynamically importing printer modules');
+          this.logger.info('Dynamically importing printer modules');
           const printerUtils = require('@tillpos/rn-receipt-printer-utils');
           USBPrinter = printerUtils.USBPrinter;
           BLEPrinter = printerUtils.BLEPrinter;
           NetPrinter = printerUtils.NetPrinter;
         }
       } catch (importError) {
-        console.warn('Failed to import printer modules:', importError);
+        this.logger.warn('Failed to import printer modules:', importError);
         throw new Error('Failed to initialize printer modules: ' + importError.message);
       }
 
@@ -119,7 +121,7 @@ export class UnifiedPrinterService extends AbstractPrinterService {
 
           // Check if we have a valid MAC address for connection
           if (!bleConfig.macAddress) {
-            console.error('MAC address is required for Bluetooth printer connection');
+            this.logger.error('MAC address is required for Bluetooth printer connection');
             return false;
           }
 
@@ -156,7 +158,7 @@ export class UnifiedPrinterService extends AbstractPrinterService {
       // Safely access the printer type using a type guard
       const printerTypeName = config && 'printerType' in config ? String(config.printerType) : 'unknown';
 
-      console.error(`Failed to connect to ${printerTypeName} printer:`, error);
+      this.logger.error(`Failed to connect to ${printerTypeName} printer:`, error);
       this._isConnected = false;
       this.printerInstance = null;
       return false;
@@ -173,7 +175,7 @@ export class UnifiedPrinterService extends AbstractPrinterService {
     }
 
     try {
-      console.log(`Printing receipt for order ${data.orderId}`);
+      this.logger.info(`Printing receipt for order ${data.orderId}`);
 
       // Initialize the printer
       await this.printerInstance.init();
@@ -255,10 +257,10 @@ export class UnifiedPrinterService extends AbstractPrinterService {
       // Cut paper
       await this.printerInstance.cutPaper();
 
-      console.log('Receipt printed successfully');
+      this.logger.info('Receipt printed successfully');
       return true;
     } catch (error) {
-      console.error('Failed to print receipt:', error);
+      this.logger.error('Failed to print receipt:', error);
       return false;
     }
   }
@@ -338,7 +340,7 @@ export class UnifiedPrinterService extends AbstractPrinterService {
         errorMessage: 'Printer connection lost',
       };
     } catch (error) {
-      console.error('Failed to get printer status:', error);
+      this.logger.error('Failed to get printer status:', error);
       return {
         isOnline: false,
         hasPaper: false,
@@ -358,11 +360,11 @@ export class UnifiedPrinterService extends AbstractPrinterService {
         this.printerInstance = null;
         this.printerType = null;
       } catch (error) {
-        console.error('Error disconnecting from printer:', error);
+        this.logger.error('Error disconnecting from printer:', error);
       }
     }
 
     await super.disconnect();
-    console.log('Disconnected from printer');
+    this.logger.info('Disconnected from printer');
   }
 }

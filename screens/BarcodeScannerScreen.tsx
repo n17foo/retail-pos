@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     height: 250,
     borderWidth: 2,
     borderColor: lightColors.primary,
-    backgroundColor: 'transparent',
+    backgroundColor: lightColors.transparent,
     marginBottom: spacing.lg,
   },
   scanText: {

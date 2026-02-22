@@ -46,13 +46,16 @@ export const useBarcodeScanner = ({ scannerSettings, products, onScanSuccess }: 
   /**
    * Safely execute scanner operations with error handling
    */
-  const executeScannerOperation = useCallback(async (operation: string, action: () => Promise<void>) => {
-    try {
-      await action();
-    } catch (error) {
-      logger.error({ message: `Error ${operation}` }, error instanceof Error ? error : new Error(String(error)));
-    }
-  }, []);
+  const executeScannerOperation = useCallback(
+    async (operation: string, action: () => Promise<void>) => {
+      try {
+        await action();
+      } catch (error) {
+        logger.error({ message: `Error ${operation}` }, error instanceof Error ? error : new Error(String(error)));
+      }
+    },
+    [logger]
+  );
 
   /**
    * Display scanner-related alerts
@@ -112,7 +115,7 @@ export const useBarcodeScanner = ({ scannerSettings, products, onScanSuccess }: 
         ]);
       }
     },
-    [products, onScanSuccess, showScannerAlert]
+    [products, onScanSuccess, showScannerAlert, currency.code]
   );
 
   // Connect to scanner
@@ -185,7 +188,7 @@ export const useBarcodeScanner = ({ scannerSettings, products, onScanSuccess }: 
     } finally {
       setConnecting(false);
     }
-  }, [disconnectScanner, executeScannerOperation, processBarcodeData, scannerSettings, scanned, showScannerAlert]);
+  }, [disconnectScanner, executeScannerOperation, processBarcodeData, scannerSettings, scanned, showScannerAlert, scannerFactory]);
 
   // Handle camera barcode scanning
   const handleBarCodeScanned = useCallback(

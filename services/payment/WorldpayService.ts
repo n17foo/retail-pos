@@ -1,6 +1,7 @@
 // Import Worldpay SDK
 import '@worldpay/access-worldpay-checkout-react-native-sdk';
 import { PaymentRequest, PaymentResponse, PaymentServiceInterface } from './PaymentServiceInterface';
+import { LoggerFactory } from '../logger/LoggerFactory';
 
 // Since we're having issues with the types, we'll use dynamic imports with proper types
 // This allows us to use the SDK while maintaining type safety in our own code
@@ -97,6 +98,7 @@ export class WorldpayService implements PaymentServiceInterface {
   private isConnected: boolean = false;
   private deviceId: string | null = null;
   private connectedDevice: PaymentDevice | null = null;
+  private logger = LoggerFactory.getInstance().createLogger('WorldpayService');
 
   private constructor() {
     try {
@@ -120,16 +122,16 @@ export class WorldpayService implements PaymentServiceInterface {
       } else {
         // Fallback to using the object directly
         this.checkout = WorldpaySDK;
-        console.warn('Worldpay SDK initialized using default approach - verify this works correctly');
+        this.logger.warn('Worldpay SDK initialized using default approach - verify this works correctly');
         this.checkout.initialize(worldpayConfig);
       }
 
-      console.log('Worldpay payment service initialized successfully');
+      this.logger.info('Worldpay payment service initialized successfully');
 
       // Set up device status listener
       this.setupEventListeners();
     } catch (error) {
-      console.error('Failed to initialize Worldpay payment service:', error);
+      this.logger.error('Failed to initialize Worldpay payment service:', error);
       this.isConnected = false;
     }
   }
@@ -137,7 +139,7 @@ export class WorldpayService implements PaymentServiceInterface {
   private setupEventListeners(): void {
     // Listen for device status changes
     this.checkout.addDeviceStatusListener((device: PaymentDevice, status: string) => {
-      console.log(`Payment device ${device.id} status changed: ${status}`);
+      this.logger.info(`Payment device ${device.id} status changed: ${status}`);
 
       if (device.id === this.deviceId) {
         this.isConnected = status === DeviceStatus.CONNECTED;
@@ -163,7 +165,7 @@ export class WorldpayService implements PaymentServiceInterface {
    */
   public async connectToTerminal(deviceId: string): Promise<boolean> {
     try {
-      console.log(`Connecting to Worldpay payment terminal: ${deviceId}`);
+      this.logger.info(`Connecting to Worldpay payment terminal: ${deviceId}`);
 
       // Discover available payment terminals
       const devices = await this.checkout.scanForDevices();
@@ -185,10 +187,10 @@ export class WorldpayService implements PaymentServiceInterface {
       this.deviceId = deviceId;
       this.connectedDevice = targetDevice;
 
-      console.log(`Successfully connected to terminal: ${targetDevice.name}`);
+      this.logger.info(`Successfully connected to terminal: ${targetDevice.name}`);
       return true;
     } catch (error) {
-      console.error('Failed to connect to Worldpay payment terminal:', error);
+      this.logger.error('Failed to connect to Worldpay payment terminal:', error);
       this.isConnected = false;
       this.deviceId = null;
       this.connectedDevice = null;
@@ -211,7 +213,7 @@ export class WorldpayService implements PaymentServiceInterface {
     }
 
     try {
-      console.log(`Processing payment of $${request.amount.toFixed(2)} on terminal ${this.deviceId}`);
+      this.logger.info(`Processing payment of $${request.amount.toFixed(2)} on terminal ${this.deviceId}`);
 
       // Format payment request for Worldpay SDK
       const paymentRequest = {
@@ -259,7 +261,7 @@ export class WorldpayService implements PaymentServiceInterface {
         };
       }
     } catch (error) {
-      console.error('Worldpay payment processing error:', error);
+      this.logger.error('Worldpay payment processing error:', error);
       return {
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown payment processing error',
@@ -276,7 +278,7 @@ export class WorldpayService implements PaymentServiceInterface {
     try {
       return await this.checkout.scanForDevices();
     } catch (error) {
-      console.error('Failed to discover payment terminals:', error);
+      this.logger.error('Failed to discover payment terminals:', error);
       return [];
     }
   }
@@ -286,15 +288,15 @@ export class WorldpayService implements PaymentServiceInterface {
    */
   public disconnect(): void {
     if (this.isConnected && this.connectedDevice) {
-      console.log(`Disconnecting from Worldpay terminal: ${this.deviceId}`);
+      this.logger.info(`Disconnecting from Worldpay terminal: ${this.deviceId}`);
 
       this.checkout
         .disconnectFromDevice(this.connectedDevice)
         .then(() => {
-          console.log('Successfully disconnected from terminal');
+          this.logger.info('Successfully disconnected from terminal');
         })
         .catch(error => {
-          console.error('Error during disconnect:', error);
+          this.logger.error('Error during disconnect:', error);
         })
         .finally(() => {
           this.isConnected = false;
@@ -339,7 +341,7 @@ export class WorldpayService implements PaymentServiceInterface {
         last4: status?.last4 || 'xxxx',
       };
     } catch (error) {
-      console.error('Failed to get transaction status:', error);
+      this.logger.error('Failed to get transaction status:', error);
       return {
         success: false,
         transactionId,
@@ -374,7 +376,7 @@ export class WorldpayService implements PaymentServiceInterface {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Failed to void transaction:', error);
+      this.logger.error('Failed to void transaction:', error);
       return {
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown error voiding transaction',
@@ -406,7 +408,7 @@ export class WorldpayService implements PaymentServiceInterface {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Failed to process refund:', error);
+      this.logger.error('Failed to process refund:', error);
       return {
         success: false,
         errorMessage: error instanceof Error ? error.message : 'Unknown error processing refund',

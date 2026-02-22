@@ -190,7 +190,7 @@ export const useUnifiedProducts = (platform?: ECommercePlatform, initialOptions?
   // Fetch products on mount and when initialOptions change
   useEffect(() => {
     fetchProducts(initialOptions);
-  }, [initialOptions?.categoryId, initialOptions?.search, platform]);
+  }, [fetchProducts, initialOptions]);
 
   return {
     products,

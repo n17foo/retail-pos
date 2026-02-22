@@ -156,7 +156,7 @@ const ReceiptTemplate: React.FC<ReceiptTemplateProps> = ({
 
 const styles = StyleSheet.create({
   receipt: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: lightColors.surface,
     padding: spacing.md,
     borderRadius: borderRadius.md,
   },

@@ -1,7 +1,7 @@
 import React, { FC, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { lightColors, spacing, typography, borderRadius, elevation } from '../utils/theme';
+import { lightColors, spacing, typography, borderRadius, elevation, semanticColors } from '../utils/theme';
 import { useResponsive } from '../hooks/useResponsive';
 import { FloatingSaveBar } from '../components/FloatingSaveBar';
 import { useTranslate } from '../hooks/useTranslate';
@@ -274,10 +274,10 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     paddingLeft: spacing.lg,
     borderLeftWidth: 3,
-    borderLeftColor: 'transparent',
+    borderLeftColor: lightColors.transparent,
   },
   sideNavItemActive: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: semanticColors.hover,
     borderLeftColor: lightColors.primary,
   },
   sideNavIcon: {
@@ -323,7 +323,7 @@ const styles = StyleSheet.create({
   },
   dropdownOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'flex-start',
     paddingTop: 120,
   },
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     borderBottomColor: lightColors.divider,
   },
   dropdownItemActive: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: semanticColors.hover,
   },
   dropdownItemIcon: {
     fontSize: 18,
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     alignItems: 'center',
     borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderBottomColor: lightColors.transparent,
   },
   activeTab: {
     borderBottomColor: lightColors.primary,

@@ -36,7 +36,7 @@ export const useUsers = (): UseUsersReturn => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logger]);
 
   const createUser = useCallback(
     async (input: CreateUserInput): Promise<string> => {
@@ -160,23 +160,29 @@ export const useUsers = (): UseUsersReturn => {
     [loadUsers]
   );
 
-  const validatePin = useCallback(async (pin: string): Promise<User | null> => {
-    try {
-      return await userRepository.findByPin(pin);
-    } catch (err) {
-      logger.error({ message: 'Error validating PIN' }, err instanceof Error ? err : new Error(String(err)));
-      return null;
-    }
-  }, []);
+  const validatePin = useCallback(
+    async (pin: string): Promise<User | null> => {
+      try {
+        return await userRepository.findByPin(pin);
+      } catch (err) {
+        logger.error({ message: 'Error validating PIN' }, err instanceof Error ? err : new Error(String(err)));
+        return null;
+      }
+    },
+    [logger]
+  );
 
-  const isPinUnique = useCallback(async (pin: string, excludeUserId?: string): Promise<boolean> => {
-    try {
-      return await userRepository.isPinUnique(pin, excludeUserId);
-    } catch (err) {
-      logger.error({ message: 'Error checking PIN uniqueness' }, err instanceof Error ? err : new Error(String(err)));
-      return false;
-    }
-  }, []);
+  const isPinUnique = useCallback(
+    async (pin: string, excludeUserId?: string): Promise<boolean> => {
+      try {
+        return await userRepository.isPinUnique(pin, excludeUserId);
+      } catch (err) {
+        logger.error({ message: 'Error checking PIN uniqueness' }, err instanceof Error ? err : new Error(String(err)));
+        return false;
+      }
+    },
+    [logger]
+  );
 
   const hasAdminUser = useCallback(async (): Promise<boolean> => {
     try {
@@ -185,7 +191,7 @@ export const useUsers = (): UseUsersReturn => {
       logger.error({ message: 'Error checking for admin user' }, err instanceof Error ? err : new Error(String(err)));
       return false;
     }
-  }, []);
+  }, [logger]);
 
   // Load users on mount
   useEffect(() => {

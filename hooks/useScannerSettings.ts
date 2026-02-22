@@ -40,25 +40,28 @@ export const useScannerSettings = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logger]);
 
   // Save scanner settings to storage
-  const saveSettings = useCallback(async (settings: ScannerSettings) => {
-    try {
-      setSaveStatus('saving');
-      await keyValueRepository.setItem(SCANNER_SETTINGS_KEY, settings);
-      setScannerSettings(settings);
-      setSaveStatus('saved');
-      logger.info('Scanner settings saved successfully');
-      return true;
-    } catch (err) {
-      const errorMessage = 'Failed to save scanner settings';
-      setError(errorMessage);
-      setSaveStatus('error');
-      logger.error({ message: errorMessage }, err instanceof Error ? err : new Error(String(err)));
-      return false;
-    }
-  }, []);
+  const saveSettings = useCallback(
+    async (settings: ScannerSettings) => {
+      try {
+        setSaveStatus('saving');
+        await keyValueRepository.setItem(SCANNER_SETTINGS_KEY, settings);
+        setScannerSettings(settings);
+        setSaveStatus('saved');
+        logger.info('Scanner settings saved successfully');
+        return true;
+      } catch (err) {
+        const errorMessage = 'Failed to save scanner settings';
+        setError(errorMessage);
+        setSaveStatus('error');
+        logger.error({ message: errorMessage }, err instanceof Error ? err : new Error(String(err)));
+        return false;
+      }
+    },
+    [logger]
+  );
 
   // Handle scanner settings change
   const handleScannerSettingsChange = useCallback((settings: Partial<ScannerSettings>) => {
@@ -70,18 +73,21 @@ export const useScannerSettings = () => {
   }, []);
 
   // Test scanner connection
-  const testConnection = useCallback(async (_settings: ScannerSettings) => {
-    try {
-      // TODO: Implement actual scanner connection test
-      // This is a placeholder implementation
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      logger.info('Scanner connection test completed successfully');
-      return true;
-    } catch (err) {
-      logger.error({ message: 'Error testing scanner connection' }, err instanceof Error ? err : new Error(String(err)));
-      return false;
-    }
-  }, []);
+  const testConnection = useCallback(
+    async (_settings: ScannerSettings) => {
+      try {
+        // TODO: Implement actual scanner connection test
+        // This is a placeholder implementation
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        logger.info('Scanner connection test completed successfully');
+        return true;
+      } catch (err) {
+        logger.error({ message: 'Error testing scanner connection' }, err instanceof Error ? err : new Error(String(err)));
+        return false;
+      }
+    },
+    [logger]
+  );
 
   // Load settings on mount
   useEffect(() => {

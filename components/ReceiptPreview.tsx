@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Modal, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { lightColors, spacing, borderRadius, typography, elevation } from '../utils/theme';
+import { lightColors, spacing, borderRadius, typography, elevation, semanticColors } from '../utils/theme';
 import { Button } from './Button';
 
 interface ReceiptPreviewProps {
@@ -46,7 +46,7 @@ export const ReceiptPreview: React.FC<ReceiptPreviewProps> = ({ visible, lines, 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.lg,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   receiptPaper: {
-    backgroundColor: '#FFFFF0',
+    backgroundColor: semanticColors.receiptPaper,
     borderWidth: 1,
     borderColor: lightColors.border,
     borderRadius: borderRadius.sm,

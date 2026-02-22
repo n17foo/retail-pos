@@ -18,7 +18,7 @@ const SyncQueueScreen = lazy(() => import('../screens/SyncQueueScreen'));
 const ReportingScreen = lazy(() => import('../screens/ReportingScreen'));
 
 const LazyFallback = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <View style={styles.fallback}>
     <ActivityIndicator size="large" color={lightColors.primary} />
   </View>
 );
@@ -245,6 +245,11 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.md,
     fontWeight: '500',
     color: lightColors.textPrimary,
+  },
+  fallback: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

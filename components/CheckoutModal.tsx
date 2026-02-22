@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { lightColors, spacing, borderRadius, typography, elevation } from '../utils/theme';
+import { lightColors, spacing, borderRadius, typography, elevation, semanticColors } from '../utils/theme';
 import { formatMoney } from '../utils/money';
 import { Button } from './Button';
 import { useCurrency } from '../hooks/useCurrency';
@@ -153,7 +153,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = props => {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: lightColors.overlay,
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.lg,
@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
   },
   paymentOptionSelected: {
     borderColor: lightColors.primary,
-    backgroundColor: '#E3F2FD',
+    backgroundColor: semanticColors.infoBackground,
   },
   paymentOptionDisabled: {
     opacity: 0.5,

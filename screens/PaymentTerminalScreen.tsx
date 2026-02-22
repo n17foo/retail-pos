@@ -82,7 +82,7 @@ const PaymentTerminalScreen: React.FC<PaymentTerminalScreenProps> = ({ navigatio
     if (!isStripeNfcActive) {
       handleScan();
     }
-  }, []);
+  }, [handleScan, isStripeNfcActive]);
 
   // Disconnect on unmount
   useEffect(() => {
@@ -91,7 +91,7 @@ const PaymentTerminalScreen: React.FC<PaymentTerminalScreenProps> = ({ navigatio
         disconnect();
       }
     };
-  }, []);
+  }, [disconnect, isTerminalConnected]);
 
   const handleConnect = async (terminalId: string, terminalName: string) => {
     setConnecting(true);
