@@ -116,6 +116,7 @@ retailpos/
 ├── components/        # Reusable UI components
 ├── contexts/          # React contexts for global state
 ├── hooks/            # Custom React hooks
+├── locales/          # Internationalization files
 ├── repositories/     # Data access layer (SQLite)
 ├── screens/          # Screen components
 ├── services/         # Business logic and external APIs
@@ -139,9 +140,7 @@ retailpos/
 │   ├── sync/         # Data synchronization
 │   ├── tax/          # Tax profile management
 │   └── token/        # Platform API token management
-├── utils/            # Utility functions and helpers
-├── locales/          # Internationalization files
-└── types/            # TypeScript type definitions
+└── utils/            # Utility functions and helpers
 ```
 
 ## 🔧 Configuration
