@@ -98,7 +98,7 @@ describe('MagentoCustomerService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -134,7 +134,7 @@ describe('MagentoCustomerService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockCustomer),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.getCustomer('1');
 

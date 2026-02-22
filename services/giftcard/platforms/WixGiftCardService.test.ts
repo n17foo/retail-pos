@@ -85,7 +85,7 @@ describe('WixGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.checkBalance('TEST100');
 
@@ -111,7 +111,7 @@ describe('WixGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.checkBalance('EXPIRED');
       expect(result.status).toBe('disabled');
@@ -135,7 +135,7 @@ describe('WixGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.redeemGiftCard('TEST100', 20);
 
@@ -151,7 +151,7 @@ describe('WixGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.redeemGiftCard('TEST100', 50);
       expect(result.success).toBe(false);

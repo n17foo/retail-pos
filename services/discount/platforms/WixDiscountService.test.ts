@@ -94,7 +94,7 @@ describe('WixDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('TEST20', 100, []);
 
@@ -122,7 +122,7 @@ describe('WixDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
 
@@ -149,7 +149,7 @@ describe('WixDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('INACTIVE', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon is inactive' });

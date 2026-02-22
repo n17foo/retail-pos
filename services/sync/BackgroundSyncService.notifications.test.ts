@@ -1,4 +1,3 @@
-// eslint-disable @typescript-eslint/no-explicit-any -- test file requires any for private method access and mocking
 // Mock dependencies - paths must match what BackgroundSyncService.ts imports
 jest.mock('../basket/BasketServiceFactory', () => ({
   getServiceContainer: jest.fn(),
@@ -58,7 +57,7 @@ describe('BackgroundSyncService - Notification Integration', () => {
       });
 
       // Access private performSync via prototype
-      await (service as any).performSync();
+      await (service as unknown as { performSync: () => Promise<void> }).performSync();
 
       expect(notificationService.notify).toHaveBeenCalledWith('Orders Synced', '2 order(s) synced successfully.', 'success');
     });
@@ -73,7 +72,7 @@ describe('BackgroundSyncService - Notification Integration', () => {
         },
       });
 
-      await (service as any).performSync();
+      await (service as unknown as { performSync: () => Promise<void> }).performSync();
 
       expect(notificationService.notify).toHaveBeenCalledWith(
         'Sync Failed',
@@ -85,7 +84,7 @@ describe('BackgroundSyncService - Notification Integration', () => {
     it('should notify warning on sync exception', async () => {
       (getServiceContainer as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      await (service as any).performSync();
+      await (service as unknown as { performSync: () => Promise<void> }).performSync();
 
       expect(notificationService.notify).toHaveBeenCalledWith('Sync Error', 'Background sync encountered an error. Retrying…', 'warning');
     });

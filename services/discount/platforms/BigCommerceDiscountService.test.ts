@@ -105,7 +105,7 @@ describe('BigCommerceDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('TEST10', 100, []);
 
@@ -122,7 +122,7 @@ describe('BigCommerceDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ data: [] }),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('INVALID', 100, []);
       expect(result).toEqual({ valid: false, error: 'Invalid coupon code' });
@@ -143,7 +143,7 @@ describe('BigCommerceDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('DISABLED', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon is disabled' });
@@ -166,7 +166,7 @@ describe('BigCommerceDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('USEDUP', 100, []);
       expect(result).toEqual({ valid: false, error: 'Coupon usage limit reached' });
@@ -190,7 +190,7 @@ describe('BigCommerceDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('MIN50', 30, []);
       expect(result).toEqual({
@@ -217,7 +217,7 @@ describe('BigCommerceDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
       expect(result).toEqual({
@@ -232,7 +232,7 @@ describe('BigCommerceDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 500,
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('TEST', 100, []);
       expect(result).toEqual({ valid: false, error: 'Failed to validate coupon' });

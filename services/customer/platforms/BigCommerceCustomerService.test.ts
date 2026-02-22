@@ -123,7 +123,7 @@ describe('BigCommerceCustomerService', () => {
         ok: true,
         json: () => Promise.resolve(mockResponse),
         headers: new Map([['X-WP-TotalPages', '1']]),
-      } as any);
+      } as unknown as Response);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -148,7 +148,7 @@ describe('BigCommerceCustomerService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 500,
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.searchCustomers({ query: 'test' });
       expect(result).toEqual({ customers: [], hasMore: false });
@@ -190,7 +190,7 @@ describe('BigCommerceCustomerService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.getCustomer('1');
 
@@ -211,7 +211,7 @@ describe('BigCommerceCustomerService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ data: [] }),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.getCustomer('999');
       expect(result).toBeNull();
@@ -221,7 +221,7 @@ describe('BigCommerceCustomerService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 404,
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.getCustomer('1');
       expect(result).toBeNull();
@@ -231,7 +231,7 @@ describe('BigCommerceCustomerService', () => {
   describe('getAuthHeaders', () => {
     it('should return proper auth headers', async () => {
       await service.initialize();
-      const headers = await (service as any).getAuthHeaders();
+      const headers = await (service as unknown as { getAuthHeaders: () => Promise<Record<string, string>> }).getAuthHeaders();
       expect(headers).toEqual({
         'Content-Type': 'application/json',
         'X-Auth-Token': 'test-token',

@@ -12,7 +12,7 @@ jest.mock('../config/POSConfigService', () => ({
 }));
 
 import { BasketService } from './BasketService';
-import { BasketRepository } from '../../repositories/BasketRepository';
+import { BasketRepository, BasketRow } from '../../repositories/BasketRepository';
 import { LoggerInterface } from '../logger/LoggerInterface';
 
 // ── Mocks ─────────────────────────────────────────────────────────────
@@ -23,7 +23,7 @@ function createMockBasketRepo(): jest.Mocked<BasketRepository> {
     createBasket: jest.fn(),
     updateBasket: jest.fn(),
     clearBasket: jest.fn(),
-  } as any;
+  } as jest.Mocked<BasketRepository>;
 }
 
 function createMockLogger(): LoggerInterface {
@@ -35,7 +35,7 @@ function createMockLogger(): LoggerInterface {
     setLevel: jest.fn(),
     getLevel: jest.fn(),
     createChild: jest.fn(),
-  } as any;
+  } as jest.Mocked<LoggerInterface>;
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────
@@ -102,7 +102,7 @@ describe('BasketService', () => {
 
     it('increments quantity for duplicate product', async () => {
       // Track saved basket state so subsequent reads return it
-      let savedRow: any = null;
+      let savedRow: BasketRow | null = null;
       basketRepo.updateBasket.mockImplementation(async (_id, data) => {
         savedRow = {
           id: 'mock-uuid-1', // matches the basket ID created during initialize

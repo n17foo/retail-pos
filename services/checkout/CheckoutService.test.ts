@@ -72,7 +72,7 @@ function createMockOrderRepo(): jest.Mocked<OrderRepository> {
     updateSyncSuccess: jest.fn(),
     updateSyncError: jest.fn(),
     delete: jest.fn(),
-  } as any;
+  } as jest.Mocked<OrderRepository>;
 }
 
 function createMockOrderItemRepo(): jest.Mocked<OrderItemRepository> {
@@ -80,7 +80,7 @@ function createMockOrderItemRepo(): jest.Mocked<OrderItemRepository> {
     createMany: jest.fn(),
     findByOrderId: jest.fn().mockResolvedValue([]),
     deleteByOrderId: jest.fn(),
-  } as any;
+  } as jest.Mocked<OrderItemRepository>;
 }
 
 function createMockLogger(): LoggerInterface {
@@ -92,7 +92,7 @@ function createMockLogger(): LoggerInterface {
     setLevel: jest.fn(),
     getLevel: jest.fn(),
     createChild: jest.fn(),
-  } as any;
+  } as jest.Mocked<LoggerInterface>;
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────

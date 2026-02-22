@@ -87,7 +87,7 @@ describe('PrestaShopGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.checkBalance('TEST100');
 
@@ -114,7 +114,7 @@ describe('PrestaShopGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.checkBalance('INACTIVE');
       expect(result.status).toBe('disabled');
@@ -142,7 +142,7 @@ describe('PrestaShopGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.redeemGiftCard('TEST100', 15);
 
@@ -169,7 +169,7 @@ describe('PrestaShopGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.redeemGiftCard('TEST100', 25);
       expect(result.success).toBe(false);

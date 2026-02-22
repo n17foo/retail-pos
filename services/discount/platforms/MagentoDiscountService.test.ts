@@ -127,7 +127,7 @@ describe('MagentoDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve({ items: [] }),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('INVALID', 100, []);
       expect(result).toEqual({ valid: false, error: 'Invalid coupon code' });

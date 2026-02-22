@@ -22,7 +22,7 @@ function createMockRepo(): jest.Mocked<KeyValueRepository> {
     getAllKeys: jest.fn().mockResolvedValue([]),
     multiSet: jest.fn().mockResolvedValue(undefined),
     multiGet: jest.fn().mockResolvedValue([]),
-  } as any;
+  } as jest.Mocked<KeyValueRepository>;
 }
 
 describe('POSConfigService', () => {
@@ -61,7 +61,7 @@ describe('POSConfigService', () => {
 
     it('populates config from stored values', async () => {
       repo.getObject.mockImplementation(async (key: string) => {
-        const data: Record<string, any> = {
+        const data: Record<string, unknown> = {
           'pos.taxRate': 0.1,
           'pos.storeName': 'My Store',
           'pos.currencySymbol': '$',
@@ -125,7 +125,7 @@ describe('POSConfigService', () => {
     });
 
     it('skips undefined values', async () => {
-      await service.updateAll({ taxRate: 0.08, storeName: undefined as any });
+      await service.updateAll({ taxRate: 0.08, storeName: undefined as unknown as string });
 
       expect(repo.setObject).toHaveBeenCalledTimes(1);
       expect(repo.setObject).toHaveBeenCalledWith('pos.taxRate', 0.08);

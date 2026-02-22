@@ -89,7 +89,7 @@ describe('PrestaShopDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('PERCENT20', 100, []);
 
@@ -118,7 +118,7 @@ describe('PrestaShopDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
 
@@ -145,7 +145,7 @@ describe('PrestaShopDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('INACTIVE', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon is inactive' });
@@ -167,7 +167,7 @@ describe('PrestaShopDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('EXPIRED', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon has expired' });

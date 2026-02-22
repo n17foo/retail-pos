@@ -92,7 +92,7 @@ describe('WooCommerceGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.checkBalance('TEST100');
 
@@ -109,7 +109,7 @@ describe('WooCommerceGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve([]),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.checkBalance('INVALID');
       expect(result).toEqual({
@@ -133,7 +133,7 @@ describe('WooCommerceGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.checkBalance('INACTIVE');
       expect(result.status).toBe('disabled');
@@ -154,7 +154,7 @@ describe('WooCommerceGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockResponse),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.redeemGiftCard('TEST100', 10);
 
@@ -170,7 +170,7 @@ describe('WooCommerceGiftCardService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: false,
         status: 400,
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.redeemGiftCard('TEST100', 10);
       expect(result.success).toBe(false);

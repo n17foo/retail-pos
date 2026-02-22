@@ -85,7 +85,7 @@ describe('SyliusDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockCoupon),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('TEST20', 100, []);
 
@@ -108,7 +108,7 @@ describe('SyliusDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockCoupon),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('EXPIRED', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon has expired' });
@@ -126,7 +126,7 @@ describe('SyliusDiscountService', () => {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
         json: () => Promise.resolve(mockCoupon),
-      } as any);
+      } as Partial<Response>);
 
       const result = await service.validateCoupon('USEDUP', 100, []);
       expect(result).toEqual({ valid: false, error: 'Coupon usage limit reached' });
