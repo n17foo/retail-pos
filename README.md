@@ -235,8 +235,6 @@ Licensed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
 
 - **Issues**: [GitHub Issues](https://github.com/n17foo/retailpos/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/n17foo/retailpos/discussions)
-- **Documentation**: [ARCHITECTURE.md](ARCHITECTURE.md)
-- **Website brief**: [WEBSITE_BRIEF.md](WEBSITE_BRIEF.md) — full product brief for website generation
 
 ---
 
