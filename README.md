@@ -255,7 +255,6 @@ If you need help with any of the following, get in touch:
 
 - 🌐 **Website**: [N17](https://n17.foo)
 - 📧 **Email**: [hello@n17.foo](mailto:hello@n17.foo)
-- 💬 **GitHub Discussions**: [github.com/n17foo/retailpos/discussions](https://github.com/n17foo/retailpos/discussions)
 
 ---
 
