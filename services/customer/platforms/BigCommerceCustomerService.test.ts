@@ -38,7 +38,6 @@ jest.mock('../../logger/LoggerFactory', () => ({
 }));
 
 import { getPlatformToken } from '../../token/TokenUtils';
-import { TokenInitializer } from '../../token/TokenInitializer';
 import { withTokenRefresh } from '../../token/TokenIntegration';
 import { ECommercePlatform } from '../../../utils/platforms';
 import secretsService from '../../secrets/SecretsService';
@@ -46,10 +45,17 @@ import secretsService from '../../secrets/SecretsService';
 describe('BigCommerceCustomerService', () => {
   let service: BigCommerceCustomerService;
   const mockStoreHash = 'test-store-hash';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new BigCommerceCustomerService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     // Setup default mocks
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
@@ -59,6 +65,8 @@ describe('BigCommerceCustomerService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -75,20 +83,13 @@ describe('BigCommerceCustomerService', () => {
       expect(service.isInitialized()).toBe(false);
     });
 
-    it('should fail initialization if token initialization fails', async () => {
-      const mockTokenInit = TokenInitializer.getInstance as jest.Mock;
-      mockTokenInit.mockReturnValue({
-        initializePlatformToken: jest.fn().mockResolvedValue(false),
-      });
+    it('should fail initialization if API client initialization fails', async () => {
+      mockApiClient.isInitialized.mockReturnValue(false);
+      mockApiClient.initialize.mockRejectedValue(new Error('init failed'));
 
       const result = await service.initialize();
       expect(result).toBe(false);
       expect(service.isInitialized()).toBe(false);
-
-      // Restore the default mock so subsequent tests aren't affected
-      mockTokenInit.mockReturnValue({
-        initializePlatformToken: jest.fn().mockResolvedValue(true),
-      });
     });
   });
 
@@ -119,11 +120,7 @@ describe('BigCommerceCustomerService', () => {
         meta: { pagination: { total_pages: 1, current_page: 1 } },
       };
 
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-        headers: new Map([['X-WP-TotalPages', '1']]),
-      } as unknown as Response);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -145,17 +142,14 @@ describe('BigCommerceCustomerService', () => {
     });
 
     it('should handle API errors gracefully', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: false,
-        status: 500,
-      } as Partial<Response>);
+      mockApiClient.get.mockRejectedValue(new Error('API error'));
 
       const result = await service.searchCustomers({ query: 'test' });
       expect(result).toEqual({ customers: [], hasMore: false });
     });
 
     it('should handle network errors gracefully', async () => {
-      global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+      mockApiClient.get.mockRejectedValue(new Error('Network error'));
       const result = await service.searchCustomers({ query: 'test' });
       expect(result).toEqual({ customers: [], hasMore: false });
     });
@@ -187,10 +181,7 @@ describe('BigCommerceCustomerService', () => {
         ],
       };
 
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.getCustomer('1');
 
@@ -208,20 +199,14 @@ describe('BigCommerceCustomerService', () => {
     });
 
     it('should return null for non-existent customer', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ data: [] }),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue({ data: [] });
 
       const result = await service.getCustomer('999');
       expect(result).toBeNull();
     });
 
     it('should handle API errors gracefully', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: false,
-        status: 404,
-      } as Partial<Response>);
+      mockApiClient.get.mockRejectedValue(new Error('Not found'));
 
       const result = await service.getCustomer('1');
       expect(result).toBeNull();

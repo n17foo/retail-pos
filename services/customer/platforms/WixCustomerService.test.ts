@@ -45,10 +45,18 @@ import { ECommercePlatform } from '../../../utils/platforms';
 describe('WixCustomerService', () => {
   let service: WixCustomerService;
   const mockSiteId = 'test-site-id';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+    post: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new WixCustomerService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'WIX_SITE_ID') return Promise.resolve(mockSiteId);
@@ -57,6 +65,8 @@ describe('WixCustomerService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -95,11 +105,7 @@ describe('WixCustomerService', () => {
         ],
         pagingMetadata: { total: 1 },
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.post.mockResolvedValue(mockResponse);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -137,11 +143,7 @@ describe('WixCustomerService', () => {
         createdDate: '2024-01-01T00:00:00Z',
         updatedDate: '2024-01-02T00:00:00Z',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ contact: mockContact }),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue({ contact: mockContact });
 
       const result = await service.getCustomer('contact-1');
 

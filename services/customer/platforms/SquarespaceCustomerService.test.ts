@@ -43,13 +43,21 @@ import { ECommercePlatform } from '../../../utils/platforms';
 
 describe('SquarespaceCustomerService', () => {
   let service: SquarespaceCustomerService;
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new SquarespaceCustomerService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -80,11 +88,7 @@ describe('SquarespaceCustomerService', () => {
         ],
         pagination: { nextPageCursor: null },
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -120,11 +124,7 @@ describe('SquarespaceCustomerService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -148,11 +148,7 @@ describe('SquarespaceCustomerService', () => {
         totalOrderAmount: { value: '250.00' },
         createdOn: '2024-01-01T00:00:00Z',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockProfile),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockProfile);
 
       const result = await service.getCustomer('profile-1');
 

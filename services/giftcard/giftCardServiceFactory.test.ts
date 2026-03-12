@@ -72,6 +72,13 @@ jest.mock('./platforms/SquarespaceGiftCardService', () => ({
   })),
 }));
 
+jest.mock('./platforms/CommerceFullGiftCardService', () => ({
+  CommerceFullGiftCardService: jest.fn().mockImplementation(() => ({
+    initialize: jest.fn().mockResolvedValue(true),
+    isInitialized: jest.fn().mockReturnValue(true),
+  })),
+}));
+
 describe('giftCardServiceFactory', () => {
   beforeEach(() => {
     giftCardServiceFactory.reset();

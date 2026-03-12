@@ -73,6 +73,9 @@ jest.mock('./platforms/PrestaShopRefundService', () => ({
 jest.mock('./platforms/SquarespaceRefundService', () => ({
   SquarespaceRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
 }));
+jest.mock('./platforms/CommerceFullRefundService', () => ({
+  CommerceFullRefundService: jest.fn().mockImplementation(mockPlatformRefundImpl),
+}));
 jest.mock('./platforms/OfflineRefundService', () => ({
   OfflineRefundService: jest.fn().mockImplementation(() => ({
     processRefund: jest.fn().mockResolvedValue({ success: true, refundId: 'offline-refund-1', timestamp: new Date() }),

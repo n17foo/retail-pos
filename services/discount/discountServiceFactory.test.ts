@@ -72,6 +72,13 @@ jest.mock('./platforms/SquarespaceDiscountService', () => ({
   })),
 }));
 
+jest.mock('./platforms/CommerceFullDiscountService', () => ({
+  CommerceFullDiscountService: jest.fn().mockImplementation(() => ({
+    initialize: jest.fn().mockResolvedValue(true),
+    isInitialized: jest.fn().mockReturnValue(true),
+  })),
+}));
+
 describe('discountServiceFactory', () => {
   beforeEach(() => {
     discountServiceFactory.reset();

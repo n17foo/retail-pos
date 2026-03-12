@@ -72,6 +72,13 @@ jest.mock('./platforms/SquarespaceCustomerService', () => ({
   })),
 }));
 
+jest.mock('./platforms/CommerceFullCustomerService', () => ({
+  CommerceFullCustomerService: jest.fn().mockImplementation(() => ({
+    initialize: jest.fn().mockResolvedValue(true),
+    isInitialized: jest.fn().mockReturnValue(true),
+  })),
+}));
+
 describe('customerServiceFactory', () => {
   beforeEach(() => {
     // Clear the factory cache before each test

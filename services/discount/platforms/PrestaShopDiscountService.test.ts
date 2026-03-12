@@ -44,10 +44,17 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 describe('PrestaShopDiscountService', () => {
   let service: PrestaShopDiscountService;
   const mockBaseUrl = 'https://prestashop.example.com';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new PrestaShopDiscountService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'PRESTASHOP_BASE_URL') return Promise.resolve(mockBaseUrl);
@@ -56,6 +63,8 @@ describe('PrestaShopDiscountService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -85,11 +94,7 @@ describe('PrestaShopDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('PERCENT20', 100, []);
 
@@ -114,11 +119,7 @@ describe('PrestaShopDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
 
@@ -141,11 +142,7 @@ describe('PrestaShopDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('INACTIVE', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon is inactive' });
@@ -163,11 +160,7 @@ describe('PrestaShopDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('EXPIRED', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon has expired' });

@@ -44,10 +44,17 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 describe('WixDiscountService', () => {
   let service: WixDiscountService;
   const mockSiteId = 'test-site-id';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    post: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new WixDiscountService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'WIX_SITE_ID') return Promise.resolve(mockSiteId);
@@ -56,6 +63,8 @@ describe('WixDiscountService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -90,11 +99,7 @@ describe('WixDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.post.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('TEST20', 100, []);
 
@@ -118,11 +123,7 @@ describe('WixDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.post.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
 
@@ -145,11 +146,7 @@ describe('WixDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.post.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('INACTIVE', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon is inactive' });

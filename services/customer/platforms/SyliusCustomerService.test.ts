@@ -45,10 +45,17 @@ import { ECommercePlatform } from '../../../utils/platforms';
 describe('SyliusCustomerService', () => {
   let service: SyliusCustomerService;
   const mockBaseUrl = 'https://sylius.example.com';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new SyliusCustomerService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'SYLIUS_BASE_URL') return Promise.resolve(mockBaseUrl);
@@ -57,6 +64,8 @@ describe('SyliusCustomerService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -93,11 +102,7 @@ describe('SyliusCustomerService', () => {
         ],
         'hydra:totalItems': 1,
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -129,11 +134,7 @@ describe('SyliusCustomerService', () => {
         lastName: 'Smith',
         createdAt: '2024-01-01T00:00:00+00:00',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCustomer),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCustomer);
 
       const result = await service.getCustomer('customer-1');
 

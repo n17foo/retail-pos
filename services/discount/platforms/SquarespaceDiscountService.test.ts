@@ -42,13 +42,21 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 
 describe('SquarespaceDiscountService', () => {
   let service: SquarespaceDiscountService;
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new SquarespaceDiscountService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -77,11 +85,7 @@ describe('SquarespaceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('PERCENT20', 100, []);
 
@@ -106,11 +110,7 @@ describe('SquarespaceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
 
@@ -133,11 +133,7 @@ describe('SquarespaceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('INACTIVE', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon is inactive' });

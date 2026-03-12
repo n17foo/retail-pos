@@ -45,10 +45,17 @@ import { ECommercePlatform } from '../../../utils/platforms';
 describe('PrestaShopCustomerService', () => {
   let service: PrestaShopCustomerService;
   const mockBaseUrl = 'https://prestashop.example.com';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new PrestaShopCustomerService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'PRESTASHOP_BASE_URL') return Promise.resolve(mockBaseUrl);
@@ -57,6 +64,8 @@ describe('PrestaShopCustomerService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -92,11 +101,7 @@ describe('PrestaShopCustomerService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -129,11 +134,7 @@ describe('PrestaShopCustomerService', () => {
         date_add: '2024-01-01 00:00:00',
         date_upd: '2024-01-02 00:00:00',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ customer: mockCustomer }),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue({ customer: mockCustomer });
 
       const result = await service.getCustomer('1');
 

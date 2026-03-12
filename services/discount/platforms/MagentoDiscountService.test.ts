@@ -44,10 +44,17 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 describe('MagentoDiscountService', () => {
   let service: MagentoDiscountService;
   const mockBaseUrl = 'https://magento.example.com';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new MagentoDiscountService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'MAGENTO_BASE_URL') return Promise.resolve(mockBaseUrl);
@@ -56,6 +63,8 @@ describe('MagentoDiscountService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -97,21 +106,7 @@ describe('MagentoDiscountService', () => {
         discount_amount: '20.00',
         is_active: true,
       };
-
-      global.fetch = jest
-        .fn()
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve(mockSearchResponse),
-          })
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve(mockRuleResponse),
-          })
-        );
+      mockApiClient.get.mockResolvedValueOnce(mockSearchResponse).mockResolvedValueOnce(mockRuleResponse);
 
       const result = await service.validateCoupon('TEST20', 100, []);
 
@@ -124,10 +119,7 @@ describe('MagentoDiscountService', () => {
     });
 
     it('should handle invalid coupon code', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ items: [] }),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue({ items: [] });
 
       const result = await service.validateCoupon('INVALID', 100, []);
       expect(result).toEqual({ valid: false, error: 'Invalid coupon code' });
@@ -145,21 +137,7 @@ describe('MagentoDiscountService', () => {
         discount_amount: '10.00',
         is_active: true,
       };
-
-      global.fetch = jest
-        .fn()
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve(mockSearchResponse),
-          })
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            ok: true,
-            json: () => Promise.resolve(mockRuleResponse),
-          })
-        );
+      mockApiClient.get.mockResolvedValueOnce(mockSearchResponse).mockResolvedValueOnce(mockRuleResponse);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
       expect(result).toEqual({

@@ -45,10 +45,17 @@ import { BasketItem } from '../../../services/basket/basket';
 describe('BigCommerceDiscountService', () => {
   let service: BigCommerceDiscountService;
   const mockStoreHash = 'test-store-hash';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new BigCommerceDiscountService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'BIGCOMMERCE_STORE_HASH') return Promise.resolve(mockStoreHash);
@@ -57,6 +64,8 @@ describe('BigCommerceDiscountService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -101,11 +110,7 @@ describe('BigCommerceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('TEST10', 100, []);
 
@@ -119,10 +124,7 @@ describe('BigCommerceDiscountService', () => {
     });
 
     it('should handle invalid coupon code', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ data: [] }),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue({ data: [] });
 
       const result = await service.validateCoupon('INVALID', 100, []);
       expect(result).toEqual({ valid: false, error: 'Invalid coupon code' });
@@ -139,11 +141,7 @@ describe('BigCommerceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('DISABLED', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon is disabled' });
@@ -162,11 +160,7 @@ describe('BigCommerceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('USEDUP', 100, []);
       expect(result).toEqual({ valid: false, error: 'Coupon usage limit reached' });
@@ -186,11 +180,7 @@ describe('BigCommerceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('MIN50', 30, []);
       expect(result).toEqual({
@@ -213,11 +203,7 @@ describe('BigCommerceDiscountService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.validateCoupon('FIXED10', 100, []);
       expect(result).toEqual({
@@ -229,10 +215,7 @@ describe('BigCommerceDiscountService', () => {
     });
 
     it('should handle API errors gracefully', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: false,
-        status: 500,
-      } as Partial<Response>);
+      mockApiClient.get.mockRejectedValue(new Error('API error'));
 
       const result = await service.validateCoupon('TEST', 100, []);
       expect(result).toEqual({ valid: false, error: 'Failed to validate coupon' });

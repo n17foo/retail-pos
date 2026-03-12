@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any -- raw platform API response mapping */
 import { BaseCustomerService } from './BaseCustomerService';
 import { CustomerSearchOptions, CustomerSearchResult, PlatformCustomer } from '../CustomerServiceInterface';
 import { ECommercePlatform } from '../../../utils/platforms';
@@ -6,6 +5,31 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 import { LoggerFactory } from '../../logger/LoggerFactory';
 import secretsService from '../../secrets/SecretsService';
 import { BigCommerceApiClient } from '../../clients/bigcommerce/BigCommerceApiClient';
+import { getPlatformToken } from '../../token/TokenUtils';
+
+interface BigCommerceCustomerRecord {
+  id: string | number;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+  orders_count?: number;
+  total_spent?: string;
+  date_created?: string;
+  date_modified?: string;
+}
+
+interface BigCommerceCustomerPagination {
+  total_pages?: number;
+  current_page?: number;
+}
+
+interface BigCommerceCustomersResponse {
+  data: BigCommerceCustomerRecord[];
+  meta?: {
+    pagination?: BigCommerceCustomerPagination;
+  };
+}
 
 export class BigCommerceCustomerService extends BaseCustomerService {
   private apiClient = BigCommerceApiClient.getInstance();
@@ -48,8 +72,8 @@ export class BigCommerceCustomerService extends BaseCustomerService {
         if (options.query) params['name:like'] = options.query;
         if (options.cursor) params['page'] = options.cursor;
 
-        const body = await this.apiClient.get<{ data: any[]; meta: any }>('customers', params);
-        const customers: PlatformCustomer[] = (body.data || []).map((c: any) => this.mapCustomer(c));
+        const body = await this.apiClient.get<BigCommerceCustomersResponse>('customers', params);
+        const customers: PlatformCustomer[] = (body.data || []).map(c => this.mapCustomer(c));
         const hasMore = !!(body.meta?.pagination?.total_pages && body.meta.pagination.current_page < body.meta.pagination.total_pages);
         return { customers, hasMore, nextCursor: hasMore ? String((body.meta?.pagination?.current_page || 1) + 1) : undefined };
       });
@@ -63,7 +87,7 @@ export class BigCommerceCustomerService extends BaseCustomerService {
     if (!this.initialized) return null;
     try {
       return await withTokenRefresh(ECommercePlatform.BIGCOMMERCE, async () => {
-        const body = await this.apiClient.get<{ data: any[] }>('customers', { 'id:in': customerId });
+        const body = await this.apiClient.get<BigCommerceCustomersResponse>('customers', { 'id:in': customerId });
         if (!body.data?.length) return null;
         return this.mapCustomer(body.data[0]);
       });
@@ -73,7 +97,17 @@ export class BigCommerceCustomerService extends BaseCustomerService {
     }
   }
 
-  private mapCustomer(c: any): PlatformCustomer {
+  protected async getAuthHeaders(): Promise<Record<string, string>> {
+    const token = await getPlatformToken(ECommercePlatform.BIGCOMMERCE);
+    return token
+      ? {
+          'Content-Type': 'application/json',
+          'X-Auth-Token': token,
+        }
+      : {};
+  }
+
+  private mapCustomer(c: BigCommerceCustomerRecord): PlatformCustomer {
     return {
       id: String(c.id),
       platformId: String(c.id),

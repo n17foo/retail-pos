@@ -42,13 +42,21 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 
 describe('SquarespaceGiftCardService', () => {
   let service: SquarespaceGiftCardService;
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new SquarespaceGiftCardService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -71,11 +79,7 @@ describe('SquarespaceGiftCardService', () => {
         balance: { value: '65.00', currency: 'USD' },
         status: 'ACTIVE',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCard),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCard);
 
       const result = await service.checkBalance('TEST100');
 
@@ -94,11 +98,7 @@ describe('SquarespaceGiftCardService', () => {
         balance: { value: '0.00', currency: 'USD' },
         status: 'REDEEMED',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCard),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCard);
 
       const result = await service.checkBalance('REDEEMED');
       expect(result.status).toBe('disabled');
@@ -117,11 +117,7 @@ describe('SquarespaceGiftCardService', () => {
         balance: { value: '100.00', currency: 'USD' },
         status: 'ACTIVE',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCard),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCard);
 
       const result = await service.redeemGiftCard('TEST100', 35);
 
@@ -139,11 +135,7 @@ describe('SquarespaceGiftCardService', () => {
         balance: { value: '20.00', currency: 'USD' },
         status: 'ACTIVE',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCard),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCard);
 
       const result = await service.redeemGiftCard('TEST100', 40);
       expect(result.success).toBe(false);

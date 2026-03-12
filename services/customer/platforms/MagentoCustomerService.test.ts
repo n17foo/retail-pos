@@ -45,10 +45,17 @@ import { ECommercePlatform } from '../../../utils/platforms';
 describe('MagentoCustomerService', () => {
   let service: MagentoCustomerService;
   const mockBaseUrl = 'https://magento.example.com';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new MagentoCustomerService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     // Setup default mocks
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
@@ -58,6 +65,8 @@ describe('MagentoCustomerService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -94,11 +103,7 @@ describe('MagentoCustomerService', () => {
         ],
         total_count: 1,
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.searchCustomers({ query: 'john', limit: 10 });
 
@@ -130,11 +135,7 @@ describe('MagentoCustomerService', () => {
         lastname: 'Smith',
         addresses: [{ telephone: '+1234567890' }],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCustomer),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCustomer);
 
       const result = await service.getCustomer('1');
 

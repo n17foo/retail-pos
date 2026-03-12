@@ -44,10 +44,17 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 describe('SyliusDiscountService', () => {
   let service: SyliusDiscountService;
   const mockBaseUrl = 'https://sylius.example.com';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new SyliusDiscountService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'SYLIUS_BASE_URL') return Promise.resolve(mockBaseUrl);
@@ -56,6 +63,8 @@ describe('SyliusDiscountService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -81,11 +90,7 @@ describe('SyliusDiscountService', () => {
         expiresAt: '2030-01-01T00:00:00+00:00',
         enabled: true,
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCoupon),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCoupon);
 
       const result = await service.validateCoupon('TEST20', 100, []);
 
@@ -104,11 +109,7 @@ describe('SyliusDiscountService', () => {
         promotion: { name: 'Expired Promotion' },
         expiresAt: '2020-01-01T00:00:00+00:00',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCoupon),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCoupon);
 
       const result = await service.validateCoupon('EXPIRED', 100, []);
       expect(result).toEqual({ valid: false, error: 'This coupon has expired' });
@@ -122,11 +123,7 @@ describe('SyliusDiscountService', () => {
         used: 10,
         usageLimit: 10,
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockCoupon),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockCoupon);
 
       const result = await service.validateCoupon('USEDUP', 100, []);
       expect(result).toEqual({ valid: false, error: 'Coupon usage limit reached' });

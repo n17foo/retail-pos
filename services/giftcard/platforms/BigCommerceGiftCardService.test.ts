@@ -44,10 +44,17 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 describe('BigCommerceGiftCardService', () => {
   let service: BigCommerceGiftCardService;
   const mockStoreHash = 'test-store-hash';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new BigCommerceGiftCardService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'BIGCOMMERCE_STORE_HASH') return Promise.resolve(mockStoreHash);
@@ -56,6 +63,8 @@ describe('BigCommerceGiftCardService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -84,11 +93,7 @@ describe('BigCommerceGiftCardService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.checkBalance('TEST100');
 
@@ -102,10 +107,7 @@ describe('BigCommerceGiftCardService', () => {
     });
 
     it('should return not_found for invalid gift certificate', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ data: [] }),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue({ data: [] });
 
       const result = await service.checkBalance('INVALID');
       expect(result).toEqual({
@@ -135,11 +137,7 @@ describe('BigCommerceGiftCardService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.redeemGiftCard('TEST100', 25);
 
@@ -161,11 +159,7 @@ describe('BigCommerceGiftCardService', () => {
           },
         ],
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.redeemGiftCard('TEST100', 25);
       expect(result.success).toBe(false);

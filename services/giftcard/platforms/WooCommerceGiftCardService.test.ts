@@ -44,10 +44,18 @@ import { withTokenRefresh } from '../../token/TokenIntegration';
 describe('WooCommerceGiftCardService', () => {
   let service: WooCommerceGiftCardService;
   const mockStoreUrl = 'https://woocommerce.example.com';
+  const mockApiClient = {
+    isInitialized: jest.fn(),
+    configure: jest.fn(),
+    initialize: jest.fn(),
+    get: jest.fn(),
+    post: jest.fn(),
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
     service = new WooCommerceGiftCardService();
+    (service as unknown as { apiClient: typeof mockApiClient }).apiClient = mockApiClient;
 
     (secretsService.getSecret as jest.Mock).mockImplementation((key: string) => {
       if (key === 'WOOCOMMERCE_STORE_URL') return Promise.resolve(mockStoreUrl);
@@ -56,6 +64,8 @@ describe('WooCommerceGiftCardService', () => {
 
     (getPlatformToken as jest.Mock).mockResolvedValue('test-token');
     (withTokenRefresh as jest.Mock).mockImplementation(async (platform, fn) => fn());
+    mockApiClient.isInitialized.mockReturnValue(true);
+    mockApiClient.initialize.mockResolvedValue(undefined);
   });
 
   describe('initialize', () => {
@@ -88,11 +98,7 @@ describe('WooCommerceGiftCardService', () => {
           expiration_date: '2025-01-01T00:00:00Z',
         },
       ];
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.checkBalance('TEST100');
 
@@ -106,10 +112,7 @@ describe('WooCommerceGiftCardService', () => {
     });
 
     it('should return not_found for invalid gift card', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve([]),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue([]);
 
       const result = await service.checkBalance('INVALID');
       expect(result).toEqual({
@@ -129,11 +132,7 @@ describe('WooCommerceGiftCardService', () => {
           active: false,
         },
       ];
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.get.mockResolvedValue(mockResponse);
 
       const result = await service.checkBalance('INACTIVE');
       expect(result.status).toBe('disabled');
@@ -150,11 +149,7 @@ describe('WooCommerceGiftCardService', () => {
         balance: '40.00',
         id: 'txn-123',
       };
-
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(mockResponse),
-      } as Partial<Response>);
+      mockApiClient.post.mockResolvedValue(mockResponse);
 
       const result = await service.redeemGiftCard('TEST100', 10);
 
@@ -167,14 +162,11 @@ describe('WooCommerceGiftCardService', () => {
     });
 
     it('should handle redemption failure', async () => {
-      global.fetch = jest.fn().mockResolvedValue({
-        ok: false,
-        status: 400,
-      } as Partial<Response>);
+      mockApiClient.post.mockRejectedValue(new Error('Redemption failed'));
 
       const result = await service.redeemGiftCard('TEST100', 10);
       expect(result.success).toBe(false);
-      expect(result.error).toContain('Redemption failed');
+      expect(result.error).toContain('Failed to redeem gift card');
     });
   });
 });
